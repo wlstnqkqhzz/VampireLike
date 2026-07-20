@@ -6,14 +6,35 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     private const int PlayerSortingOrder = 10;
-    private const string DefaultSpritePath = "Assets/Art/Characters/Vampire/SeparateAnim/Idle.png";
-    private const string DefaultSpriteName = "Idle_0";
+    private const float PlayerVisualScale = 3f;
+    private const int SpriteSize = 16;
+    private const int DirectionFrameCount = 4;
+    private const string PlayerVisualName = "PlayerVisual";
+    private const string WalkSpritePath = "Assets/Art/Characters/Vampire/SeparateAnim/Walk.png";
 
     [SerializeField]
     private float moveSpeed = 5f;
 
+    [SerializeField]
+    private float animationFrameRate = 8f;
+
     private Rigidbody2D rb;
     private Vector2 moveInput;
+    private SpriteRenderer visualRenderer;
+    private Sprite[][] walkFramesByDirection;
+    private float animationTimer;
+    private int animationFrameIndex;
+    private bool wasMoving;
+    private Direction facingDirection = Direction.Down;
+    private Direction previousFacingDirection = Direction.Down;
+
+    private enum Direction
+    {
+        Down = 0,
+        Up = 1,
+        Left = 2,
+        Right = 3
+    }
 
     private void Awake()
     {
@@ -31,6 +52,18 @@ public class PlayerController : MonoBehaviour
 
         ConfigureSpriteRenderer();
     }
+
+    private void Start()
+    {
+        ConfigureSpriteRenderer();
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        ConfigureSpriteRenderer();
+    }
+#endif
 
     private void Update()
     {
@@ -54,6 +87,8 @@ public class PlayerController : MonoBehaviour
             moveInput.y -= 1;
 
         moveInput = moveInput.normalized;
+        UpdateFacingDirection();
+        UpdateAnimation();
     }
 
     private void FixedUpdate()
@@ -64,32 +99,129 @@ public class PlayerController : MonoBehaviour
 
     private void ConfigureSpriteRenderer()
     {
-        SpriteRenderer spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        visualRenderer = GetOrCreateVisualRenderer();
 
-        if (spriteRenderer == null)
-            spriteRenderer = gameObject.AddComponent<SpriteRenderer>();
+        if (visualRenderer.sortingOrder < PlayerSortingOrder)
+            visualRenderer.sortingOrder = PlayerSortingOrder;
 
-        if (spriteRenderer.sortingOrder < PlayerSortingOrder)
-            spriteRenderer.sortingOrder = PlayerSortingOrder;
+        visualRenderer.transform.localPosition = Vector3.zero;
+        visualRenderer.transform.localScale = Vector3.one * PlayerVisualScale;
 
 #if UNITY_EDITOR
-        if (spriteRenderer.sprite == null)
-            spriteRenderer.sprite = LoadEditorSprite(DefaultSpritePath, DefaultSpriteName);
+        walkFramesByDirection = LoadEditorDirectionalSprites(WalkSpritePath);
+
+        if (walkFramesByDirection != null)
+            visualRenderer.sprite = walkFramesByDirection[(int)facingDirection][0];
 #endif
     }
 
-#if UNITY_EDITOR
-    private static Sprite LoadEditorSprite(string assetPath, string spriteName)
+    private void UpdateFacingDirection()
     {
-        Object[] assets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(assetPath);
+        if (moveInput.sqrMagnitude <= 0.01f)
+            return;
 
-        foreach (Object asset in assets)
+        if (Mathf.Abs(moveInput.x) > Mathf.Abs(moveInput.y))
+            facingDirection = moveInput.x < 0f ? Direction.Left : Direction.Right;
+        else
+            facingDirection = moveInput.y < 0f ? Direction.Down : Direction.Up;
+    }
+
+    private void UpdateAnimation()
+    {
+        if (visualRenderer == null)
+            return;
+
+        bool isMoving = moveInput.sqrMagnitude > 0.01f;
+        Sprite[] frames = GetCurrentDirectionFrames();
+
+        if (frames == null || frames.Length == 0)
+            return;
+
+        if (isMoving != wasMoving || facingDirection != previousFacingDirection)
         {
-            if (asset is Sprite sprite && sprite.name == spriteName)
-                return sprite;
+            animationFrameIndex = 0;
+            animationTimer = 0f;
+            wasMoving = isMoving;
+            previousFacingDirection = facingDirection;
         }
 
-        return null;
+        if (!isMoving)
+        {
+            visualRenderer.sprite = frames[0];
+            return;
+        }
+
+        animationTimer += Time.unscaledDeltaTime;
+
+        if (animationTimer >= 1f / animationFrameRate)
+        {
+            animationTimer = 0f;
+            animationFrameIndex = (animationFrameIndex + 1) % frames.Length;
+        }
+
+        visualRenderer.sprite = frames[animationFrameIndex];
+    }
+
+    private Sprite[] GetCurrentDirectionFrames()
+    {
+        if (walkFramesByDirection == null)
+            return null;
+
+        return walkFramesByDirection[(int)facingDirection];
+    }
+
+    private SpriteRenderer GetOrCreateVisualRenderer()
+    {
+        Transform visual = transform.Find(PlayerVisualName);
+
+        if (visual == null)
+        {
+            GameObject visualObject = new GameObject(PlayerVisualName);
+            visual = visualObject.transform;
+            visual.SetParent(transform);
+            visual.localPosition = Vector3.zero;
+            visual.localRotation = Quaternion.identity;
+            visual.localScale = Vector3.one;
+        }
+
+        SpriteRenderer spriteRenderer = visual.GetComponent<SpriteRenderer>();
+
+        if (spriteRenderer == null)
+            spriteRenderer = visual.gameObject.AddComponent<SpriteRenderer>();
+
+        SpriteRenderer rootSpriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (rootSpriteRenderer != null)
+            rootSpriteRenderer.enabled = false;
+
+        return spriteRenderer;
+    }
+
+#if UNITY_EDITOR
+    private static Sprite[][] LoadEditorDirectionalSprites(string assetPath)
+    {
+        Texture2D texture = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+
+        if (texture == null)
+            return null;
+
+        Sprite[][] directionalSprites = new Sprite[4][];
+
+        for (int direction = 0; direction < directionalSprites.Length; direction++)
+        {
+            directionalSprites[direction] = new Sprite[DirectionFrameCount];
+            int x = SpriteSize * direction;
+
+            for (int frame = 0; frame < DirectionFrameCount; frame++)
+            {
+                int y = texture.height - SpriteSize * (frame + 1);
+                Rect rect = new Rect(x, y, SpriteSize, SpriteSize);
+                Vector2 pivot = new Vector2(0.5f, 0.5f);
+                directionalSprites[direction][frame] = Sprite.Create(texture, rect, pivot, 100f);
+            }
+        }
+
+        return directionalSprites;
     }
 #endif
 }
