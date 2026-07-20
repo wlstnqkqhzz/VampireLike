@@ -50,3 +50,6 @@ Desktop.ini
 *.apk
 *.aab
 *.unitypackage
+
+# 외부 에셋 전체 제외
+/Assets/ExternalAssets/
