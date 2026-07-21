@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
     private const int DirectionFrameCount = 4;
     private const string PlayerVisualName = "PlayerVisual";
     private const string WalkSpritePath = "Assets/Art/Characters/Vampire/SeparateAnim/Walk.png";
+    private static readonly Vector2 PlayerColliderOffset = new Vector2(0f, -0.08f);
+    private static readonly Vector2 PlayerColliderSize = new Vector2(0.28f, 0.32f);
 
     [SerializeField]
     private float moveSpeed = 5f;
@@ -19,6 +21,7 @@ public class PlayerController : MonoBehaviour
     private float animationFrameRate = 8f;
 
     private Rigidbody2D rb;
+    private Collider2D playerCollider;
     private Vector2 moveInput;
     private SpriteRenderer visualRenderer;
     private Sprite[][] walkFramesByDirection;
@@ -43,13 +46,16 @@ public class PlayerController : MonoBehaviour
         if (rb == null)
             rb = gameObject.AddComponent<Rigidbody2D>();
 
-        if (GetComponent<Collider2D>() == null)
-            gameObject.AddComponent<CapsuleCollider2D>();
+        playerCollider = GetComponent<Collider2D>();
+
+        if (playerCollider == null)
+            playerCollider = gameObject.AddComponent<CapsuleCollider2D>();
 
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.gravityScale = 0f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
+        ConfigurePlayerCollider();
         ConfigureSpriteRenderer();
     }
 
@@ -113,6 +119,28 @@ public class PlayerController : MonoBehaviour
         if (walkFramesByDirection != null)
             visualRenderer.sprite = walkFramesByDirection[(int)facingDirection][0];
 #endif
+    }
+
+    private void ConfigurePlayerCollider()
+    {
+        if (playerCollider == null)
+            return;
+
+        playerCollider.isTrigger = false;
+
+        if (playerCollider is CapsuleCollider2D capsuleCollider)
+        {
+            capsuleCollider.offset = PlayerColliderOffset;
+            capsuleCollider.size = PlayerColliderSize;
+            capsuleCollider.direction = CapsuleDirection2D.Vertical;
+            return;
+        }
+
+        if (playerCollider is BoxCollider2D boxCollider)
+        {
+            boxCollider.offset = PlayerColliderOffset;
+            boxCollider.size = PlayerColliderSize;
+        }
     }
 
     private void UpdateFacingDirection()
