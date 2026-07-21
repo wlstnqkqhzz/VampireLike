@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VampireLike.Combat;
 
 namespace VampireLike.Enemies
 {
@@ -34,7 +35,7 @@ namespace VampireLike.Enemies
 
         private void Update()
         {
-            if (enemyPrefab == null || player == null)
+            if (enemyPrefab == null || player == null || GameState.IsGameOver)
                 return;
 
             RemoveMissingEnemies();

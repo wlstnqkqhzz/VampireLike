@@ -1,4 +1,5 @@
 using UnityEngine;
+using VampireLike.Combat;
 
 namespace VampireLike.Enemies
 {
@@ -13,7 +14,7 @@ namespace VampireLike.Enemies
         private float moveSpeed = 1.5f;
 
         [SerializeField]
-        private float stoppingDistance = 0.2f;
+        private float stoppingDistance = 0f;
 
         private Rigidbody2D rb;
 
@@ -31,7 +32,7 @@ namespace VampireLike.Enemies
 
         private void FixedUpdate()
         {
-            if (target == null || Time.timeScale <= 0f)
+            if (target == null || GameState.IsGameOver || Time.timeScale <= 0f)
                 return;
 
             Vector2 currentPosition = rb.position;

@@ -7889,9 +7889,11 @@ GameObject:
   - component: {fileID: 1723042665}
   - component: {fileID: 1723042664}
   - component: {fileID: 1723042663}
-  m_Layer: 0
+  - component: {fileID: 1723042666}
+  - component: {fileID: 1723042667}
+  m_Layer: 6
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7985,6 +7987,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1723042666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723042662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aac9e15fa5fd46c19d2fa309276f9fd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.PlayerHealth
+  maxHealth: 10
+  contactDamage: 1
+  invincibleDuration: 1
+  hitFlashDuration: 0.6
+  hitFlashInterval: 0.08
+  contactCheckRadius: 0.35
+  enemyLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+--- !u!114 &1723042667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723042662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7bd8069f7ab4172b4e49470177f6653, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.PlayerAutoAttack
+  projectilePrefab: {fileID: 200005, guid: ec057b357e1c4153b443286eb504d007, type: 3}
+  firePoint: {fileID: 0}
+  attackInterval: 1
+  attackRange: 6
 --- !u!1 &1990000000
 GameObject:
   m_ObjectHideFlags: 0
