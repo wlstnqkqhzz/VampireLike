@@ -16,12 +16,20 @@ namespace VampireLike.Growth
         [SerializeField]
         private float nextLevelExperienceMultiplier = 1.5f;
 
+        [SerializeField]
+        private float pickupRadius = 0.45f;
+
+        [SerializeField]
+        private LayerMask pickupLayerMask = ~0;
+
         private LevelUpChoiceUI levelUpChoiceUI;
         private bool hasPendingLevelUpChoice;
+        private readonly Collider2D[] pickupResults = new Collider2D[16];
 
         public int CurrentExperience => currentExperience;
         public int CurrentLevel => currentLevel;
         public int ExperienceToNextLevel => experienceToNextLevel;
+        public float PickupRadius => pickupRadius;
 
         private void Awake()
         {
@@ -29,6 +37,14 @@ namespace VampireLike.Growth
 
             if (levelUpChoiceUI == null)
                 levelUpChoiceUI = gameObject.AddComponent<LevelUpChoiceUI>();
+
+            if (GetComponent<PlayerUpgradeController>() == null)
+                gameObject.AddComponent<PlayerUpgradeController>();
+        }
+
+        private void Update()
+        {
+            CollectNearbyExperienceGems();
         }
 
         public void AddExperience(int amount)
@@ -41,12 +57,21 @@ namespace VampireLike.Growth
             CheckLevelUp();
         }
 
+        public void MultiplyPickupRadius(float multiplier)
+        {
+            if (multiplier <= 0f)
+                return;
+
+            pickupRadius *= multiplier;
+        }
+
         private void OnValidate()
         {
             currentExperience = Mathf.Max(0, currentExperience);
             currentLevel = Mathf.Max(1, currentLevel);
             experienceToNextLevel = Mathf.Max(1, experienceToNextLevel);
             nextLevelExperienceMultiplier = Mathf.Max(1f, nextLevelExperienceMultiplier);
+            pickupRadius = Mathf.Max(0.05f, pickupRadius);
         }
 
         private void CheckLevelUp()
@@ -64,6 +89,27 @@ namespace VampireLike.Growth
             {
                 hasPendingLevelUpChoice = false;
                 levelUpChoiceUI.Show(currentLevel);
+            }
+        }
+
+        private void CollectNearbyExperienceGems()
+        {
+            if (Time.timeScale <= 0f)
+                return;
+
+            int hitCount = Physics2D.OverlapCircleNonAlloc(transform.position, pickupRadius, pickupResults, pickupLayerMask);
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D hit = pickupResults[i];
+
+                if (hit == null)
+                    continue;
+
+                ExperienceGem gem = hit.GetComponentInParent<ExperienceGem>();
+
+                if (gem != null)
+                    gem.StartAttract(this);
             }
         }
     }

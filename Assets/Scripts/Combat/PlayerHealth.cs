@@ -100,6 +100,23 @@ namespace VampireLike.Combat
                 Die();
         }
 
+        public void IncreaseMaxHealth(int amount)
+        {
+            if (amount <= 0 || isDead)
+                return;
+
+            maxHealth += amount;
+            currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        }
+
+        public void Heal(int amount)
+        {
+            if (amount <= 0 || isDead)
+                return;
+
+            currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        }
+
         private void CacheSpriteRenderer()
         {
             spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);

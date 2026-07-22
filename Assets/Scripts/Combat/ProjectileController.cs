@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace VampireLike.Combat
 {
@@ -18,6 +19,9 @@ namespace VampireLike.Combat
         private Rigidbody2D rb;
         private Vector2 moveDirection = Vector2.right;
         private float lifeTimer;
+        private int effectiveDamage;
+        private int remainingPierceCount;
+        private readonly HashSet<EnemyHealth> hitEnemies = new HashSet<EnemyHealth>();
 
         private void Awake()
         {
@@ -28,6 +32,7 @@ namespace VampireLike.Combat
 
             Collider2D projectileCollider = GetComponent<Collider2D>();
             projectileCollider.isTrigger = true;
+            effectiveDamage = damage;
         }
 
         private void FixedUpdate()
@@ -56,7 +61,18 @@ namespace VampireLike.Combat
             if (enemyHealth == null)
                 return;
 
-            enemyHealth.TakeDamage(damage);
+            if (hitEnemies.Contains(enemyHealth))
+                return;
+
+            hitEnemies.Add(enemyHealth);
+            enemyHealth.TakeDamage(effectiveDamage);
+
+            if (remainingPierceCount > 0)
+            {
+                remainingPierceCount--;
+                return;
+            }
+
             Destroy(gameObject);
         }
 
@@ -69,11 +85,19 @@ namespace VampireLike.Combat
 
         public void Launch(Vector2 direction)
         {
+            Launch(direction, 1f, 0);
+        }
+
+        public void Launch(Vector2 direction, float damageMultiplier, int pierceCount)
+        {
             if (direction.sqrMagnitude <= 0f)
                 return;
 
             moveDirection = direction.normalized;
             transform.right = moveDirection;
+            effectiveDamage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, damageMultiplier)));
+            remainingPierceCount = Mathf.Max(0, pierceCount);
+            hitEnemies.Clear();
         }
     }
 }

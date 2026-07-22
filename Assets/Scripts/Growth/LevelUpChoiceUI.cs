@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -9,19 +10,22 @@ namespace VampireLike.Growth
     {
         private const string CanvasName = "Level Up Choice Canvas";
         private const string RootName = "Level Up Choice";
-
-        private readonly string[] choiceLabels =
-        {
-            "공격 속도 강화",
-            "투사체 피해 강화",
-            "이동 속도 강화"
-        };
+        private const int ChoiceCount = 3;
 
         private GameObject choiceRoot;
+        private Button[] choiceButtons;
+        private Text[] choiceTexts;
         private bool isShowing;
+        private PlayerUpgradeController upgradeController;
+        private List<PlayerUpgradeController.UpgradeChoice> currentChoices = new List<PlayerUpgradeController.UpgradeChoice>();
 
         private void Awake()
         {
+            upgradeController = GetComponent<PlayerUpgradeController>();
+
+            if (upgradeController == null)
+                upgradeController = gameObject.AddComponent<PlayerUpgradeController>();
+
             EnsureUI();
             EnsureEventSystem();
             Hide();
@@ -30,6 +34,26 @@ namespace VampireLike.Growth
         public void Show(int level)
         {
             EnsureUI();
+
+            currentChoices = upgradeController.GetRandomChoices(ChoiceCount);
+
+            if (currentChoices.Count == 0)
+                return;
+
+            for (int i = 0; i < choiceButtons.Length; i++)
+            {
+                bool hasChoice = i < currentChoices.Count;
+                choiceButtons[i].gameObject.SetActive(hasChoice);
+
+                if (!hasChoice)
+                    continue;
+
+                choiceTexts[i].text = currentChoices[i].ButtonText;
+                int choiceIndex = i;
+                choiceButtons[i].onClick.RemoveAllListeners();
+                choiceButtons[i].onClick.AddListener(() => SelectChoice(choiceIndex));
+            }
+
             isShowing = true;
             Time.timeScale = 0f;
 
@@ -47,12 +71,12 @@ namespace VampireLike.Growth
                 choiceRoot.SetActive(false);
         }
 
-        private void SelectChoice(string choiceLabel)
+        private void SelectChoice(int choiceIndex)
         {
-            if (!isShowing)
+            if (!isShowing || choiceIndex < 0 || choiceIndex >= currentChoices.Count)
                 return;
 
-            Debug.Log($"Level Up Choice Selected: {choiceLabel}");
+            upgradeController.ApplyUpgrade(currentChoices[choiceIndex].Definition);
             Hide();
             Time.timeScale = 1f;
         }
@@ -79,19 +103,22 @@ namespace VampireLike.Growth
             panelRect.anchorMin = new Vector2(0.5f, 0.5f);
             panelRect.anchorMax = new Vector2(0.5f, 0.5f);
             panelRect.pivot = new Vector2(0.5f, 0.5f);
-            panelRect.sizeDelta = new Vector2(520f, 300f);
+            panelRect.sizeDelta = new Vector2(620f, 360f);
             panelRect.anchoredPosition = Vector2.zero;
 
             Image panelImage = panel.AddComponent<Image>();
             panelImage.color = new Color(0.1f, 0.13f, 0.15f, 0.96f);
 
-            CreateLabel(panel.transform, "레벨업", new Vector2(0f, 105f), 34, Color.white);
+            CreateLabel(panel.transform, "레벨업", new Vector2(0f, 130f), 36, Color.white, new Vector2(520f, 52f));
 
-            for (int i = 0; i < choiceLabels.Length; i++)
+            choiceButtons = new Button[ChoiceCount];
+            choiceTexts = new Text[ChoiceCount];
+
+            for (int i = 0; i < ChoiceCount; i++)
             {
-                string label = choiceLabels[i];
-                Button button = CreateButton(panel.transform, label, new Vector2(0f, 40f - i * 68f));
-                button.onClick.AddListener(() => SelectChoice(label));
+                Button button = CreateButton(panel.transform, new Vector2(0f, 62f - i * 82f), out Text buttonText);
+                choiceButtons[i] = button;
+                choiceTexts[i] = buttonText;
             }
         }
 
@@ -136,7 +163,7 @@ namespace VampireLike.Growth
             rectTransform.anchoredPosition = Vector2.zero;
         }
 
-        private static void CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color)
+        private static Text CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color, Vector2 size)
         {
             GameObject labelObject = new GameObject(text);
             labelObject.transform.SetParent(parent, false);
@@ -145,7 +172,7 @@ namespace VampireLike.Growth
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(420f, 52f);
+            rectTransform.sizeDelta = size;
             rectTransform.anchoredPosition = position;
 
             Text label = labelObject.AddComponent<Text>();
@@ -155,26 +182,26 @@ namespace VampireLike.Growth
             label.alignment = TextAnchor.MiddleCenter;
             label.color = color;
             label.raycastTarget = false;
+            return label;
         }
 
-        private static Button CreateButton(Transform parent, string text, Vector2 position)
+        private static Button CreateButton(Transform parent, Vector2 position, out Text buttonText)
         {
-            GameObject buttonObject = new GameObject(text);
+            GameObject buttonObject = new GameObject("Upgrade Choice Button");
             buttonObject.transform.SetParent(parent, false);
 
             RectTransform rectTransform = buttonObject.AddComponent<RectTransform>();
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(380f, 52f);
+            rectTransform.sizeDelta = new Vector2(520f, 64f);
             rectTransform.anchoredPosition = position;
 
             Image image = buttonObject.AddComponent<Image>();
             image.color = new Color(0.72f, 0.9f, 0.95f, 1f);
 
             Button button = buttonObject.AddComponent<Button>();
-            CreateLabel(buttonObject.transform, text, Vector2.zero, 22, new Color(0.06f, 0.1f, 0.12f, 1f));
-
+            buttonText = CreateLabel(buttonObject.transform, string.Empty, Vector2.zero, 21, new Color(0.06f, 0.1f, 0.12f, 1f), new Vector2(480f, 58f));
             return button;
         }
     }

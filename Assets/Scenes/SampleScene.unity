@@ -7893,6 +7893,7 @@ GameObject:
   - component: {fileID: 1723042667}
   - component: {fileID: 1723042668}
   - component: {fileID: 1723042669}
+  - component: {fileID: 1723042670}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -8026,6 +8027,11 @@ MonoBehaviour:
   firePoint: {fileID: 0}
   attackInterval: 1
   attackRange: 6
+  minimumAttackInterval: 0.15
+  projectileDamageMultiplier: 1
+  projectileCount: 1
+  projectileSpreadAngle: 12
+  projectilePierceCount: 0
 --- !u!114 &1723042668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8042,6 +8048,10 @@ MonoBehaviour:
   currentLevel: 1
   experienceToNextLevel: 5
   nextLevelExperienceMultiplier: 1.5
+  pickupRadius: 0.45
+  pickupLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!114 &1723042669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8054,6 +8064,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5d42036df74cda9d21d0e9b8aa9f06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.LevelUpChoiceUI
+--- !u!114 &1723042670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723042662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64ff4261944e4386a49952d18253e280, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerUpgradeController
+  upgradeDefinitions:
+  - {fileID: 11400000, guid: 207dadecee214dff9a762467edd406e5, type: 2}
+  - {fileID: 11400000, guid: b6f1c737ff744e06b35b4e938b815d10, type: 2}
+  - {fileID: 11400000, guid: 13c7223ec5d44d32b4209e4516e2e043, type: 2}
+  - {fileID: 11400000, guid: 9749acdd8eec439cac1cf76da740a57e, type: 2}
+  - {fileID: 11400000, guid: 58f0d475dbb641c28f06cfc9362509e7, type: 2}
+  - {fileID: 11400000, guid: 0fe4cf79699345d28c0918c77c1f6456, type: 2}
+  - {fileID: 11400000, guid: b5f730069ffc4ae29ee6d462efc84946, type: 2}
+  - {fileID: 11400000, guid: c41e19c7fb9a489ca6427813b97db21a, type: 2}
 --- !u!1 &1990000000
 GameObject:
   m_ObjectHideFlags: 0

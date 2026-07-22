@@ -16,6 +16,21 @@ namespace VampireLike.Combat
         [SerializeField]
         private float attackRange = 6f;
 
+        [SerializeField]
+        private float minimumAttackInterval = 0.15f;
+
+        [SerializeField]
+        private float projectileDamageMultiplier = 1f;
+
+        [SerializeField]
+        private int projectileCount = 1;
+
+        [SerializeField]
+        private float projectileSpreadAngle = 12f;
+
+        [SerializeField]
+        private int projectilePierceCount;
+
         private float attackTimer;
         private bool isStopped;
 
@@ -46,13 +61,44 @@ namespace VampireLike.Combat
 
         private void OnValidate()
         {
-            attackInterval = Mathf.Max(0.05f, attackInterval);
+            minimumAttackInterval = Mathf.Max(0.05f, minimumAttackInterval);
+            attackInterval = Mathf.Max(minimumAttackInterval, attackInterval);
             attackRange = Mathf.Max(0f, attackRange);
+            projectileDamageMultiplier = Mathf.Max(0.1f, projectileDamageMultiplier);
+            projectileCount = Mathf.Max(1, projectileCount);
+            projectileSpreadAngle = Mathf.Max(0f, projectileSpreadAngle);
+            projectilePierceCount = Mathf.Max(0, projectilePierceCount);
         }
 
         public void StopAttacking()
         {
             isStopped = true;
+        }
+
+        public void MultiplyAttackInterval(float multiplier)
+        {
+            if (multiplier <= 0f)
+                return;
+
+            attackInterval = Mathf.Max(minimumAttackInterval, attackInterval * multiplier);
+        }
+
+        public void MultiplyProjectileDamage(float multiplier)
+        {
+            if (multiplier <= 0f)
+                return;
+
+            projectileDamageMultiplier *= multiplier;
+        }
+
+        public void AddProjectileCount(int amount)
+        {
+            projectileCount = Mathf.Max(1, projectileCount + amount);
+        }
+
+        public void AddProjectilePierceCount(int amount)
+        {
+            projectilePierceCount = Mathf.Max(0, projectilePierceCount + amount);
         }
 
         private EnemyHealth FindClosestEnemyInRange()
@@ -85,8 +131,24 @@ namespace VampireLike.Combat
             if (direction.sqrMagnitude <= 0f)
                 return;
 
-            ProjectileController projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-            projectile.Launch(direction);
+            int shotCount = Mathf.Max(1, projectileCount);
+            float firstAngle = shotCount == 1 ? 0f : -projectileSpreadAngle * (shotCount - 1) * 0.5f;
+
+            for (int i = 0; i < shotCount; i++)
+            {
+                float angle = firstAngle + projectileSpreadAngle * i;
+                Vector2 shotDirection = Rotate(direction, angle);
+                ProjectileController projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+                projectile.Launch(shotDirection, projectileDamageMultiplier, projectilePierceCount);
+            }
+        }
+
+        private static Vector2 Rotate(Vector2 vector, float degrees)
+        {
+            float radians = degrees * Mathf.Deg2Rad;
+            float sin = Mathf.Sin(radians);
+            float cos = Mathf.Cos(radians);
+            return new Vector2(vector.x * cos - vector.y * sin, vector.x * sin + vector.y * cos);
         }
     }
 }

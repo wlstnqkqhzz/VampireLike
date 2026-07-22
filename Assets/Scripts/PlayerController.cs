@@ -103,6 +103,14 @@ public class PlayerController : MonoBehaviour
         rb.MovePosition(nextPosition);
     }
 
+    public void MultiplyMoveSpeed(float multiplier)
+    {
+        if (multiplier <= 0f)
+            return;
+
+        moveSpeed *= multiplier;
+    }
+
     private void ConfigureSpriteRenderer()
     {
         visualRenderer = GetOrCreateVisualRenderer();
