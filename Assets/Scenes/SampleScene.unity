@@ -8038,6 +8038,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerExperience
   currentExperience: 0
+  currentLevel: 1
+  experienceToNextLevel: 5
+  nextLevelExperienceMultiplier: 1.5
 --- !u!1 &1990000000
 GameObject:
   m_ObjectHideFlags: 0
