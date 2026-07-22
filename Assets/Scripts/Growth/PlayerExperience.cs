@@ -16,9 +16,20 @@ namespace VampireLike.Growth
         [SerializeField]
         private float nextLevelExperienceMultiplier = 1.5f;
 
+        private LevelUpChoiceUI levelUpChoiceUI;
+        private bool hasPendingLevelUpChoice;
+
         public int CurrentExperience => currentExperience;
         public int CurrentLevel => currentLevel;
         public int ExperienceToNextLevel => experienceToNextLevel;
+
+        private void Awake()
+        {
+            levelUpChoiceUI = GetComponent<LevelUpChoiceUI>();
+
+            if (levelUpChoiceUI == null)
+                levelUpChoiceUI = gameObject.AddComponent<LevelUpChoiceUI>();
+        }
 
         public void AddExperience(int amount)
         {
@@ -46,6 +57,13 @@ namespace VampireLike.Growth
                 currentLevel++;
                 experienceToNextLevel = Mathf.CeilToInt(experienceToNextLevel * nextLevelExperienceMultiplier);
                 Debug.Log($"Level Up! Level {currentLevel} / Next EXP: {currentExperience}/{experienceToNextLevel}");
+                hasPendingLevelUpChoice = true;
+            }
+
+            if (hasPendingLevelUpChoice)
+            {
+                hasPendingLevelUpChoice = false;
+                levelUpChoiceUI.Show(currentLevel);
             }
         }
     }
