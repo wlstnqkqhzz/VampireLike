@@ -4,6 +4,9 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
+/// <summary>
+/// Escape 키로 일시정지 메뉴를 열고 닫으며, 계속하기/게임 종료 버튼을 처리한다.
+/// </summary>
 public class PauseMenu : MonoBehaviour
 {
     private const string PauseCanvasName = "Pause Menu Canvas";
@@ -13,9 +16,11 @@ public class PauseMenu : MonoBehaviour
     [SerializeField]
     private GameObject pauseMenuRoot;
 
+    // 일시정지 해제 버튼이다. 자동 생성 UI 또는 Inspector 연결 둘 다 지원한다.
     [SerializeField]
     private Button resumeButton;
 
+    // 에디터에서는 Play Mode를 종료하고, 빌드에서는 애플리케이션을 종료한다.
     [SerializeField]
     private Button quitButton;
 
@@ -40,6 +45,7 @@ public class PauseMenu : MonoBehaviour
     {
         Keyboard keyboard = Keyboard.current;
 
+        // New Input System 기준으로 Escape 입력을 직접 확인한다.
         if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
             TogglePause();
     }
@@ -80,6 +86,7 @@ public class PauseMenu : MonoBehaviour
     private void SetPaused(bool paused)
     {
         isPaused = paused;
+        // Time.timeScale이 0이면 이동, 공격, 적 생성처럼 deltaTime 기반 동작이 멈춘다.
         Time.timeScale = isPaused ? 0f : 1f;
         CenterPauseMenu();
 
@@ -89,6 +96,7 @@ public class PauseMenu : MonoBehaviour
 
     private void EnsurePauseMenu()
     {
+        // 씬에 이미 메뉴가 있으면 재사용하고, 없으면 런타임에 기본 UI를 만든다.
         if (pauseMenuRoot != null)
         {
             CachePausePanel();
@@ -144,6 +152,7 @@ public class PauseMenu : MonoBehaviour
 
     private static void EnsureEventSystem()
     {
+        // 버튼 클릭을 받을 EventSystem이 없으면 New Input System용 모듈과 함께 만든다.
         if (FindFirstObjectByType<EventSystem>() != null)
             return;
 

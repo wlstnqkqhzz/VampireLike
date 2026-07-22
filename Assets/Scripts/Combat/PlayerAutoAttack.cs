@@ -2,23 +2,32 @@ using UnityEngine;
 
 namespace VampireLike.Combat
 {
+    /// <summary>
+    /// 일정 시간마다 공격 범위 안의 가장 가까운 적을 찾아 투사체를 발사한다.
+    /// </summary>
     public class PlayerAutoAttack : MonoBehaviour
     {
+        // 발사할 투사체 프리팹이다.
         [SerializeField]
         private ProjectileController projectilePrefab;
 
+        // 발사 위치다. 비어 있으면 플레이어 위치를 사용한다.
         [SerializeField]
         private Transform firePoint;
 
+        // 공격 사이의 대기 시간이다. 공격 속도 강화는 이 값을 줄인다.
         [SerializeField]
         private float attackInterval = 1f;
 
+        // 가장 가까운 적을 찾을 최대 거리다.
         [SerializeField]
         private float attackRange = 6f;
 
+        // 공격 속도 강화가 누적되어도 이 값보다 빠르게는 공격하지 않는다.
         [SerializeField]
         private float minimumAttackInterval = 0.15f;
 
+        // 투사체 피해 강화로 누적되는 공격력 배율이다.
         [SerializeField]
         private float projectileDamageMultiplier = 1f;
 
@@ -75,6 +84,9 @@ namespace VampireLike.Combat
             isStopped = true;
         }
 
+        /// <summary>
+        /// 공격 간격 강화에서 호출한다. 예: 0.88을 곱하면 공격 간격이 12% 줄어든다.
+        /// </summary>
         public void MultiplyAttackInterval(float multiplier)
         {
             if (multiplier <= 0f)
@@ -83,6 +95,9 @@ namespace VampireLike.Combat
             attackInterval = Mathf.Max(minimumAttackInterval, attackInterval * multiplier);
         }
 
+        /// <summary>
+        /// 투사체 공격력 강화에서 호출한다.
+        /// </summary>
         public void MultiplyProjectileDamage(float multiplier)
         {
             if (multiplier <= 0f)
@@ -91,11 +106,17 @@ namespace VampireLike.Combat
             projectileDamageMultiplier *= multiplier;
         }
 
+        /// <summary>
+        /// 다중 발사 강화에서 호출한다.
+        /// </summary>
         public void AddProjectileCount(int amount)
         {
             projectileCount = Mathf.Max(1, projectileCount + amount);
         }
 
+        /// <summary>
+        /// 관통탄 강화에서 호출한다.
+        /// </summary>
         public void AddProjectilePierceCount(int amount)
         {
             projectilePierceCount = Mathf.Max(0, projectilePierceCount + amount);
@@ -103,6 +124,7 @@ namespace VampireLike.Combat
 
         private EnemyHealth FindClosestEnemyInRange()
         {
+            // EnemyHealth.ActiveEnemies를 순회해 매 프레임 FindObject 계열 호출을 피한다.
             EnemyHealth closestEnemy = null;
             float closestSqrDistance = attackRange * attackRange;
             Vector2 origin = transform.position;
@@ -126,6 +148,7 @@ namespace VampireLike.Combat
 
         private void FireAt(Transform target)
         {
+            // 발사 시점의 방향을 기준으로 직선 투사체를 만든다. 유도탄은 아니다.
             Vector2 direction = ((Vector2)target.position - (Vector2)firePoint.position).normalized;
 
             if (direction.sqrMagnitude <= 0f)

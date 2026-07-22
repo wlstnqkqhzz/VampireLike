@@ -2,20 +2,28 @@ using UnityEngine;
 
 namespace VampireLike.Growth
 {
+    /// <summary>
+    /// 화면 최상단에 뱀서라이크 스타일의 경험치 게이지와 현재 레벨을 표시한다.
+    /// </summary>
     public class PlayerExperienceUI : MonoBehaviour
     {
+        // 표시할 경험치 데이터다. 비어 있으면 같은 Player 오브젝트에서 찾는다.
         [SerializeField]
         private PlayerExperience playerExperience;
 
+        // 화면 위쪽에서 얼마나 내려올지 정한다.
         [SerializeField]
         private float topMargin = 8f;
 
+        // 화면 좌우 여백이다.
         [SerializeField]
         private float sideMargin = 72f;
 
+        // 경험치 바 높이다.
         [SerializeField]
         private float barHeight = 18f;
 
+        // HUD 표시 여부다. 테스트 중 Inspector에서 끌 수 있다.
         [SerializeField]
         private bool drawHud = true;
 
@@ -45,6 +53,7 @@ namespace VampireLike.Growth
 
         private void OnGUI()
         {
+            // 현재 프로젝트에서는 간단한 학습용 HUD라 OnGUI로 고정 화면 UI를 그린다.
             if (!drawHud)
                 return;
 
@@ -63,6 +72,7 @@ namespace VampireLike.Growth
 
         private void DrawHud()
         {
+            // 현재 Game 뷰 해상도에 맞춰 상단 경험치 바의 폭을 계산한다.
             const float levelWidth = 92f;
             const float levelGap = 8f;
             float barWidth = Mathf.Max(240f, Screen.width - sideMargin * 2f - levelWidth - levelGap);
@@ -92,6 +102,7 @@ namespace VampireLike.Growth
 
         private void EnsureTexture()
         {
+            // GUI.DrawTexture에 사용할 1x1 흰색 텍스처를 만들어 색상만 바꿔 재사용한다.
             if (whiteTexture != null)
                 return;
 
@@ -102,6 +113,7 @@ namespace VampireLike.Growth
 
         private void EnsureStyles()
         {
+            // 레벨 배지 텍스트 스타일을 한 번만 만든다.
             if (levelStyle != null)
                 return;
 

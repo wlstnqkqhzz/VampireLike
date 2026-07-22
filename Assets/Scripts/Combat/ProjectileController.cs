@@ -3,16 +3,22 @@ using System.Collections.Generic;
 
 namespace VampireLike.Combat
 {
+    /// <summary>
+    /// 발사된 투사체의 직선 이동, 수명, 적 충돌 피해, 관통 처리를 담당한다.
+    /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Collider2D))]
     public class ProjectileController : MonoBehaviour
     {
+        // 투사체 이동 속도다.
         [SerializeField]
         private float moveSpeed = 8f;
 
+        // 기본 피해량이다. 발사 시 공격력 배율을 곱해 실제 피해량을 계산한다.
         [SerializeField]
         private int damage = 1;
 
+        // 충돌하지 않아도 자동 제거되는 시간이다.
         [SerializeField]
         private float lifeTime = 3f;
 
@@ -25,6 +31,7 @@ namespace VampireLike.Combat
 
         private void Awake()
         {
+            // 투사체는 중력 없이 회전 고정 상태로 물리 이동한다.
             rb = GetComponent<Rigidbody2D>();
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.gravityScale = 0f;
@@ -56,6 +63,7 @@ namespace VampireLike.Combat
 
         private void OnTriggerEnter2D(Collider2D other)
         {
+            // 적과 충돌했을 때만 피해를 주고, 같은 적을 중복 타격하지 않게 막는다.
             EnemyHealth enemyHealth = other.GetComponentInParent<EnemyHealth>();
 
             if (enemyHealth == null)
@@ -88,6 +96,9 @@ namespace VampireLike.Combat
             Launch(direction, 1f, 0);
         }
 
+        /// <summary>
+        /// 발사 순간의 방향, 공격력 배율, 관통 횟수를 설정한다.
+        /// </summary>
         public void Launch(Vector2 direction, float damageMultiplier, int pierceCount)
         {
             if (direction.sqrMagnitude <= 0f)

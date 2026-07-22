@@ -3,26 +3,36 @@ using System.Collections;
 
 namespace VampireLike.Combat
 {
+    /// <summary>
+    /// 플레이어 체력, 접촉 피해, 무적 시간, 피격 연출, 사망 처리를 관리한다.
+    /// </summary>
     public class PlayerHealth : MonoBehaviour
     {
+        // 플레이어 최대 체력이다.
         [SerializeField]
         private int maxHealth = 10;
 
+        // 적과 접촉했을 때 받는 피해량이다.
         [SerializeField]
         private int contactDamage = 1;
 
+        // 피해를 받은 뒤 다시 피해를 받을 수 없도록 막는 시간이다.
         [SerializeField]
         private float invincibleDuration = 1f;
 
+        // 피격 시 빨간색으로 깜빡이는 전체 시간이다.
         [SerializeField]
         private float hitFlashDuration = 0.6f;
 
+        // 피격 점멸의 한 번 깜빡임 간격이다.
         [SerializeField]
         private float hitFlashInterval = 0.08f;
 
+        // 적과 계속 붙어 있을 때 충돌 이벤트 누락을 보완하는 접촉 검사 반경이다.
         [SerializeField]
         private float contactCheckRadius = 0.35f;
 
+        // 접촉 피해를 검사할 Enemy 레이어다.
         [SerializeField]
         private LayerMask enemyLayerMask = 1 << 7;
 
@@ -39,6 +49,7 @@ namespace VampireLike.Combat
 
         private void Awake()
         {
+            // Play 재시작 시 이전 게임 오버 상태가 남지 않게 초기화한다.
             GameState.ResetGame();
             currentHealth = maxHealth;
         }
@@ -50,6 +61,7 @@ namespace VampireLike.Combat
 
         private void Update()
         {
+            // 무적 시간은 일반 시간 흐름을 따른다. 일시정지 중에는 Time.deltaTime이 0이다.
             if (invincibleTimer > 0f)
                 invincibleTimer -= Time.deltaTime;
 
@@ -68,6 +80,7 @@ namespace VampireLike.Combat
 
         private void TryApplyContactDamage(GameObject other)
         {
+            // 일시정지/사망 중에는 접촉 피해를 처리하지 않는다.
             if (isDead || Time.timeScale <= 0f)
                 return;
 
@@ -89,6 +102,7 @@ namespace VampireLike.Combat
 
         public void TakeDamage(int damage)
         {
+            // 무적 시간 중에는 반복 피해를 막는다.
             if (isDead || damage <= 0 || invincibleTimer > 0f)
                 return;
 
@@ -100,6 +114,9 @@ namespace VampireLike.Combat
                 Die();
         }
 
+        /// <summary>
+        /// 최대 체력 강화에서 호출한다. 최대 체력과 현재 체력을 함께 올린다.
+        /// </summary>
         public void IncreaseMaxHealth(int amount)
         {
             if (amount <= 0 || isDead)
@@ -109,6 +126,9 @@ namespace VampireLike.Combat
             currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         }
 
+        /// <summary>
+        /// 회복 강화에서 호출한다. 현재 체력을 최대 체력 안에서 회복한다.
+        /// </summary>
         public void Heal(int amount)
         {
             if (amount <= 0 || isDead)
@@ -119,6 +139,7 @@ namespace VampireLike.Combat
 
         private void CacheSpriteRenderer()
         {
+            // PlayerVisual을 포함한 모든 자식 SpriteRenderer의 원래 상태를 저장한다.
             spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
             originalColors = new Color[spriteRenderers.Length];
             originalRendererEnabledStates = new bool[spriteRenderers.Length];
@@ -165,6 +186,7 @@ namespace VampireLike.Combat
 
         private void CheckEnemyContact()
         {
+            // 적과 겹쳐 있는 상태에서도 일정 무적 시간마다 피해를 받도록 보완 검사한다.
             if (isDead || Time.timeScale <= 0f || invincibleTimer > 0f)
                 return;
 
@@ -222,6 +244,7 @@ namespace VampireLike.Combat
 
         private void Die()
         {
+            // 현재는 게임 오버 상태 전환과 이동/공격 정지만 처리한다. UI는 이후 단계에서 연결한다.
             isDead = true;
             currentHealth = 0;
             GameState.SetGameOver();

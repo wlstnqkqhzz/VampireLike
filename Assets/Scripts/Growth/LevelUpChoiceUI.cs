@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 namespace VampireLike.Growth
 {
+    /// <summary>
+    /// 플레이어 레벨업 시 강화 선택지 3개를 화면에 보여주고, 선택된 강화를 적용한다.
+    /// </summary>
     public class LevelUpChoiceUI : MonoBehaviour
     {
         private const string CanvasName = "Level Up Choice Canvas";
@@ -35,6 +38,7 @@ namespace VampireLike.Growth
         {
             EnsureUI();
 
+            // 강화 컨트롤러에서 현재 선택 가능한 강화 3개를 랜덤으로 받아온다.
             currentChoices = upgradeController.GetRandomChoices(ChoiceCount);
 
             if (currentChoices.Count == 0)
@@ -145,6 +149,7 @@ namespace VampireLike.Growth
 
         private static void EnsureEventSystem()
         {
+            // 버튼 클릭을 받을 EventSystem이 없으면 New Input System용 모듈과 함께 만든다.
             if (FindFirstObjectByType<EventSystem>() != null)
                 return;
 
