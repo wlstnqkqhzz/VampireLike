@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VampireLike.Growth;
 
 namespace VampireLike.Combat
 {
@@ -13,6 +14,9 @@ namespace VampireLike.Combat
 
         [SerializeField]
         private float hitFlashDuration = 0.08f;
+
+        [SerializeField]
+        private ExperienceGem experienceGemPrefab;
 
         private int currentHealth;
         private SpriteRenderer spriteRenderer;
@@ -86,7 +90,16 @@ namespace VampireLike.Combat
         private void Die()
         {
             IsDead = true;
+            DropExperienceGem();
             Destroy(gameObject);
+        }
+
+        private void DropExperienceGem()
+        {
+            if (experienceGemPrefab == null)
+                return;
+
+            Instantiate(experienceGemPrefab, transform.position, Quaternion.identity);
         }
     }
 }

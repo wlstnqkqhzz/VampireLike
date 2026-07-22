@@ -7891,6 +7891,7 @@ GameObject:
   - component: {fileID: 1723042663}
   - component: {fileID: 1723042666}
   - component: {fileID: 1723042667}
+  - component: {fileID: 1723042668}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -8024,6 +8025,19 @@ MonoBehaviour:
   firePoint: {fileID: 0}
   attackInterval: 1
   attackRange: 6
+--- !u!114 &1723042668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723042662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b145a3cf78412185cf485b4d827ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerExperience
+  currentExperience: 0
 --- !u!1 &1990000000
 GameObject:
   m_ObjectHideFlags: 0
