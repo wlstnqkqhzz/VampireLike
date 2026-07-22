@@ -7894,6 +7894,7 @@ GameObject:
   - component: {fileID: 1723042668}
   - component: {fileID: 1723042669}
   - component: {fileID: 1723042670}
+  - component: {fileID: 1723042671}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -8085,6 +8086,23 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0fe4cf79699345d28c0918c77c1f6456, type: 2}
   - {fileID: 11400000, guid: b5f730069ffc4ae29ee6d462efc84946, type: 2}
   - {fileID: 11400000, guid: c41e19c7fb9a489ca6427813b97db21a, type: 2}
+--- !u!114 &1723042671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723042662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7802a4821dc8406fa1e9cf1b1bacb4f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerExperienceUI
+  playerExperience: {fileID: 1723042668}
+  topMargin: 8
+  sideMargin: 72
+  barHeight: 18
+  drawHud: 1
 --- !u!1 &1990000000
 GameObject:
   m_ObjectHideFlags: 0

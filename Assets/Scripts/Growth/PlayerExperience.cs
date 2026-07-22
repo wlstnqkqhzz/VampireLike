@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 namespace VampireLike.Growth
 {
@@ -30,6 +31,8 @@ namespace VampireLike.Growth
         public int CurrentLevel => currentLevel;
         public int ExperienceToNextLevel => experienceToNextLevel;
         public float PickupRadius => pickupRadius;
+        public float ExperienceProgress => experienceToNextLevel <= 0 ? 0f : (float)currentExperience / experienceToNextLevel;
+        public event Action<int, int, int> ExperienceChanged;
 
         private void Awake()
         {
@@ -40,6 +43,14 @@ namespace VampireLike.Growth
 
             if (GetComponent<PlayerUpgradeController>() == null)
                 gameObject.AddComponent<PlayerUpgradeController>();
+
+            if (GetComponent<PlayerExperienceUI>() == null)
+                gameObject.AddComponent<PlayerExperienceUI>();
+        }
+
+        private void Start()
+        {
+            NotifyExperienceChanged();
         }
 
         private void Update()
@@ -53,8 +64,9 @@ namespace VampireLike.Growth
                 return;
 
             currentExperience += amount;
-            Debug.Log($"Experience: {currentExperience}/{experienceToNextLevel}");
             CheckLevelUp();
+            NotifyExperienceChanged();
+            Debug.Log($"Experience: {currentExperience}/{experienceToNextLevel}");
         }
 
         public void MultiplyPickupRadius(float multiplier)
@@ -90,6 +102,11 @@ namespace VampireLike.Growth
                 hasPendingLevelUpChoice = false;
                 levelUpChoiceUI.Show(currentLevel);
             }
+        }
+
+        private void NotifyExperienceChanged()
+        {
+            ExperienceChanged?.Invoke(currentLevel, currentExperience, experienceToNextLevel);
         }
 
         private void CollectNearbyExperienceGems()
