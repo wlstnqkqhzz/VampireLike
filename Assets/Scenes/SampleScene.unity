@@ -7895,6 +7895,7 @@ GameObject:
   - component: {fileID: 1723042669}
   - component: {fileID: 1723042670}
   - component: {fileID: 1723042671}
+  - component: {fileID: 1723042672}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -8103,6 +8104,21 @@ MonoBehaviour:
   sideMargin: 72
   barHeight: 18
   drawHud: 1
+--- !u!114 &1723042672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1723042662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cdfc44fe31a4742bb3a1cb8b9afeb68, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.GameOverUI
+  gameOverRoot: {fileID: 0}
+  restartButton: {fileID: 0}
+  quitButton: {fileID: 0}
 --- !u!1 &1990000000
 GameObject:
   m_ObjectHideFlags: 0

@@ -45,6 +45,9 @@ public class PauseMenu : MonoBehaviour
     {
         Keyboard keyboard = Keyboard.current;
 
+        if (VampireLike.Combat.GameState.IsGameOver)
+            return;
+
         // New Input System 기준으로 Escape 입력을 직접 확인한다.
         if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
             TogglePause();

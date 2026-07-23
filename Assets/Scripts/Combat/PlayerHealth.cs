@@ -52,6 +52,9 @@ namespace VampireLike.Combat
             // Play 재시작 시 이전 게임 오버 상태가 남지 않게 초기화한다.
             GameState.ResetGame();
             currentHealth = maxHealth;
+
+            if (GetComponent<GameOverUI>() == null)
+                gameObject.AddComponent<GameOverUI>();
         }
 
         private void Start()
