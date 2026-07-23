@@ -14,6 +14,7 @@ namespace VampireLike.Combat
         public static void ResetGame()
         {
             IsGameOver = false;
+            GameSessionStats.Reset();
         }
 
         /// <summary>
@@ -22,6 +23,7 @@ namespace VampireLike.Combat
         public static void SetGameOver()
         {
             IsGameOver = true;
+            GameSessionStats.EndRun();
         }
     }
 }

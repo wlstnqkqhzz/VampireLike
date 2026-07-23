@@ -3,17 +3,23 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using VampireLike.Enemies;
+using VampireLike.Growth;
 
 namespace VampireLike.Combat
 {
     /// <summary>
-    /// 게임 오버 상태가 되면 중앙 패널을 표시하고 다시 시작/게임 종료 버튼을 처리한다.
+    /// Shows the game over panel and run result when the player dies.
     /// </summary>
     public class GameOverUI : MonoBehaviour
     {
         private const string CanvasName = "Game Over Canvas";
         private const string RootName = "Game Over";
         private const string PanelName = "Game Over Panel";
+        private const string SurvivalTimeName = "Survival Time";
+        private const string WaveResultName = "Wave Result";
+        private const string LevelResultName = "Level Result";
+        private const string KillCountName = "Kill Count";
 
         [SerializeField]
         private GameObject gameOverRoot;
@@ -25,6 +31,10 @@ namespace VampireLike.Combat
         private Button quitButton;
 
         private RectTransform gameOverPanel;
+        private Text survivalTimeText;
+        private Text waveText;
+        private Text levelText;
+        private Text killCountText;
         private bool isShowing;
 
         private void Awake()
@@ -54,6 +64,7 @@ namespace VampireLike.Combat
             isShowing = true;
             Time.timeScale = 0f;
             CenterGameOverPanel();
+            UpdateResultTexts();
 
             if (gameOverRoot != null)
                 gameOverRoot.SetActive(true);
@@ -116,10 +127,13 @@ namespace VampireLike.Combat
             Image panelImage = panel.AddComponent<Image>();
             panelImage.color = new Color(0.08f, 0.08f, 0.09f, 0.96f);
 
-            CreateLabel(panel.transform, "게임 오버", new Vector2(0f, 76f), 36, Color.white, new Vector2(340f, 56f));
-            CreateLabel(panel.transform, "다시 도전할까요?", new Vector2(0f, 28f), 20, new Color(0.85f, 0.9f, 0.86f, 1f), new Vector2(340f, 34f));
-            restartButton = CreateButton(panel.transform, "다시 시작", new Vector2(0f, -24f));
-            quitButton = CreateButton(panel.transform, "게임 종료", new Vector2(0f, -82f));
+            CreateLabel(panel.transform, "게임 오버", new Vector2(0f, 138f), 36, Color.white, new Vector2(340f, 56f));
+            survivalTimeText = CreateLabel(panel.transform, "생존 시간 00:00", new Vector2(0f, 82f), 20, new Color(0.9f, 0.95f, 0.88f, 1f), new Vector2(340f, 28f), SurvivalTimeName);
+            waveText = CreateLabel(panel.transform, "도달 웨이브 -", new Vector2(0f, 48f), 18, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(340f, 26f), WaveResultName);
+            levelText = CreateLabel(panel.transform, "레벨 -", new Vector2(0f, 18f), 18, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(340f, 26f), LevelResultName);
+            killCountText = CreateLabel(panel.transform, "처치 수 0", new Vector2(0f, -12f), 18, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(340f, 26f), KillCountName);
+            restartButton = CreateButton(panel.transform, "다시 시작", new Vector2(0f, -72f));
+            quitButton = CreateButton(panel.transform, "게임 종료", new Vector2(0f, -130f));
             BindButtons();
         }
 
@@ -173,8 +187,14 @@ namespace VampireLike.Combat
         {
             Transform panelTransform = gameOverRoot.transform.Find(PanelName);
 
-            if (panelTransform != null)
-                gameOverPanel = panelTransform.GetComponent<RectTransform>();
+            if (panelTransform == null)
+                return;
+
+            gameOverPanel = panelTransform.GetComponent<RectTransform>();
+            survivalTimeText = panelTransform.Find(SurvivalTimeName)?.GetComponent<Text>();
+            waveText = panelTransform.Find(WaveResultName)?.GetComponent<Text>();
+            levelText = panelTransform.Find(LevelResultName)?.GetComponent<Text>();
+            killCountText = panelTransform.Find(KillCountName)?.GetComponent<Text>();
         }
 
         private void CenterGameOverPanel()
@@ -189,6 +209,32 @@ namespace VampireLike.Combat
 
             if (gameOverPanel != null)
                 CenterPanel(gameOverPanel);
+        }
+
+        private void UpdateResultTexts()
+        {
+            PlayerExperience playerExperience = GetComponent<PlayerExperience>();
+            EnemySpawner enemySpawner = FindFirstObjectByType<EnemySpawner>();
+
+            if (survivalTimeText != null)
+                survivalTimeText.text = $"생존 시간 {FormatTime(GameSessionStats.SurvivalTime)}";
+
+            if (waveText != null)
+                waveText.text = enemySpawner == null ? "도달 웨이브 -" : $"도달 웨이브 {enemySpawner.CurrentWave}";
+
+            if (levelText != null)
+                levelText.text = playerExperience == null ? "레벨 -" : $"레벨 {playerExperience.CurrentLevel}";
+
+            if (killCountText != null)
+                killCountText.text = $"처치 수 {GameSessionStats.KillCount}";
+        }
+
+        private static string FormatTime(float seconds)
+        {
+            int totalSeconds = Mathf.FloorToInt(seconds);
+            int minutes = totalSeconds / 60;
+            int remainingSeconds = totalSeconds % 60;
+            return $"{minutes:00}:{remainingSeconds:00}";
         }
 
         private static void StretchToParent(RectTransform rectTransform)
@@ -206,13 +252,13 @@ namespace VampireLike.Combat
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(420f, 280f);
+            rectTransform.sizeDelta = new Vector2(460f, 380f);
             rectTransform.anchoredPosition = Vector2.zero;
         }
 
-        private static Text CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color, Vector2 size)
+        private static Text CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color, Vector2 size, string objectName = null)
         {
-            GameObject labelObject = new GameObject(text);
+            GameObject labelObject = new GameObject(string.IsNullOrEmpty(objectName) ? text : objectName);
             labelObject.transform.SetParent(parent, false);
 
             RectTransform rectTransform = labelObject.AddComponent<RectTransform>();

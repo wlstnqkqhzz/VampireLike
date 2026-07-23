@@ -108,6 +108,7 @@ namespace VampireLike.Combat
         private void Die()
         {
             IsDead = true;
+            GameSessionStats.RecordKill();
             DropExperienceGem();
             Destroy(gameObject);
         }
