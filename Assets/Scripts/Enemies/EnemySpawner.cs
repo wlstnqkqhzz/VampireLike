@@ -95,6 +95,7 @@ namespace VampireLike.Enemies
         private float currentSpawnInterval;
         private int currentMaxEnemyCount;
         private int currentWave;
+        private bool isWaveProgressPaused;
 
         public event Action<int> WaveChanged;
 
@@ -103,6 +104,7 @@ namespace VampireLike.Enemies
         public int CurrentMaxEnemyCount => currentMaxEnemyCount;
         public int AliveEnemyCount => spawnedEnemies.Count;
         public float WaveProgress => waveDuration <= 0f ? 0f : Mathf.Clamp01(waveTimer / waveDuration);
+        public bool IsWaveProgressPaused => isWaveProgressPaused;
 
         private void Awake()
         {
@@ -156,6 +158,9 @@ namespace VampireLike.Enemies
 
         private void UpdateWaveTimer()
         {
+            if (isWaveProgressPaused)
+                return;
+
             waveTimer += Time.deltaTime;
 
             if (waveTimer < waveDuration)
@@ -174,6 +179,14 @@ namespace VampireLike.Enemies
 
             if (logWaveChanges)
                 Debug.Log($"Wave {currentWave} started. Spawn Interval: {currentSpawnInterval:0.00}, Max Enemies: {currentMaxEnemyCount}");
+        }
+
+        /// <summary>
+        /// 보스전처럼 현재 웨이브를 고정해야 할 때 웨이브 타이머만 멈춘다. 일반 적 생성은 계속 진행된다.
+        /// </summary>
+        public void SetWaveProgressPaused(bool paused)
+        {
+            isWaveProgressPaused = paused;
         }
 
         private void SpawnEnemy()

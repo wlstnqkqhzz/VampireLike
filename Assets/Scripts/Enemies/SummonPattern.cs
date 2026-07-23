@@ -27,7 +27,7 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float summonInterval = 0.15f;
 
-        private readonly List<GameObject> activeSummons = new List<GameObject>();
+        private readonly List<BossSummonTracker> activeSummons = new List<BossSummonTracker>();
 
         protected override bool CanExecutePattern()
         {
@@ -47,7 +47,9 @@ namespace VampireLike.Enemies
             {
                 Vector2 spawnPosition = GetSummonPosition(i, count);
                 GameObject summon = Instantiate(summonPrefab, spawnPosition, Quaternion.identity);
-                activeSummons.Add(summon);
+                BossSummonTracker tracker = summon.AddComponent<BossSummonTracker>();
+                tracker.Initialize(HandleSummonRemoved);
+                activeSummons.Add(tracker);
 
                 if (summonInterval > 0f)
                     yield return new WaitForSeconds(summonInterval);
@@ -68,6 +70,11 @@ namespace VampireLike.Enemies
                 if (activeSummons[i] == null)
                     activeSummons.RemoveAt(i);
             }
+        }
+
+        private void HandleSummonRemoved(BossSummonTracker summon)
+        {
+            activeSummons.Remove(summon);
         }
 
         protected override void OnValidate()

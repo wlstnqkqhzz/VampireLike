@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 100009}
   - component: {fileID: 100010}
   m_Layer: 7
-  m_Name: Boss
+  m_Name: Brute
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -198,8 +198,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossController
   player: {fileID: 0}
   commonRecoveryTime: 0.8
-  phase2HealthRatio: 0.6
-  phase3HealthRatio: 0.3
+  phase2HealthRatio: 0.5
+  phase3HealthRatio: 0
   useDefaultEnemyMovement: 1
 --- !u!114 &100009
 MonoBehaviour:
@@ -219,7 +219,7 @@ MonoBehaviour:
   minimumPhase: 1
   maximumPhase: 3
   allowMovementDuringPattern: 0
-  prepareTime: 0.7
+  prepareTime: 0.9
   dashSpeed: 6
   dashDuration: 0.35
   endLag: 0.25
@@ -242,7 +242,7 @@ MonoBehaviour:
   maximumPhase: 3
   allowMovementDuringPattern: 0
   triggerHealthRatio: 0.5
-  moveSpeedMultiplier: 1.25
-  cooldownMultiplier: 0.75
-  pauseDuration: 0.35
+  moveSpeedMultiplier: 1.35
+  cooldownMultiplier: 0.65
+  pauseDuration: 0.5
   enragedColor: {r: 1, g: 0.45, b: 0.35, a: 1}

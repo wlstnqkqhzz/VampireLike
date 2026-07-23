@@ -62,6 +62,7 @@ namespace VampireLike.Enemies
         private GameObject activeBoss;
         private EnemyHealth activeBossHealth;
         private int lastBossSpawnWave;
+        private bool hasPausedWaveProgress;
 
         public EnemyHealth ActiveBossHealth => activeBossHealth;
         public bool HasActiveBoss => activeBossHealth != null && !activeBossHealth.IsDead;
@@ -87,7 +88,10 @@ namespace VampireLike.Enemies
         private void OnDisable()
         {
             if (enemySpawner != null)
+            {
                 enemySpawner.WaveChanged -= HandleWaveChanged;
+                SetWaveProgressPaused(false);
+            }
         }
 
         private void Update()
@@ -96,6 +100,11 @@ namespace VampireLike.Enemies
             {
                 activeBoss = null;
                 activeBossHealth = null;
+                SetWaveProgressPaused(false);
+            }
+            else
+            {
+                SetWaveProgressPaused(true);
             }
 
             if (activeBoss != null)
@@ -171,7 +180,17 @@ namespace VampireLike.Enemies
                 bossController.InitializeBoss(bossStage, player);
 
             ApplyBossScaling(activeBoss, wave);
+            SetWaveProgressPaused(true);
             Debug.Log($"Boss appeared - Wave {wave}");
+        }
+
+        private void SetWaveProgressPaused(bool paused)
+        {
+            if (enemySpawner == null || hasPausedWaveProgress == paused)
+                return;
+
+            hasPausedWaveProgress = paused;
+            enemySpawner.SetWaveProgressPaused(paused);
         }
 
         private GameObject GetBossPrefabForStage(int bossStage)

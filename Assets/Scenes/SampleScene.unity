@@ -9357,6 +9357,12 @@ MonoBehaviour:
     bossPrefab: {fileID: 100000, guid: b281f8e312344110abf1833500f64b25, type: 3}
   - bossStage: 2
     bossPrefab: {fileID: 100000, guid: 9a0d0ad049264db2b3ef1bba436811de, type: 3}
+  - bossStage: 3
+    bossPrefab: {fileID: 100000, guid: c2e3e9a836454751b1fb8e28c9d95d4a, type: 3}
+  - bossStage: 4
+    bossPrefab: {fileID: 100000, guid: dfc13e8843854ddab4dcc28d40cbc784, type: 3}
+  - bossStage: 5
+    bossPrefab: {fileID: 100000, guid: 39030f494df242ab8fbe6eda9316510d, type: 3}
   player: {fileID: 1723042665}
   bossWaveInterval: 5
   minSpawnDistance: 5

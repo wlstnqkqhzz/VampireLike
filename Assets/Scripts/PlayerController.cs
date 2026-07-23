@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,6 +15,7 @@ public class PlayerController : MonoBehaviour
     private const float PlayerVisualScale = 3f;
     private const int SpriteSize = 16;
     private const int DirectionFrameCount = 4;
+    private const float MinimumMoveSpeedMultiplier = 0.25f;
     private const string PlayerVisualName = "PlayerVisual";
     private const string WalkSpritePath = "Assets/Art/Characters/Vampire/SeparateAnim/Walk.png";
     private static readonly Vector2 PlayerColliderOffset = new Vector2(0f, -0.08f);
@@ -31,6 +33,8 @@ public class PlayerController : MonoBehaviour
     private Vector2 moveInput;
     private SpriteRenderer visualRenderer;
     private Sprite[][] walkFramesByDirection;
+    private readonly Dictionary<object, float> moveSpeedMultipliers = new Dictionary<object, float>();
+    private float currentMoveSpeedMultiplier = 1f;
     private float animationTimer;
     private int animationFrameIndex;
     private bool wasMoving;
@@ -108,7 +112,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         // Transform 직접 변경 대신 Rigidbody2D.MovePosition으로 이동해 충돌과 함께 동작하게 한다.
-        Vector2 nextPosition = rb.position + moveInput * moveSpeed * Time.fixedDeltaTime;
+        Vector2 nextPosition = rb.position + moveInput * moveSpeed * currentMoveSpeedMultiplier * Time.fixedDeltaTime;
         rb.MovePosition(nextPosition);
     }
 
@@ -121,6 +125,40 @@ public class PlayerController : MonoBehaviour
             return;
 
         moveSpeed *= multiplier;
+    }
+
+    /// <summary>
+    /// 장판 같은 상태 이상이 플레이어 이동속도에 임시 배율을 적용할 때 사용한다.
+    /// </summary>
+    public void AddMoveSpeedMultiplier(object source, float multiplier)
+    {
+        if (source == null)
+            return;
+
+        moveSpeedMultipliers[source] = Mathf.Clamp(multiplier, MinimumMoveSpeedMultiplier, 1f);
+        RecalculateMoveSpeedMultiplier();
+    }
+
+    /// <summary>
+    /// 상태 이상이 끝났을 때 해당 source가 적용한 이동속도 배율을 제거한다.
+    /// </summary>
+    public void RemoveMoveSpeedMultiplier(object source)
+    {
+        if (source == null)
+            return;
+
+        if (moveSpeedMultipliers.Remove(source))
+            RecalculateMoveSpeedMultiplier();
+    }
+
+    private void RecalculateMoveSpeedMultiplier()
+    {
+        currentMoveSpeedMultiplier = 1f;
+
+        foreach (float multiplier in moveSpeedMultipliers.Values)
+            currentMoveSpeedMultiplier *= multiplier;
+
+        currentMoveSpeedMultiplier = Mathf.Max(MinimumMoveSpeedMultiplier, currentMoveSpeedMultiplier);
     }
 
     private void ConfigureSpriteRenderer()

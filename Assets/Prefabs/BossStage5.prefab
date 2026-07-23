@@ -20,7 +20,7 @@ GameObject:
   - component: {fileID: 100010}
   - component: {fileID: 100011}
   m_Layer: 7
-  m_Name: Necromancer
+  m_Name: Frost Golem
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -36,7 +36,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4.6, y: 4.6, z: 1}
+  m_LocalScale: {x: 5.1, y: 5.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -90,7 +90,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 93ee1c7bce424fd38af840e921be905b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2187708dee694b20a5fdba1385bd7a3b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemyController
   target: {fileID: 0}
-  moveSpeed: 0
+  moveSpeed: 0.65
   stoppingDistance: 0
   separationRadius: 0.8
   separationWeight: 0.55
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e49223c768843d1b10e75211e2971a3, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyHealth
-  maxHealth: 42
+  maxHealth: 70
   hitFlashDuration: 0.08
   experienceGemPrefab: {fileID: 400005, guid: 11ed6501a06941049f1bff2dc0b4e971, type: 3}
 --- !u!114 &100007
@@ -184,7 +184,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 113ec33c53d640779794ad63f17b84ec, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyContactDamage
-  contactDamage: 2
+  contactDamage: 4
 --- !u!114 &100008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198,10 +198,10 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossController
   player: {fileID: 0}
-  commonRecoveryTime: 0.7
-  phase2HealthRatio: 0.6
-  phase3HealthRatio: 0.3
-  useDefaultEnemyMovement: 0
+  commonRecoveryTime: 0.8
+  phase2HealthRatio: 0.5
+  phase3HealthRatio: 0.25
+  useDefaultEnemyMovement: 1
 --- !u!114 &100009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -211,38 +211,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93e141dff8a24208aafb6af38198631f, type: 3}
+  m_Script: {fileID: 11500000, guid: e138d8649925414d85666d692bb75cf1, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossDistanceMovement
-  moveSpeed: 1.15
-  minDistance: 2.7
-  maxDistance: 4.4
-  strafeWeight: 0.35
---- !u!114 &100010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100000}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a054d1f5dffc4f56b860384e0b79af1d, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.SummonPattern
-  cooldown: 6
-  initialDelay: 1.5
-  priority: 4
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.ShockwavePattern
+  cooldown: 5
+  initialDelay: 1.6
+  priority: 7
   minimumPhase: 1
   maximumPhase: 3
   allowMovementDuringPattern: 0
-  summonPrefab: {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
-  summonCount: 2
-  phaseBonusSummonCount: 2
-  maxActiveSummons: 8
-  spawnRadius: 1.6
-  summonInterval: 0.15
---- !u!114 &100011
+  shockwaveVisualPrefab: {fileID: 540000, guid: 3f0039e23202426b8b67bb0b749257d3, type: 3}
+  prepareTime: 0.65
+  maxRadius: 1.4
+  phaseBonusRadius: 0.45
+  expandDuration: 0.5
+  damage: 2
+  slowMultiplier: 0.65
+  slowDuration: 0.8
+  playerLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &100010
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -254,19 +243,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 111c22fdb8ab42a1899f578638dd4e3c, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.TargetAreaPattern
-  cooldown: 4.5
+  cooldown: 5.5
   initialDelay: 3
-  priority: 6
-  minimumPhase: 3
+  priority: 5
+  minimumPhase: 1
   maximumPhase: 3
   allowMovementDuringPattern: 0
-  warningDuration: 0.9
-  radius: 0.9
+  warningDuration: 1
+  radius: 1
   damage: 2
-  warningPrefab: {fileID: 500000, guid: b58dffb01cda429b917549b5580985ea, type: 3}
-  impactPrefab: {fileID: 510000, guid: 919bbeaf531e4cc99f50b0162362f72b, type: 3}
+  warningPrefab: {fileID: 550000, guid: 5e6248361905416994cad8285a2acbb9, type: 3}
+  impactPrefab: {fileID: 560000, guid: ed377b1111354708a53c4de286efde90, type: 3}
   impactLifetime: 0.35
-  warningColor: {r: 1, g: 0.1, b: 0.05, a: 0.35}
+  warningColor: {r: 0.45, g: 0.85, b: 1, a: 0.35}
   playerLayerMask:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &100011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27d9aa9fb6434efbbda0dad9826ee753, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnragePattern
+  cooldown: 1
+  initialDelay: 0
+  priority: 20
+  minimumPhase: 2
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  triggerHealthRatio: 0.5
+  moveSpeedMultiplier: 1.15
+  cooldownMultiplier: 0.72
+  pauseDuration: 0.45
+  enragedColor: {r: 0.72, g: 0.92, b: 1, a: 1}
