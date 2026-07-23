@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 100005}
   - component: {fileID: 100006}
   m_Layer: 7
-  m_Name: Enemy
+  m_Name: EnemyTank
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalScale: {x: 3.5, y: 3.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 9
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: ecb0ebbe649e4326b942d760ff21a641, type: 3}
+  m_Sprite: {fileID: 21300000, guid: fce7ba4ef1174743a212448418b2928a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -130,7 +130,7 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: -0.02}
-  m_Size: {x: 0.24, y: 0.26}
+  m_Size: {x: 0.42, y: 0.34}
   m_Direction: 0
 --- !u!114 &100005
 MonoBehaviour:
@@ -142,13 +142,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2be1385d92bb437993093413b1e01747, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemyController
   target: {fileID: 0}
-  moveSpeed: 1.5
+  moveSpeed: 1
   stoppingDistance: 0
-  separationRadius: 0.55
-  separationWeight: 0.45
+  separationRadius: 0.62
+  separationWeight: 0.5
   enemyLayerMask:
     serializedVersion: 2
     m_Bits: 128
@@ -162,8 +162,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e49223c768843d1b10e75211e2971a3, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyHealth
-  maxHealth: 3
+  maxHealth: 8
   hitFlashDuration: 0.08
   experienceGemPrefab: {fileID: 300005, guid: 1cc53847a73f4bc99b0debc19fd6ffb2, type: 3}
