@@ -90,7 +90,7 @@ namespace VampireLike.Combat
             if (!other.CompareTag("Enemy") && other.GetComponentInParent<EnemyHealth>() == null)
                 return;
 
-            TakeDamage(contactDamage);
+            TakeDamage(GetContactDamage(other));
         }
 
         private void OnValidate()
@@ -201,10 +201,16 @@ namespace VampireLike.Combat
 
                 if (enemyCollider != null && enemyCollider.GetComponentInParent<EnemyHealth>() != null)
                 {
-                    TakeDamage(contactDamage);
+                    TakeDamage(GetContactDamage(enemyCollider.gameObject));
                     return;
                 }
             }
+        }
+
+        private int GetContactDamage(GameObject enemyObject)
+        {
+            EnemyContactDamage enemyContactDamage = enemyObject.GetComponentInParent<EnemyContactDamage>();
+            return enemyContactDamage == null ? contactDamage : enemyContactDamage.ContactDamage;
         }
 
         private void SetVisualColors(Color color)

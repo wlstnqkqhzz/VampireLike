@@ -32,6 +32,9 @@ namespace VampireLike.Combat
 
         public static IReadOnlyList<EnemyHealth> ActiveEnemies => activeEnemies;
         public bool IsDead { get; private set; }
+        public int MaxHealth => maxHealth;
+        public int CurrentHealth => currentHealth;
+        public float HealthProgress => maxHealth <= 0 ? 0f : Mathf.Clamp01((float)currentHealth / maxHealth);
 
         private void Awake()
         {
@@ -74,6 +77,12 @@ namespace VampireLike.Combat
             }
 
             PlayHitFlash();
+        }
+
+        public void SetMaxHealth(int value)
+        {
+            maxHealth = Mathf.Max(1, value);
+            currentHealth = maxHealth;
         }
 
         private void PlayHitFlash()

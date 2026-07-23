@@ -34,6 +34,9 @@ namespace VampireLike.Enemies
         private Rigidbody2D rb;
         private Collider2D enemyCollider;
         private readonly Collider2D[] separationResults = new Collider2D[8];
+        private bool movementEnabled = true;
+
+        public float MoveSpeed => moveSpeed;
 
         private void Awake()
         {
@@ -51,7 +54,7 @@ namespace VampireLike.Enemies
 
         private void FixedUpdate()
         {
-            if (target == null || GameState.IsGameOver || Time.timeScale <= 0f)
+            if (!movementEnabled || target == null || GameState.IsGameOver || Time.timeScale <= 0f)
                 return;
 
             // Rigidbody2D 기반 이동으로 물리 충돌과 자연스럽게 맞물리게 한다.
@@ -81,6 +84,19 @@ namespace VampireLike.Enemies
             stoppingDistance = Mathf.Max(0f, stoppingDistance);
             separationRadius = Mathf.Max(0f, separationRadius);
             separationWeight = Mathf.Max(0f, separationWeight);
+        }
+
+        public void SetMoveSpeed(float value)
+        {
+            moveSpeed = Mathf.Max(0f, value);
+        }
+
+        public void SetMovementEnabled(bool isEnabled)
+        {
+            movementEnabled = isEnabled;
+
+            if (!movementEnabled && rb != null)
+                rb.linearVelocity = Vector2.zero;
         }
 
         private Vector2 GetSeparationDirection(Vector2 currentPosition)
