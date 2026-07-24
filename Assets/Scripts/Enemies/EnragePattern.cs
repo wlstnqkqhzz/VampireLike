@@ -8,6 +8,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class EnragePattern : BossPattern
     {
+        protected override bool UseSkillAnimation => true;
+
         [SerializeField]
         private float triggerHealthRatio = 0.5f;
 

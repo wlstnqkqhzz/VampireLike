@@ -125,7 +125,38 @@ namespace VampireLike.Combat
             GameSessionStats.RecordKill();
             Died?.Invoke(this);
             DropExperienceGem();
-            Destroy(gameObject);
+
+            float deathDuration = bossSpriteAnimator == null ? 0f : bossSpriteAnimator.PlayDeath();
+
+            DisableAfterDeath();
+
+            if (deathDuration > 0f)
+                Destroy(gameObject, deathDuration);
+            else
+                Destroy(gameObject);
+        }
+
+        private void DisableAfterDeath()
+        {
+            EnemyController enemyController = GetComponent<EnemyController>();
+
+            if (enemyController != null)
+                enemyController.SetMovementEnabled(false);
+
+            EnemyContactDamage contactDamage = GetComponent<EnemyContactDamage>();
+
+            if (contactDamage != null)
+                contactDamage.enabled = false;
+
+            Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
+
+            foreach (Collider2D targetCollider in colliders)
+                targetCollider.enabled = false;
+
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+
+            if (rb != null)
+                rb.linearVelocity = Vector2.zero;
         }
 
         private void DropExperienceGem()

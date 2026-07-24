@@ -9,6 +9,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class TargetAreaPattern : BossPattern
     {
+        protected override bool UseSkillAnimation => true;
+
         [SerializeField]
         private float warningDuration = 0.9f;
 

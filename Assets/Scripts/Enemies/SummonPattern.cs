@@ -9,6 +9,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class SummonPattern : BossPattern
     {
+        protected override bool UseSkillAnimation => true;
+
         [SerializeField]
         private GameObject summonPrefab;
 

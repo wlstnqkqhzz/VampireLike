@@ -10,6 +10,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class ShockwavePattern : BossPattern
     {
+        protected override bool UseSkillAnimation => true;
+
         [SerializeField]
         private GameObject shockwaveVisualPrefab;
 

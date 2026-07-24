@@ -49,6 +49,9 @@ namespace VampireLike.Enemies
         private float maxSpawnDistance = 7f;
 
         [SerializeField]
+        private float cameraSafeSpawnPadding = 2f;
+
+        [SerializeField]
         private float healthMultiplierPerAppearance = 1.35f;
 
         [SerializeField]
@@ -65,6 +68,7 @@ namespace VampireLike.Enemies
         private int activeBossStage;
         private int lastBossSpawnWave;
         private bool hasPausedWaveProgress;
+        private Camera mainCamera;
 
         public EnemyHealth ActiveBossHealth => activeBossHealth;
         public bool HasActiveBoss => activeBossHealth != null && !activeBossHealth.IsDead;
@@ -79,6 +83,8 @@ namespace VampireLike.Enemies
 
             if (player == null)
                 player = GameObject.Find("Player")?.transform;
+
+            mainCamera = Camera.main;
         }
 
         private void OnEnable()
@@ -130,6 +136,7 @@ namespace VampireLike.Enemies
             bossWaveInterval = Mathf.Max(1, bossWaveInterval);
             minSpawnDistance = Mathf.Max(0f, minSpawnDistance);
             maxSpawnDistance = Mathf.Max(minSpawnDistance, maxSpawnDistance);
+            cameraSafeSpawnPadding = Mathf.Max(0f, cameraSafeSpawnPadding);
             healthMultiplierPerAppearance = Mathf.Max(1f, healthMultiplierPerAppearance);
             contactDamageMultiplierPerAppearance = Mathf.Max(1f, contactDamageMultiplierPerAppearance);
             moveSpeedMultiplierPerAppearance = Mathf.Max(1f, moveSpeedMultiplierPerAppearance);
@@ -265,10 +272,73 @@ namespace VampireLike.Enemies
 
         private Vector2 GetRandomSpawnPosition()
         {
-            float angle = Random.Range(0f, Mathf.PI * 2f);
-            float distance = Random.Range(minSpawnDistance, maxSpawnDistance);
+            const int MaxAttempts = 24;
+
+            for (int i = 0; i < MaxAttempts; i++)
+            {
+                Vector2 position = GetRandomPositionAroundPlayer();
+
+                if (IsInsideCameraSafeArea(position))
+                    return position;
+            }
+
+            Vector2 fallbackPosition = GetRandomPositionAroundPlayer();
+            return ClampToCameraSafeArea(fallbackPosition);
+        }
+
+        private Vector2 GetRandomPositionAroundPlayer()
+        {
+            float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+            float distance = UnityEngine.Random.Range(minSpawnDistance, maxSpawnDistance);
             Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
             return (Vector2)player.position + direction * distance;
+        }
+
+        private bool IsInsideCameraSafeArea(Vector2 position)
+        {
+            if (!TryGetCameraSafeBounds(out Vector2 min, out Vector2 max))
+                return true;
+
+            return position.x >= min.x
+                && position.x <= max.x
+                && position.y >= min.y
+                && position.y <= max.y;
+        }
+
+        private Vector2 ClampToCameraSafeArea(Vector2 position)
+        {
+            if (!TryGetCameraSafeBounds(out Vector2 min, out Vector2 max))
+                return position;
+
+            return new Vector2(
+                Mathf.Clamp(position.x, min.x, max.x),
+                Mathf.Clamp(position.y, min.y, max.y));
+        }
+
+        private bool TryGetCameraSafeBounds(out Vector2 min, out Vector2 max)
+        {
+            if (mainCamera == null)
+                mainCamera = Camera.main;
+
+            if (mainCamera == null || !mainCamera.orthographic)
+            {
+                min = Vector2.zero;
+                max = Vector2.zero;
+                return false;
+            }
+
+            Vector2 center = mainCamera.transform.position;
+            float halfHeight = mainCamera.orthographicSize;
+            float halfWidth = halfHeight * mainCamera.aspect;
+            float padding = cameraSafeSpawnPadding;
+
+            min = new Vector2(center.x - halfWidth + padding, center.y - halfHeight + padding);
+            max = new Vector2(center.x + halfWidth - padding, center.y + halfHeight - padding);
+
+            if (min.x > max.x || min.y > max.y)
+                return false;
+
+            return true;
         }
     }
 }

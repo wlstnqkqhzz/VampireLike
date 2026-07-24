@@ -8,6 +8,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class HomingOrbPattern : BossPattern
     {
+        protected override bool UseSkillAnimation => true;
+
         [SerializeField]
         private EnemyProjectileController projectilePrefab;
 

@@ -37,7 +37,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3.7, y: 3.7, z: 1}
+  m_LocalScale: {x: 1.8, y: 1.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -221,7 +221,7 @@ MonoBehaviour:
   minimumPhase: 1
   maximumPhase: 3
   allowMovementDuringPattern: 0
-  zonePrefab: {fileID: 620000, guid: a2f5898925a9464c8eec5880fb7c9640, type: 3}
+  zonePrefab: {fileID: 520000, guid: 3ec562f5ee064c9da261278cf98be534, type: 3}
   radius: 0.85
   duration: 5
   spawnRadius: 2.4

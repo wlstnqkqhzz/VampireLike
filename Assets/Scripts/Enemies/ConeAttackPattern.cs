@@ -36,6 +36,9 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float effectLifetime = 0.25f;
 
+        [SerializeField]
+        private float effectCameraPadding = 0.7f;
+
         private readonly Collider2D[] hitResults = new Collider2D[8];
         private GameObject activeWarning;
 
@@ -74,6 +77,7 @@ namespace VampireLike.Enemies
                 return null;
 
             Vector2 effectPosition = (Vector2)transform.position + direction * range * 0.5f;
+            effectPosition = ClampEffectToCamera(effectPosition);
             GameObject effect = Instantiate(prefab, effectPosition, Quaternion.FromToRotation(Vector3.right, direction));
             effect.transform.localScale = Vector3.one * range;
 
@@ -81,6 +85,31 @@ namespace VampireLike.Enemies
                 Destroy(effect, effectLifetime);
 
             return effect;
+        }
+
+        private Vector2 ClampEffectToCamera(Vector2 position)
+        {
+            Camera mainCamera = Camera.main;
+
+            if (mainCamera == null || !mainCamera.orthographic)
+                return position;
+
+            Vector2 center = mainCamera.transform.position;
+            float halfHeight = mainCamera.orthographicSize;
+            float halfWidth = halfHeight * mainCamera.aspect;
+            float padding = Mathf.Max(0f, effectCameraPadding);
+
+            float minX = center.x - halfWidth + padding;
+            float maxX = center.x + halfWidth - padding;
+            float minY = center.y - halfHeight + padding;
+            float maxY = center.y + halfHeight - padding;
+
+            if (minX > maxX || minY > maxY)
+                return position;
+
+            return new Vector2(
+                Mathf.Clamp(position.x, minX, maxX),
+                Mathf.Clamp(position.y, minY, maxY));
         }
 
         private void ApplyDamage(Vector2 direction)
@@ -122,6 +151,7 @@ namespace VampireLike.Enemies
             damage = Mathf.Max(1, damage);
             endLag = Mathf.Max(0f, endLag);
             effectLifetime = Mathf.Max(0.05f, effectLifetime);
+            effectCameraPadding = Mathf.Max(0f, effectCameraPadding);
         }
     }
 }

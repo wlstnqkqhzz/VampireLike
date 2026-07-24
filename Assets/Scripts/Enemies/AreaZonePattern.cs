@@ -9,6 +9,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class AreaZonePattern : BossPattern
     {
+        protected override bool UseSkillAnimation => true;
+
         [SerializeField]
         private GameObject zonePrefab;
 

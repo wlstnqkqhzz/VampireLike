@@ -9,6 +9,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class TeleportPattern : BossPattern
     {
+        protected override bool UseSkillAnimation => true;
+
         [SerializeField]
         private float vanishDelay = 0.45f;
 

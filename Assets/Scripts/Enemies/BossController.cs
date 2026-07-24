@@ -71,6 +71,7 @@ namespace VampireLike.Enemies
             }
 
             UpdatePhase();
+            UpdateFacingDirection();
 
             if (patternRoutine == null)
                 TryExecuteNextPattern();
@@ -102,6 +103,9 @@ namespace VampireLike.Enemies
 
             if (enemyController != null)
                 enemyController.SetMovementEnabled(useDefaultEnemyMovement && allowMovement);
+
+            if (state == BossState.Chasing)
+                spriteAnimator?.PlayIdle();
         }
 
         public void MultiplyPatternCooldown(float multiplier)
@@ -125,6 +129,26 @@ namespace VampireLike.Enemies
         public void PlayAttackAnimation()
         {
             spriteAnimator?.PlayAttack();
+        }
+
+        public void PlaySkillAnimation()
+        {
+            spriteAnimator?.PlaySkill();
+        }
+
+        public void FaceDirection(Vector2 direction)
+        {
+            spriteAnimator?.FaceDirection(direction);
+        }
+
+        public void ShowAttackFrame(int frameIndex)
+        {
+            spriteAnimator?.ShowAttackFrame(frameIndex);
+        }
+
+        public void PlayWalkAnimation()
+        {
+            spriteAnimator?.PlayWalk();
         }
 
         public float ActiveBossHealthRatio()
@@ -212,6 +236,15 @@ namespace VampireLike.Enemies
                 nextPhase = 2;
 
             CurrentPhase = Mathf.Max(CurrentPhase, nextPhase);
+        }
+
+        private void UpdateFacingDirection()
+        {
+            if (player == null || State != BossState.Chasing)
+                return;
+
+            FaceDirection(player.position - transform.position);
+            PlayWalkAnimation();
         }
     }
 }

@@ -35,6 +35,8 @@ namespace VampireLike.Enemies
         protected BossController Boss { get; private set; }
         protected Transform Player => Boss.Player;
         protected Rigidbody2D BossRigidbody => Boss.BossRigidbody;
+        protected virtual bool UseSkillAnimation => false;
+        protected virtual bool UseAutomaticAnimation => true;
 
         public virtual void Initialize(BossController boss)
         {
@@ -58,7 +60,15 @@ namespace VampireLike.Enemies
         public IEnumerator Execute()
         {
             MarkUsed();
-            Boss?.PlayAttackAnimation();
+
+            if (UseAutomaticAnimation)
+            {
+                if (UseSkillAnimation)
+                    Boss?.PlaySkillAnimation();
+                else
+                    Boss?.PlayAttackAnimation();
+            }
+
             yield return ExecutePattern();
         }
 

@@ -9,6 +9,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class BurrowPattern : BossPattern
     {
+        protected override bool UseSkillAnimation => true;
+
         [SerializeField]
         private float burrowDelay = 0.45f;
 

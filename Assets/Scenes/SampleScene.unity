@@ -7644,8 +7644,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
@@ -7754,7 +7754,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 74469848513176b4db5bd6bb3d12b016, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   target: {fileID: 1723042665}
   offset: {x: 0, y: 0, z: -10}
@@ -7768,7 +7768,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d8a2c7fddf949e4a95d67e16cb42e2f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenu
   pauseMenuRoot: {fileID: 0}
   resumeButton: {fileID: 0}
@@ -7800,8 +7800,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_ComponentVersion: 4
   m_LightType: 4
   m_BlendStyleIndex: 0
@@ -7878,14 +7878,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!213 &772557180
+--- !u!213 &1093371202
 Sprite:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name:
+  m_Name: 
   m_Rect:
     serializedVersion: 2
     x: 0
@@ -7897,7 +7897,7 @@ Sprite:
   m_PixelsToUnits: 100
   m_Pivot: {x: 0.5, y: 0.5}
   m_Extrude: 0
-  m_PackingTag:
+  m_PackingTag: 
   m_RenderDataKey:
     00000000000000000000000000000000: 0
   m_AtlasTags: []
@@ -8097,7 +8097,7 @@ Sprite:
   m_PhysicsShape: []
   m_Bones: []
   m_ScriptableObjects: []
-  m_SpriteID:
+  m_SpriteID: 
 --- !u!1 &1239885571
 GameObject:
   m_ObjectHideFlags: 0
@@ -8179,7 +8179,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 772557180}
+  m_Sprite: {fileID: 1093371202}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -8225,7 +8225,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e597fdad620085c4fb3a96c59a150189, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NewMonoBehaviourScript
   moveSpeed: 5
   animationFrameRate: 8
@@ -8315,7 +8315,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aac9e15fa5fd46c19d2fa309276f9fd0, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.PlayerHealth
   maxHealth: 10
   contactDamage: 1
@@ -8336,7 +8336,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7bd8069f7ab4172b4e49470177f6653, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.PlayerAutoAttack
   projectilePrefab: {fileID: 200005, guid: ec057b357e1c4153b443286eb504d007, type: 3}
   firePoint: {fileID: 0}
@@ -8357,7 +8357,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46b145a3cf78412185cf485b4d827ca1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerExperience
   currentExperience: 0
   currentLevel: 1
@@ -8377,7 +8377,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b5d42036df74cda9d21d0e9b8aa9f06, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.LevelUpChoiceUI
 --- !u!114 &1723042670
 MonoBehaviour:
@@ -8389,7 +8389,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64ff4261944e4386a49952d18253e280, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerUpgradeController
   upgradeDefinitions:
   - {fileID: 11400000, guid: 207dadecee214dff9a762467edd406e5, type: 2}
@@ -8410,7 +8410,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7802a4821dc8406fa1e9cf1b1bacb4f7, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerExperienceUI
   playerExperience: {fileID: 1723042668}
   enemySpawner: {fileID: 0}
@@ -8428,7 +8428,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0cdfc44fe31a4742bb3a1cb8b9afeb68, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.GameOverUI
   gameOverRoot: {fileID: 0}
   restartButton: {fileID: 0}
@@ -9628,7 +9628,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d134d099771441239ae8e3a565287647, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemySpawner
   enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
   enemySpawnEntries:
@@ -9659,7 +9659,7 @@ MonoBehaviour:
   player: {fileID: 1723042665}
   spawnInterval: 2
   minimumSpawnInterval: 0.45
-  startingWave: 1
+  startingWave: 5
   waveDuration: 20
   spawnIntervalMultiplier: 0.9
   logWaveChanges: 1
@@ -9678,7 +9678,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1be0aa7ada374df18a0ce207289ae7b4, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossSpawner
   enemySpawner: {fileID: 2200000002}
   bossPrefab: {fileID: 100000, guid: b281f8e312344110abf1833500f64b25, type: 3}
@@ -9707,6 +9707,7 @@ MonoBehaviour:
   bossWaveInterval: 5
   minSpawnDistance: 5
   maxSpawnDistance: 7
+  cameraSafeSpawnPadding: 2
   healthMultiplierPerAppearance: 1.35
   contactDamageMultiplierPerAppearance: 1.25
   moveSpeedMultiplierPerAppearance: 1.08
@@ -9721,10 +9722,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d45dcb1cd7674bf18ed39b286ca74501, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossHealthBarUI
   bossSpawner: {fileID: 2200000003}
-  hiddenBossSpawner: {fileID: 2200000005}
   drawHud: 1
   topOffset: 38
   sideMargin: 220
@@ -9739,7 +9739,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af63da5723bf452ca9f8ef0f98d74a8e, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.HiddenBossSpawner
   bossSpawner: {fileID: 2200000003}
   enemySpawner: {fileID: 2200000002}

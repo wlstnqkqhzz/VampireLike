@@ -8,6 +8,8 @@ namespace VampireLike.Enemies
     /// </summary>
     public class DashPattern : BossPattern
     {
+        protected override bool UseAutomaticAnimation => false;
+
         [SerializeField]
         private float prepareTime = 0.7f;
 
@@ -31,9 +33,14 @@ namespace VampireLike.Enemies
             if (dashDirection.sqrMagnitude <= 0.001f)
                 dashDirection = Vector2.down;
 
+            Boss.FaceDirection(dashDirection);
+            Boss.ShowAttackFrame(0);
+
             yield return new WaitForSeconds(prepareTime);
 
             Boss.SetState(BossState.Attacking, false);
+            Boss.FaceDirection(dashDirection);
+            Boss.ShowAttackFrame(1);
             float elapsedTime = 0f;
 
             while (elapsedTime < dashDuration && !Boss.IsDead)
