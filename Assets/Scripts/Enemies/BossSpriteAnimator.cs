@@ -158,6 +158,21 @@ namespace VampireLike.Enemies
             deathFrames = LoadFrameSet("Death");
         }
 
+        public void SetResourceFolder(string nextResourceFolder)
+        {
+            if (string.IsNullOrWhiteSpace(nextResourceFolder) || resourceFolder == nextResourceFolder)
+                return;
+
+            if (spriteRenderer == null)
+                spriteRenderer = GetComponent<SpriteRenderer>();
+
+            resourceFolder = nextResourceFolder;
+            LoadFrames();
+            currentPriority = AnimationPriority.Idle;
+            currentLoop = LoopAnimationType.None;
+            PlayIdle();
+        }
+
         private Sprite[] LoadFrameSet(string prefix)
         {
             return Resources.LoadAll<Sprite>(resourceFolder)

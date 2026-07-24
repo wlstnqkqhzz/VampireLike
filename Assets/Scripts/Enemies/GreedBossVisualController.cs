@@ -15,6 +15,18 @@ namespace VampireLike.Enemies
         private SpriteRenderer baseSpriteRenderer;
 
         [SerializeField]
+        private BossSpriteAnimator spriteAnimator;
+
+        [SerializeField]
+        private string[] greedLevelResourceFolders =
+        {
+            "BossAnimations/HiddenBoss/Level0",
+            "BossAnimations/HiddenBoss/Level1",
+            "BossAnimations/HiddenBoss/Level2",
+            "BossAnimations/HiddenBoss/Level3"
+        };
+
+        [SerializeField]
         private Color[] phaseColors =
         {
             new Color(0.95f, 0.9f, 0.72f, 1f),
@@ -36,12 +48,18 @@ namespace VampireLike.Enemies
             if (baseSpriteRenderer == null)
                 baseSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
+            if (spriteAnimator == null)
+                spriteAnimator = GetComponent<BossSpriteAnimator>();
+
             baseScale = visualRoot.localScale;
         }
 
         public void ApplyGreedLevel(int greedLevel)
         {
             int index = Mathf.Clamp(greedLevel - 1, 0, 3);
+
+            if (spriteAnimator != null && greedLevelResourceFolders != null && greedLevelResourceFolders.Length > 0)
+                spriteAnimator.SetResourceFolder(greedLevelResourceFolders[Mathf.Clamp(index, 0, greedLevelResourceFolders.Length - 1)]);
 
             if (baseSpriteRenderer != null && phaseColors != null && phaseColors.Length > 0)
                 baseSpriteRenderer.color = phaseColors[Mathf.Clamp(index, 0, phaseColors.Length - 1)];
