@@ -12,6 +12,9 @@ namespace VampireLike.Enemies
         private BossSpawner bossSpawner;
 
         [SerializeField]
+        private HiddenBossSpawner hiddenBossSpawner;
+
+        [SerializeField]
         private bool drawHud = true;
 
         [SerializeField]
@@ -30,6 +33,9 @@ namespace VampireLike.Enemies
         {
             if (bossSpawner == null)
                 bossSpawner = GetComponent<BossSpawner>();
+
+            if (hiddenBossSpawner == null)
+                hiddenBossSpawner = GetComponent<HiddenBossSpawner>();
 
             EnsureTexture();
         }
@@ -55,10 +61,16 @@ namespace VampireLike.Enemies
             if (bossSpawner == null)
                 bossSpawner = GetComponent<BossSpawner>();
 
-            if (bossSpawner == null || !bossSpawner.HasActiveBoss)
+            if (hiddenBossSpawner == null)
+                hiddenBossSpawner = GetComponent<HiddenBossSpawner>();
+
+            bool hasHiddenBoss = hiddenBossSpawner != null && hiddenBossSpawner.HasActiveHiddenBoss;
+            bool hasNormalBoss = bossSpawner != null && bossSpawner.HasActiveBoss;
+
+            if (!hasHiddenBoss && !hasNormalBoss)
                 return;
 
-            EnemyHealth bossHealth = bossSpawner.ActiveBossHealth;
+            EnemyHealth bossHealth = hasHiddenBoss ? hiddenBossSpawner.ActiveHiddenBossHealth : bossSpawner.ActiveBossHealth;
 
             if (bossHealth == null)
                 return;
@@ -67,10 +79,10 @@ namespace VampireLike.Enemies
             EnsureStyles();
 
             GUI.depth = -1200;
-            DrawBossHealthBar(bossHealth);
+            DrawBossHealthBar(bossHealth, hasHiddenBoss);
         }
 
-        private void DrawBossHealthBar(EnemyHealth bossHealth)
+        private void DrawBossHealthBar(EnemyHealth bossHealth, bool isHiddenBoss)
         {
             float width = Mathf.Max(260f, Screen.width - sideMargin * 2f);
             float x = (Screen.width - width) * 0.5f;
@@ -91,7 +103,7 @@ namespace VampireLike.Enemies
             GUI.DrawTexture(fillRect, whiteTexture);
 
             GUI.color = Color.white;
-            GUI.Label(borderRect, "BOSS", labelStyle);
+            GUI.Label(borderRect, isHiddenBoss ? "GREED LORD" : "BOSS", labelStyle);
 
             GUI.color = previousColor;
         }

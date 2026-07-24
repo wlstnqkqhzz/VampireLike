@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &100000
 GameObject:
@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 100008}
   - component: {fileID: 100009}
   - component: {fileID: 100010}
+  - component: {fileID: 190004}
   m_Layer: 7
   m_Name: Flame Demon
   m_TagString: Enemy
@@ -257,3 +258,19 @@ MonoBehaviour:
   volleyInterval: 0.22
   rotationPerVolley: 18
   projectilesPerVolley: 10
+--- !u!114 &190004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89f0546a6ed94811b7dc8e15cdcfb656, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossSpriteAnimator
+  resourceFolder: BossAnimations/Stage04
+  idleFrameRate: 6
+  hitFrameRate: 12
+  attackFrameRate: 12

@@ -1,0 +1,303 @@
+﻿%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100001}
+  - component: {fileID: 100002}
+  - component: {fileID: 100003}
+  - component: {fileID: 100004}
+  - component: {fileID: 100005}
+  - component: {fileID: 100006}
+  - component: {fileID: 100007}
+  - component: {fileID: 100008}
+  - component: {fileID: 100009}
+  - component: {fileID: 100010}
+  - component: {fileID: 100011}
+  - component: {fileID: 100012}
+  - component: {fileID: 190009}
+  m_Layer: 7
+  m_Name: Dragon
+  m_TagString: Enemy
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 3.8, y: 3.8, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &100002
+SpriteRenderer:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 10
+  m_Sprite: {fileID: 21300000, guid: 40a54cde35cc4448add64fae8307ba12, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
+--- !u!50 &100003
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!70 &100004
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_Offset: {x: 0, y: -0.03}
+  m_Size: {x: 0.36, y: 0.36}
+  m_Direction: 0
+--- !u!114 &100005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2be1385d92bb437993093413b1e01747, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemyController
+  target: {fileID: 0}
+  moveSpeed: 0.9
+  stoppingDistance: 0
+  separationRadius: 0.8
+  separationWeight: 0.55
+  enemyLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+--- !u!114 &100006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e49223c768843d1b10e75211e2971a3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyHealth
+  maxHealth: 125
+  hitFlashDuration: 0.08
+  experienceGemPrefab: {fileID: 400005, guid: 11ed6501a06941049f1bff2dc0b4e971, type: 3}
+--- !u!114 &100007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 113ec33c53d640779794ad63f17b84ec, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyContactDamage
+  contactDamage: 5
+--- !u!114 &100008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7139d5dcfa4a4707846a758e599fe686, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossController
+  player: {fileID: 0}
+  commonRecoveryTime: 0.75
+  phase2HealthRatio: 0.6
+  phase3HealthRatio: 0.3
+  useDefaultEnemyMovement: 1
+--- !u!114 &100009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 607512d53bbe4b0e8c555ea5c30fd996, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BreathPattern
+  cooldown: 5
+  initialDelay: 1.8
+  priority: 8
+  minimumPhase: 1
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  prepareTime: 0.7
+  duration: 1.35
+  range: 2.4
+  angle: 55
+  damagePerTick: 1
+  damageInterval: 0.35
+  playerLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  warningPrefab: {fileID: 570000, guid: bcc9f62a6bd04cb4a9bb22eb9b920a66, type: 3}
+  breathPrefab: {fileID: 590000, guid: d3cb206fa2874a76905a09965d252fb0, type: 3}
+--- !u!114 &100010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bc6670a32c741748e63c5d4eb107a64, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.ConeAttackPattern
+  cooldown: 3.8
+  initialDelay: 2
+  priority: 7
+  minimumPhase: 1
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  prepareTime: 0.55
+  range: 1.8
+  angle: 75
+  damage: 2
+  endLag: 0.2
+  playerLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  warningPrefab: {fileID: 570000, guid: bcc9f62a6bd04cb4a9bb22eb9b920a66, type: 3}
+  impactPrefab: {fileID: 580000, guid: ddb86af3e2bf4b7fa6e7043f1b604990, type: 3}
+  effectLifetime: 0.25
+--- !u!114 &100011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 184fc5bc0f384aab98e34591c5d8c57f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.AreaZonePattern
+  cooldown: 6
+  initialDelay: 3
+  priority: 5
+  minimumPhase: 2
+  maximumPhase: 3
+  allowMovementDuringPattern: 1
+  zonePrefab: {fileID: 610000, guid: f77f04b3df5f4c63a1eff7f62d825a3d, type: 3}
+  radius: 0.8
+  duration: 4
+  spawnRadius: 2.5
+  zonesPerCast: 1
+  phaseBonusZonesPerCast: 1
+  maxActiveZones: 3
+  phaseBonusMaxZones: 1
+  slowMultiplier: 0.85
+  damagePerTick: 1
+  damageInterval: 0.8
+  spawnNearPlayer: 1
+  clearZonesOnBossDeath: 1
+  fallbackZoneColor: {r: 1, g: 0.35, b: 0.1, a: 0.4}
+--- !u!114 &100012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59743a88f69641de95be103fcf42e2d1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.RadialProjectilePattern
+  cooldown: 4.8
+  initialDelay: 2.5
+  priority: 5
+  minimumPhase: 3
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  projectilePrefab: {fileID: 530005, guid: a6498a7ad78449a79ad4e3fd780c1e7b, type: 3}
+  projectileCount: 8
+  phaseBonusProjectileCount: 2
+  projectileSpeed: 3.3
+  damage: 1
+  projectileLifetime: 5.5
+  startAngle: 0
+  prepareTime: 0.45
+--- !u!114 &190009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89f0546a6ed94811b7dc8e15cdcfb656, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossSpriteAnimator
+  resourceFolder: BossAnimations/Stage09
+  idleFrameRate: 6
+  hitFrameRate: 12
+  attackFrameRate: 12

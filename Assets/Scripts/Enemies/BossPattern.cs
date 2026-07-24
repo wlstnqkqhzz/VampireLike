@@ -58,6 +58,7 @@ namespace VampireLike.Enemies
         public IEnumerator Execute()
         {
             MarkUsed();
+            Boss?.PlayAttackAnimation();
             yield return ExecutePattern();
         }
 

@@ -1,0 +1,345 @@
+﻿%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100001}
+  - component: {fileID: 100002}
+  - component: {fileID: 100003}
+  - component: {fileID: 100004}
+  - component: {fileID: 100005}
+  - component: {fileID: 100006}
+  - component: {fileID: 100007}
+  - component: {fileID: 100008}
+  - component: {fileID: 100009}
+  - component: {fileID: 100010}
+  - component: {fileID: 100011}
+  - component: {fileID: 100012}
+  - component: {fileID: 100013}
+  - component: {fileID: 100014}
+  - component: {fileID: 190010}
+  m_Layer: 7
+  m_Name: Death Lord
+  m_TagString: Enemy
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 3.4, y: 3.4, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &100002
+SpriteRenderer:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 10
+  m_Sprite: {fileID: 21300000, guid: 7bef168a3ffb4de2a4774ae25d67a150, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
+--- !u!50 &100003
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!70 &100004
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_Offset: {x: 0, y: -0.03}
+  m_Size: {x: 0.46, y: 0.42}
+  m_Direction: 0
+--- !u!114 &100005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2be1385d92bb437993093413b1e01747, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemyController
+  target: {fileID: 0}
+  moveSpeed: 1
+  stoppingDistance: 0
+  separationRadius: 0.8
+  separationWeight: 0.55
+  enemyLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+--- !u!114 &100006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e49223c768843d1b10e75211e2971a3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyHealth
+  maxHealth: 150
+  hitFlashDuration: 0.08
+  experienceGemPrefab: {fileID: 400005, guid: 11ed6501a06941049f1bff2dc0b4e971, type: 3}
+--- !u!114 &100007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 113ec33c53d640779794ad63f17b84ec, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyContactDamage
+  contactDamage: 6
+--- !u!114 &100008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7139d5dcfa4a4707846a758e599fe686, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossController
+  player: {fileID: 0}
+  commonRecoveryTime: 0.75
+  phase2HealthRatio: 0.7
+  phase3HealthRatio: 0.35
+  useDefaultEnemyMovement: 1
+--- !u!114 &100009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ac08e0eb254c31b9ed25175567710d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.DashPattern
+  cooldown: 4
+  initialDelay: 1.8
+  priority: 5
+  minimumPhase: 1
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  prepareTime: 0.55
+  dashSpeed: 7
+  dashDuration: 0.28
+  endLag: 0.22
+--- !u!114 &100010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a054d1f5dffc4f56b860384e0b79af1d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.SummonPattern
+  cooldown: 7
+  initialDelay: 2.8
+  priority: 4
+  minimumPhase: 2
+  maximumPhase: 3
+  allowMovementDuringPattern: 1
+  summonPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
+  summonCount: 2
+  phaseBonusSummonCount: 1
+  maxActiveSummons: 6
+  spawnRadius: 1.6
+  summonInterval: 0.15
+--- !u!114 &100011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59743a88f69641de95be103fcf42e2d1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.RadialProjectilePattern
+  cooldown: 4.8
+  initialDelay: 2.5
+  priority: 5
+  minimumPhase: 1
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  projectilePrefab: {fileID: 530005, guid: a6498a7ad78449a79ad4e3fd780c1e7b, type: 3}
+  projectileCount: 8
+  phaseBonusProjectileCount: 2
+  projectileSpeed: 3.3
+  damage: 1
+  projectileLifetime: 5.5
+  startAngle: 0
+  prepareTime: 0.45
+--- !u!114 &100012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 111c22fdb8ab42a1899f578638dd4e3c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.TargetAreaPattern
+  cooldown: 4.8
+  initialDelay: 2.5
+  priority: 6
+  minimumPhase: 2
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  warningDuration: 0.9
+  radius: 1
+  targetAreaCount: 1
+  phaseBonusTargetAreaCount: 1
+  targetAreaInterval: 0.18
+  minimumTargetDistance: 0.8
+  damage: 2
+  warningPrefab: {fileID: 500000, guid: b58dffb01cda429b917549b5580985ea, type: 3}
+  impactPrefab: {fileID: 510000, guid: 919bbeaf531e4cc99f50b0162362f72b, type: 3}
+  impactLifetime: 0.35
+  warningColor: {r: 0.65, g: 0.2, b: 1, a: 0.35}
+  playerLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &100013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a964deaa27a4ee1b1de5b36c1ad254e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.TeleportPattern
+  cooldown: 5.2
+  initialDelay: 1.2
+  priority: 8
+  minimumPhase: 2
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  vanishDelay: 0.35
+  reappearDelay: 0.2
+  teleportCount: 1
+  phaseBonusTeleportCount: 1
+  maxTeleportCount: 2
+  minDistanceFromPlayer: 1.1
+  maxDistanceFromPlayer: 2
+  obstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  disableContactDamageDuringTeleport: 1
+--- !u!114 &100014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27d9aa9fb6434efbbda0dad9826ee753, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnragePattern
+  cooldown: 1
+  initialDelay: 0
+  priority: 20
+  minimumPhase: 3
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  triggerHealthRatio: 0.35
+  moveSpeedMultiplier: 1.12
+  cooldownMultiplier: 0.78
+  pauseDuration: 0.45
+  enragedColor: {r: 0.85, g: 0.15, b: 0.95, a: 1}
+--- !u!114 &190010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89f0546a6ed94811b7dc8e15cdcfb656, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossSpriteAnimator
+  resourceFolder: BossAnimations/Stage10
+  idleFrameRate: 6
+  hitFrameRate: 12
+  attackFrameRate: 12

@@ -21,6 +21,11 @@ namespace VampireLike.Enemies
 
         private Rigidbody2D rb;
         private Vector2 direction = Vector2.down;
+        private Transform homingTarget;
+        private float homingDuration;
+        private float turnSpeed;
+        private float homingElapsedTime;
+        private bool useHoming;
 
         public void Initialize(Vector2 moveDirection, float projectileSpeed, int projectileDamage, float projectileLifetime)
         {
@@ -28,6 +33,21 @@ namespace VampireLike.Enemies
             speed = Mathf.Max(0f, projectileSpeed);
             damage = Mathf.Max(1, projectileDamage);
             lifetime = Mathf.Max(0.1f, projectileLifetime);
+            useHoming = false;
+            homingTarget = null;
+        }
+
+        /// <summary>
+        /// 워록 같은 보스가 사용하는 유도 투사체를 초기화한다.
+        /// </summary>
+        public void InitializeHoming(Transform target, Vector2 initialDirection, float projectileSpeed, int projectileDamage, float projectileLifetime, float duration, float rotationSpeed)
+        {
+            Initialize(initialDirection, projectileSpeed, projectileDamage, projectileLifetime);
+            homingTarget = target;
+            homingDuration = Mathf.Max(0f, duration);
+            turnSpeed = Mathf.Max(0f, rotationSpeed);
+            homingElapsedTime = 0f;
+            useHoming = target != null && homingDuration > 0f && turnSpeed > 0f;
         }
 
         private void Awake()
@@ -50,6 +70,7 @@ namespace VampireLike.Enemies
 
         private void FixedUpdate()
         {
+            UpdateHomingDirection();
             rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
         }
 
@@ -69,6 +90,23 @@ namespace VampireLike.Enemies
             speed = Mathf.Max(0f, speed);
             damage = Mathf.Max(1, damage);
             lifetime = Mathf.Max(0.1f, lifetime);
+        }
+
+        private void UpdateHomingDirection()
+        {
+            if (!useHoming || homingTarget == null || homingElapsedTime >= homingDuration)
+                return;
+
+            Vector2 toTarget = ((Vector2)homingTarget.position - rb.position).normalized;
+
+            if (toTarget.sqrMagnitude <= 0.001f)
+                return;
+
+            float currentAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            float targetAngle = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg;
+            float nextAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, turnSpeed * Time.fixedDeltaTime);
+            direction = new Vector2(Mathf.Cos(nextAngle * Mathf.Deg2Rad), Mathf.Sin(nextAngle * Mathf.Deg2Rad));
+            homingElapsedTime += Time.fixedDeltaTime;
         }
     }
 }

@@ -1,26 +1,31 @@
+using System;
 using UnityEngine;
 
 namespace VampireLike.Growth
 {
     /// <summary>
-    /// 적이 죽었을 때 떨어지는 경험치 보석이다. 플레이어에게 끌려가며 획득된다.
+    /// 적이 죽었을 때 떨어지는 경험치 보석이다.
+    /// 플레이어뿐 아니라 히든 보스도 같은 보석을 끌어당겨 흡수할 수 있게 소유권을 구분한다.
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class ExperienceGem : MonoBehaviour
     {
-        // 획득 시 플레이어에게 줄 경험치 양이다.
+        public enum GemCollectorType
+        {
+            None,
+            Player,
+            GreedBoss
+        }
+
         [SerializeField]
         private int experienceAmount = 1;
 
-        // 플레이어에게 끌려가기 시작할 때의 기본 속도다.
         [SerializeField]
         private float attractSpeed = 5f;
 
-        // 흡수 연출 중 점점 빨라지는 가속도다.
         [SerializeField]
         private float attractAcceleration = 18f;
 
-        // 이 거리 안까지 가까워지면 실제 획득 처리한다.
         [SerializeField]
         private float collectDistance = 0.12f;
 
@@ -29,8 +34,12 @@ namespace VampireLike.Growth
         private float currentAttractSpeed;
         private Transform target;
         private PlayerExperience targetExperience;
+        private Action<int> bossCollectCallback;
+        private GemCollectorType collectorType = GemCollectorType.None;
 
         public int ExperienceAmount => experienceAmount;
+        public bool IsClaimed => isCollected;
+        public GemCollectorType CollectorType => collectorType;
 
         private void Awake()
         {
@@ -48,47 +57,81 @@ namespace VampireLike.Growth
 
         private void Update()
         {
-            // StartAttract가 호출된 뒤 플레이어 위치로 점점 빨려 들어간다.
-            if (!isAttracting || isCollected || target == null || targetExperience == null)
+            if (!isAttracting || isCollected || target == null)
                 return;
 
             currentAttractSpeed += attractAcceleration * Time.deltaTime;
             float speed = attractSpeed + currentAttractSpeed;
             transform.position = Vector3.MoveTowards(transform.position, target.position, speed * Time.deltaTime);
 
-            if (Vector2.Distance(transform.position, target.position) <= collectDistance)
+            if (Vector2.Distance(transform.position, target.position) > collectDistance)
+                return;
+
+            if (collectorType == GemCollectorType.Player)
                 Collect(targetExperience);
+            else if (collectorType == GemCollectorType.GreedBoss)
+                CollectByBoss();
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
             PlayerExperience playerExperience = other.GetComponentInParent<PlayerExperience>();
 
-            if (playerExperience == null)
-                return;
-
-            StartAttract(playerExperience);
+            if (playerExperience != null)
+                StartAttract(playerExperience);
         }
 
         public void StartAttract(PlayerExperience playerExperience)
         {
-            // 자석 범위에 들어오거나 직접 닿으면 즉시 삭제하지 않고 흡수 연출을 시작한다.
             if (isCollected || playerExperience == null)
                 return;
 
             targetExperience = playerExperience;
             target = playerExperience.transform;
+            bossCollectCallback = null;
+            collectorType = GemCollectorType.Player;
+            currentAttractSpeed = 0f;
             isAttracting = true;
+        }
+
+        public bool StartAttractToBoss(Transform bossTarget, Action<int> onCollected)
+        {
+            // 플레이어가 이미 가져가는 중인 보석은 빼앗지 않는다.
+            if (isCollected || bossTarget == null || collectorType == GemCollectorType.Player)
+                return false;
+
+            targetExperience = null;
+            target = bossTarget;
+            bossCollectCallback = onCollected;
+            collectorType = GemCollectorType.GreedBoss;
+            currentAttractSpeed = 0f;
+            isAttracting = true;
+            return true;
+        }
+
+        public void SetExperienceAmount(int amount)
+        {
+            experienceAmount = Mathf.Max(1, amount);
         }
 
         public void Collect(PlayerExperience playerExperience)
         {
-            // 중복 획득을 막고 경험치를 더한 뒤 보석을 제거한다.
             if (isCollected || playerExperience == null)
                 return;
 
             isCollected = true;
+            collectorType = GemCollectorType.Player;
             playerExperience.AddExperience(experienceAmount);
+            Destroy(gameObject);
+        }
+
+        private void CollectByBoss()
+        {
+            if (isCollected)
+                return;
+
+            isCollected = true;
+            bossCollectCallback?.Invoke(experienceAmount);
             Destroy(gameObject);
         }
     }

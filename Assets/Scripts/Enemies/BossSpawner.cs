@@ -1,5 +1,6 @@
 using UnityEngine;
 using VampireLike.Combat;
+using System;
 
 namespace VampireLike.Enemies
 {
@@ -61,11 +62,15 @@ namespace VampireLike.Enemies
 
         private GameObject activeBoss;
         private EnemyHealth activeBossHealth;
+        private int activeBossStage;
         private int lastBossSpawnWave;
         private bool hasPausedWaveProgress;
 
         public EnemyHealth ActiveBossHealth => activeBossHealth;
         public bool HasActiveBoss => activeBossHealth != null && !activeBossHealth.IsDead;
+        public int ActiveBossStage => activeBossStage;
+        public event Action<int, GameObject> BossSpawned;
+        public event Action<int, EnemyHealth> BossDefeated;
 
         private void Awake()
         {
@@ -87,6 +92,8 @@ namespace VampireLike.Enemies
 
         private void OnDisable()
         {
+            UnsubscribeActiveBossDeath();
+
             if (enemySpawner != null)
             {
                 enemySpawner.WaveChanged -= HandleWaveChanged;
@@ -98,8 +105,10 @@ namespace VampireLike.Enemies
         {
             if (activeBoss == null || activeBossHealth == null || activeBossHealth.IsDead)
             {
+                UnsubscribeActiveBossDeath();
                 activeBoss = null;
                 activeBossHealth = null;
+                activeBossStage = 0;
                 SetWaveProgressPaused(false);
             }
             else
@@ -173,7 +182,11 @@ namespace VampireLike.Enemies
             Vector2 spawnPosition = GetRandomSpawnPosition();
             activeBoss = Instantiate(selectedBossPrefab, spawnPosition, Quaternion.identity, transform);
             activeBossHealth = activeBoss.GetComponent<EnemyHealth>();
+            activeBossStage = bossStage;
             lastBossSpawnWave = wave;
+
+            if (activeBossHealth != null)
+                activeBossHealth.Died += HandleActiveBossDied;
 
             BossController bossController = activeBoss.GetComponent<BossController>();
             if (bossController != null)
@@ -182,6 +195,20 @@ namespace VampireLike.Enemies
             ApplyBossScaling(activeBoss, wave);
             SetWaveProgressPaused(true);
             Debug.Log($"Boss appeared - Wave {wave}");
+            BossSpawned?.Invoke(bossStage, activeBoss);
+        }
+
+        private void HandleActiveBossDied(EnemyHealth defeatedBoss)
+        {
+            int defeatedStage = activeBossStage;
+            BossDefeated?.Invoke(defeatedStage, defeatedBoss);
+            UnsubscribeActiveBossDeath();
+        }
+
+        private void UnsubscribeActiveBossDeath()
+        {
+            if (activeBossHealth != null)
+                activeBossHealth.Died -= HandleActiveBossDied;
         }
 
         private void SetWaveProgressPaused(bool paused)

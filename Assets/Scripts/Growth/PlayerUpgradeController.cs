@@ -90,7 +90,7 @@ namespace VampireLike.Growth
             CacheComponents();
 
             if (!definition.Unlimited)
-                upgradeLevels[definition.UpgradeType] = GetLevel(definition.UpgradeType) + 1;
+                upgradeLevels[definition.UpgradeType] = Mathf.Min(GetLevel(definition.UpgradeType) + 1, definition.MaxLevel);
 
             switch (definition.UpgradeType)
             {
@@ -135,14 +135,20 @@ namespace VampireLike.Growth
         {
             // 제한 레벨이 남아 있거나 무제한 강화인 것만 후보로 사용한다.
             List<UpgradeDefinition> availableDefinitions = new List<UpgradeDefinition>();
+            HashSet<UpgradeType> addedLimitedTypes = new HashSet<UpgradeType>();
 
             if (upgradeDefinitions == null)
                 return availableDefinitions;
 
             foreach (UpgradeDefinition definition in upgradeDefinitions)
             {
-                if (definition != null && CanApply(definition))
-                    availableDefinitions.Add(definition);
+                if (definition == null || !CanApply(definition))
+                    continue;
+
+                if (!definition.Unlimited && !addedLimitedTypes.Add(definition.UpgradeType))
+                    continue;
+
+                availableDefinitions.Add(definition);
             }
 
             return availableDefinitions;
@@ -150,6 +156,9 @@ namespace VampireLike.Growth
 
         private bool CanApply(UpgradeDefinition definition)
         {
+            if (definition == null)
+                return false;
+
             if (definition.Unlimited)
                 return true;
 

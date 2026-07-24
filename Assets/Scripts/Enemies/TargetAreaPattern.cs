@@ -16,6 +16,18 @@ namespace VampireLike.Enemies
         private float radius = 0.9f;
 
         [SerializeField]
+        private int targetAreaCount = 1;
+
+        [SerializeField]
+        private int phaseBonusTargetAreaCount;
+
+        [SerializeField]
+        private float targetAreaInterval = 0.18f;
+
+        [SerializeField]
+        private float minimumTargetDistance = 0.6f;
+
+        [SerializeField]
         private int damage = 2;
 
         [SerializeField]
@@ -34,7 +46,7 @@ namespace VampireLike.Enemies
         private LayerMask playerLayerMask = ~0;
 
         private readonly Collider2D[] hitResults = new Collider2D[4];
-        private GameObject activeWarning;
+        private readonly System.Collections.Generic.List<GameObject> activeWarnings = new System.Collections.Generic.List<GameObject>();
 
         protected override IEnumerator ExecutePattern()
         {
@@ -42,23 +54,36 @@ namespace VampireLike.Enemies
                 yield break;
 
             Boss.SetState(BossState.Preparing, false);
-            Vector2 targetPosition = Player.position;
-            activeWarning = CreateWarning(targetPosition);
+            Vector2[] targetPositions = GetTargetPositions();
+
+            foreach (Vector2 targetPosition in targetPositions)
+            {
+                GameObject warning = CreateWarning(targetPosition);
+
+                if (warning != null)
+                    activeWarnings.Add(warning);
+            }
 
             yield return new WaitForSeconds(warningDuration);
 
             if (!Boss.IsDead)
             {
-                SpawnImpact(targetPosition);
-                ApplyDamage(targetPosition);
+                for (int i = 0; i < targetPositions.Length && !Boss.IsDead; i++)
+                {
+                    SpawnImpact(targetPositions[i]);
+                    ApplyDamage(targetPositions[i]);
+
+                    if (targetAreaInterval > 0f && i < targetPositions.Length - 1)
+                        yield return new WaitForSeconds(targetAreaInterval);
+                }
             }
 
-            DestroyActiveWarning();
+            DestroyActiveWarnings();
         }
 
         private void OnDisable()
         {
-            DestroyActiveWarning();
+            DestroyActiveWarnings();
         }
 
         private GameObject CreateWarning(Vector2 position)
@@ -69,6 +94,43 @@ namespace VampireLike.Enemies
             GameObject warning = Instantiate(warningPrefab, position, Quaternion.identity);
             ScaleEffectToRadius(warning);
             return warning;
+        }
+
+        private Vector2[] GetTargetPositions()
+        {
+            int count = Mathf.Max(1, targetAreaCount + Mathf.Max(0, Boss.CurrentPhase - 1) * phaseBonusTargetAreaCount);
+            Vector2[] positions = new Vector2[count];
+            positions[0] = Player.position;
+
+            for (int i = 1; i < count; i++)
+                positions[i] = GetSeparatedPosition(positions, i);
+
+            return positions;
+        }
+
+        private Vector2 GetSeparatedPosition(Vector2[] positions, int filledCount)
+        {
+            Vector2 center = Player.position;
+
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                Vector2 candidate = center + Random.insideUnitCircle * radius * 1.8f;
+                bool isFarEnough = true;
+
+                for (int i = 0; i < filledCount; i++)
+                {
+                    if (Vector2.Distance(candidate, positions[i]) < minimumTargetDistance)
+                    {
+                        isFarEnough = false;
+                        break;
+                    }
+                }
+
+                if (isFarEnough)
+                    return candidate;
+            }
+
+            return center + Random.insideUnitCircle * minimumTargetDistance;
         }
 
         private void SpawnImpact(Vector2 position)
@@ -119,18 +181,24 @@ namespace VampireLike.Enemies
             return warning;
         }
 
-        private void DestroyActiveWarning()
+        private void DestroyActiveWarnings()
         {
-            if (activeWarning == null)
-                return;
+            for (int i = activeWarnings.Count - 1; i >= 0; i--)
+            {
+                GameObject warning = activeWarnings[i];
 
-            LineRenderer lineRenderer = activeWarning.GetComponent<LineRenderer>();
+                if (warning == null)
+                    continue;
 
-            if (lineRenderer != null && lineRenderer.material != null)
-                Destroy(lineRenderer.material);
+                LineRenderer lineRenderer = warning.GetComponent<LineRenderer>();
 
-            Destroy(activeWarning);
-            activeWarning = null;
+                if (lineRenderer != null && lineRenderer.material != null)
+                    Destroy(lineRenderer.material);
+
+                Destroy(warning);
+            }
+
+            activeWarnings.Clear();
         }
 
         private void ApplyDamage(Vector2 position)
@@ -154,6 +222,10 @@ namespace VampireLike.Enemies
             base.OnValidate();
             warningDuration = Mathf.Max(0f, warningDuration);
             radius = Mathf.Max(0.05f, radius);
+            targetAreaCount = Mathf.Max(1, targetAreaCount);
+            phaseBonusTargetAreaCount = Mathf.Max(0, phaseBonusTargetAreaCount);
+            targetAreaInterval = Mathf.Max(0f, targetAreaInterval);
+            minimumTargetDistance = Mathf.Max(0f, minimumTargetDistance);
             damage = Mathf.Max(1, damage);
             impactLifetime = Mathf.Max(0.05f, impactLifetime);
         }

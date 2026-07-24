@@ -33,6 +33,7 @@ namespace VampireLike.Enemies
         private BossPattern lastPattern;
         private EnemyController enemyController;
         private EnemyHealth enemyHealth;
+        private BossSpriteAnimator spriteAnimator;
         private Rigidbody2D rb;
         private Coroutine patternRoutine;
 
@@ -50,6 +51,7 @@ namespace VampireLike.Enemies
             rb = GetComponent<Rigidbody2D>();
             enemyController = GetComponent<EnemyController>();
             enemyHealth = GetComponent<EnemyHealth>();
+            spriteAnimator = GetComponentInChildren<BossSpriteAnimator>();
             patterns = GetComponents<BossPattern>();
 
             if (player == null)
@@ -107,12 +109,22 @@ namespace VampireLike.Enemies
             PatternCooldownMultiplier = Mathf.Max(0.1f, PatternCooldownMultiplier * multiplier);
         }
 
+        public void SetPatternCooldownMultiplier(float multiplier)
+        {
+            PatternCooldownMultiplier = Mathf.Max(0.1f, multiplier);
+        }
+
         public void MultiplyMoveSpeed(float multiplier)
         {
             if (enemyController == null)
                 return;
 
             enemyController.SetMoveSpeed(enemyController.MoveSpeed * Mathf.Max(0f, multiplier));
+        }
+
+        public void PlayAttackAnimation()
+        {
+            spriteAnimator?.PlayAttack();
         }
 
         public float ActiveBossHealthRatio()

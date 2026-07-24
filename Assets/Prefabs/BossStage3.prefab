@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &100000
 GameObject:
@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 100009}
   - component: {fileID: 100010}
   - component: {fileID: 100011}
+  - component: {fileID: 190003}
   m_Layer: 7
   m_Name: Spider Queen
   m_TagString: Enemy
@@ -36,7 +37,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4.8, y: 4.8, z: 1}
+  m_LocalScale: {x: 3.7, y: 3.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -135,7 +136,7 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: -0.02}
-  m_Size: {x: 0.48, y: 0.34}
+  m_Size: {x: 0.4, y: 0.3}
   m_Direction: 0
 --- !u!114 &100005
 MonoBehaviour:
@@ -220,7 +221,7 @@ MonoBehaviour:
   minimumPhase: 1
   maximumPhase: 3
   allowMovementDuringPattern: 0
-  zonePrefab: {fileID: 520000, guid: 3ec562f5ee064c9da261278cf98be534, type: 3}
+  zonePrefab: {fileID: 620000, guid: a2f5898925a9464c8eec5880fb7c9640, type: 3}
   radius: 0.85
   duration: 5
   spawnRadius: 2.4
@@ -280,3 +281,19 @@ MonoBehaviour:
   maxActiveSummons: 7
   spawnRadius: 1.4
   summonInterval: 0.12
+--- !u!114 &190003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89f0546a6ed94811b7dc8e15cdcfb656, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossSpriteAnimator
+  resourceFolder: BossAnimations/Stage03
+  idleFrameRate: 6
+  hitFrameRate: 12
+  attackFrameRate: 12

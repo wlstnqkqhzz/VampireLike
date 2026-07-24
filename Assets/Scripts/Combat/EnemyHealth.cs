@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using VampireLike.Growth;
+using VampireLike.Enemies;
 
 namespace VampireLike.Combat
 {
@@ -27,6 +29,7 @@ namespace VampireLike.Combat
 
         private int currentHealth;
         private SpriteRenderer spriteRenderer;
+        private BossSpriteAnimator bossSpriteAnimator;
         private Color originalColor = Color.white;
         private Coroutine hitFlashRoutine;
 
@@ -35,11 +38,13 @@ namespace VampireLike.Combat
         public int MaxHealth => maxHealth;
         public int CurrentHealth => currentHealth;
         public float HealthProgress => maxHealth <= 0 ? 0f : Mathf.Clamp01((float)currentHealth / maxHealth);
+        public event Action<EnemyHealth> Died;
 
         private void Awake()
         {
             currentHealth = maxHealth;
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            bossSpriteAnimator = GetComponentInChildren<BossSpriteAnimator>();
 
             if (spriteRenderer != null)
                 originalColor = spriteRenderer.color;
@@ -69,6 +74,7 @@ namespace VampireLike.Combat
                 return;
 
             currentHealth -= damage;
+            bossSpriteAnimator?.PlayHit();
 
             if (currentHealth <= 0)
             {
@@ -83,6 +89,14 @@ namespace VampireLike.Combat
         {
             maxHealth = Mathf.Max(1, value);
             currentHealth = maxHealth;
+        }
+
+        public void Heal(int amount)
+        {
+            if (IsDead || amount <= 0)
+                return;
+
+            currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         }
 
         private void PlayHitFlash()
@@ -109,6 +123,7 @@ namespace VampireLike.Combat
         {
             IsDead = true;
             GameSessionStats.RecordKill();
+            Died?.Invoke(this);
             DropExperienceGem();
             Destroy(gameObject);
         }
