@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using VampireLike.Combat;
 
 namespace VampireLike.Growth
 {
@@ -76,6 +77,7 @@ namespace VampireLike.Growth
                 return;
 
             currentExperience += amount;
+            GameSessionStats.RecordExperience(amount);
             CheckLevelUp();
             NotifyExperienceChanged();
             Debug.Log($"Experience: {currentExperience}/{experienceToNextLevel}");

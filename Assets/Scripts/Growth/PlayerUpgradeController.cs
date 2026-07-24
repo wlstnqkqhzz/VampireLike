@@ -128,6 +128,7 @@ namespace VampireLike.Growth
                     break;
             }
 
+            GameSessionStats.RecordUpgrade(definition.DisplayName);
             Debug.Log($"Upgrade Selected: {definition.DisplayName}");
         }
 

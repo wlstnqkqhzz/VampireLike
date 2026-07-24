@@ -122,7 +122,7 @@ namespace VampireLike.Combat
         private void Die()
         {
             IsDead = true;
-            GameSessionStats.RecordKill();
+            GameSessionStats.RecordKill(IsBossEnemy());
             Died?.Invoke(this);
             DropExperienceGem();
 
@@ -134,6 +134,11 @@ namespace VampireLike.Combat
                 Destroy(gameObject, deathDuration);
             else
                 Destroy(gameObject);
+        }
+
+        private bool IsBossEnemy()
+        {
+            return GetComponent<BossController>() != null || GetComponent<GreedBossController>() != null;
         }
 
         private void DisableAfterDeath()
