@@ -138,9 +138,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e49223c768843d1b10e75211e2971a3, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyHealth
-  maxHealth: 150
+  maxHealth: 200
   hitFlashDuration: 0.08
   experienceGemPrefab: {fileID: 400005, guid: 11ed6501a06941049f1bff2dc0b4e971, type: 3}
+  experienceRewardOverride: 110
 --- !u!114 &100007
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -197,6 +197,7 @@ MonoBehaviour:
   maxHealth: 4
   hitFlashDuration: 0.08
   experienceGemPrefab: {fileID: 300005, guid: 1cc53847a73f4bc99b0debc19fd6ffb2, type: 3}
+  experienceRewardOverride: 3
 --- !u!114 &100007
 MonoBehaviour:
   m_ObjectHideFlags: 0

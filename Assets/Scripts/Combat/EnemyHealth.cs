@@ -27,6 +27,9 @@ namespace VampireLike.Combat
         [SerializeField]
         private ExperienceGem experienceGemPrefab;
 
+        [SerializeField]
+        private int experienceRewardOverride;
+
         private int currentHealth;
         private SpriteRenderer spriteRenderer;
         private BossSpriteAnimator bossSpriteAnimator;
@@ -65,6 +68,7 @@ namespace VampireLike.Combat
         {
             maxHealth = Mathf.Max(1, maxHealth);
             hitFlashDuration = Mathf.Max(0f, hitFlashDuration);
+            experienceRewardOverride = Mathf.Max(0, experienceRewardOverride);
         }
 
         public void TakeDamage(int damage)
@@ -170,7 +174,10 @@ namespace VampireLike.Combat
             if (experienceGemPrefab == null)
                 return;
 
-            Instantiate(experienceGemPrefab, transform.position, Quaternion.identity);
+            ExperienceGem gem = Instantiate(experienceGemPrefab, transform.position, Quaternion.identity);
+
+            if (experienceRewardOverride > 0)
+                gem.SetExperienceAmount(experienceRewardOverride);
         }
     }
 }

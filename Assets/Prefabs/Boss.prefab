@@ -172,6 +172,7 @@ MonoBehaviour:
   maxHealth: 35
   hitFlashDuration: 0.08
   experienceGemPrefab: {fileID: 400005, guid: 11ed6501a06941049f1bff2dc0b4e971, type: 3}
+  experienceRewardOverride: 18
 --- !u!114 &100007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -184,7 +185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 113ec33c53d640779794ad63f17b84ec, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyContactDamage
-  contactDamage: 3
+  contactDamage: 2
 --- !u!114 &100008
 MonoBehaviour:
   m_ObjectHideFlags: 0

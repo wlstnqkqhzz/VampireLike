@@ -8361,8 +8361,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerExperience
   currentExperience: 0
   currentLevel: 1
-  experienceToNextLevel: 5
-  nextLevelExperienceMultiplier: 1.5
+  experienceToNextLevel: 6
+  nextLevelExperienceMultiplier: 1.35
   pickupRadius: 0.45
   pickupLayerMask:
     serializedVersion: 2
@@ -9634,40 +9634,160 @@ MonoBehaviour:
   enemySpawnEntries:
   - enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
     unlockWave: 1
+    maxWave: 4
+    spawnWeight: 10
+  - enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
+    unlockWave: 5
+    maxWave: 9
     spawnWeight: 8
   - enemyPrefab: {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
     unlockWave: 5
+    maxWave: 9
+    spawnWeight: 3
+  - enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
+    unlockWave: 10
+    maxWave: 14
+    spawnWeight: 6
+  - enemyPrefab: {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
+    unlockWave: 10
+    maxWave: 14
     spawnWeight: 3
   - enemyPrefab: {fileID: 100000, guid: 8b21dd4087434b79bd232748b3f5fbe3, type: 3}
     unlockWave: 10
+    maxWave: 14
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
+    unlockWave: 15
+    maxWave: 19
+    spawnWeight: 5
+  - enemyPrefab: {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
+    unlockWave: 15
+    maxWave: 19
+    spawnWeight: 3
+  - enemyPrefab: {fileID: 100000, guid: 8b21dd4087434b79bd232748b3f5fbe3, type: 3}
+    unlockWave: 15
+    maxWave: 19
     spawnWeight: 2
   - enemyPrefab: {fileID: 100000, guid: d204816acc014397a58ae453e1ba97f0, type: 3}
     unlockWave: 15
+    maxWave: 19
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
+    unlockWave: 20
+    maxWave: 24
+    spawnWeight: 4
+  - enemyPrefab: {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
+    unlockWave: 20
+    maxWave: 24
+    spawnWeight: 3
+  - enemyPrefab: {fileID: 100000, guid: 8b21dd4087434b79bd232748b3f5fbe3, type: 3}
+    unlockWave: 20
+    maxWave: 24
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: d204816acc014397a58ae453e1ba97f0, type: 3}
+    unlockWave: 20
+    maxWave: 24
     spawnWeight: 2
   - enemyPrefab: {fileID: 100000, guid: ad99d8dd7c634c56b2cb025a2a48d7a7, type: 3}
     unlockWave: 20
+    maxWave: 24
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
+    unlockWave: 25
+    maxWave: 29
+    spawnWeight: 4
+  - enemyPrefab: {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
+    unlockWave: 25
+    maxWave: 29
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 8b21dd4087434b79bd232748b3f5fbe3, type: 3}
+    unlockWave: 25
+    maxWave: 29
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: d204816acc014397a58ae453e1ba97f0, type: 3}
+    unlockWave: 25
+    maxWave: 29
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: ad99d8dd7c634c56b2cb025a2a48d7a7, type: 3}
+    unlockWave: 25
+    maxWave: 29
     spawnWeight: 2
   - enemyPrefab: {fileID: 100000, guid: 83239844c95143cba35825d4f4146f95, type: 3}
     unlockWave: 25
-    spawnWeight: 1
+    maxWave: 29
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
+    unlockWave: 30
+    maxWave: 34
+    spawnWeight: 3
+  - enemyPrefab: {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
+    unlockWave: 30
+    maxWave: 34
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 8b21dd4087434b79bd232748b3f5fbe3, type: 3}
+    unlockWave: 30
+    maxWave: 34
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: d204816acc014397a58ae453e1ba97f0, type: 3}
+    unlockWave: 30
+    maxWave: 34
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: ad99d8dd7c634c56b2cb025a2a48d7a7, type: 3}
+    unlockWave: 30
+    maxWave: 34
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 83239844c95143cba35825d4f4146f95, type: 3}
+    unlockWave: 30
+    maxWave: 34
+    spawnWeight: 2
   - enemyPrefab: {fileID: 100000, guid: e4f9f601608d41f6a72b78fe29e0aa67, type: 3}
     unlockWave: 30
+    maxWave: 34
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
+    unlockWave: 35
+    maxWave: 0
+    spawnWeight: 3
+  - enemyPrefab: {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
+    unlockWave: 35
+    maxWave: 0
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 8b21dd4087434b79bd232748b3f5fbe3, type: 3}
+    unlockWave: 35
+    maxWave: 0
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: d204816acc014397a58ae453e1ba97f0, type: 3}
+    unlockWave: 35
+    maxWave: 0
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: ad99d8dd7c634c56b2cb025a2a48d7a7, type: 3}
+    unlockWave: 35
+    maxWave: 0
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: 83239844c95143cba35825d4f4146f95, type: 3}
+    unlockWave: 35
+    maxWave: 0
+    spawnWeight: 2
+  - enemyPrefab: {fileID: 100000, guid: e4f9f601608d41f6a72b78fe29e0aa67, type: 3}
+    unlockWave: 35
+    maxWave: 0
     spawnWeight: 2
   - enemyPrefab: {fileID: 100000, guid: e33a0db109994ee5801dc5e6f796fb44, type: 3}
     unlockWave: 35
-    spawnWeight: 1
+    maxWave: 0
+    spawnWeight: 2
   player: {fileID: 1723042665}
-  spawnInterval: 2
-  minimumSpawnInterval: 0.45
-  startingWave: 5
+  spawnInterval: 1.9
+  minimumSpawnInterval: 0.55
+  startingWave: 1
   waveDuration: 20
-  spawnIntervalMultiplier: 0.9
+  spawnIntervalMultiplier: 0.92
   logWaveChanges: 1
   minSpawnDistance: 4
   maxSpawnDistance: 6
-  maxEnemyCount: 30
-  maxEnemyCountIncrease: 5
-  maxEnemyCountLimit: 120
+  maxEnemyCount: 24
+  maxEnemyCountIncrease: 4
+  maxEnemyCountLimit: 100
 --- !u!114 &2200000003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9708,9 +9828,9 @@ MonoBehaviour:
   minSpawnDistance: 5
   maxSpawnDistance: 7
   cameraSafeSpawnPadding: 2
-  healthMultiplierPerAppearance: 1.35
-  contactDamageMultiplierPerAppearance: 1.25
-  moveSpeedMultiplierPerAppearance: 1.08
+  healthMultiplierPerAppearance: 1
+  contactDamageMultiplierPerAppearance: 1
+  moveSpeedMultiplierPerAppearance: 1
   maxBossMoveSpeed: 1.8
 --- !u!114 &2200000004
 MonoBehaviour:

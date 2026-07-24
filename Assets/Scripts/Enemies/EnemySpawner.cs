@@ -20,15 +20,20 @@ namespace VampireLike.Enemies
             private int unlockWave = 1;
 
             [SerializeField]
+            private int maxWave;
+
+            [SerializeField]
             private int spawnWeight = 1;
 
             public GameObject EnemyPrefab => enemyPrefab;
             public int UnlockWave => unlockWave;
+            public int MaxWave => maxWave;
             public int SpawnWeight => spawnWeight;
 
             public void Validate()
             {
                 unlockWave = Mathf.Max(1, unlockWave);
+                maxWave = Mathf.Max(0, maxWave);
                 spawnWeight = Mathf.Max(0, spawnWeight);
             }
         }
@@ -240,7 +245,8 @@ namespace VampireLike.Enemies
             return entry != null
                 && entry.EnemyPrefab != null
                 && entry.SpawnWeight > 0
-                && currentWave >= entry.UnlockWave;
+                && currentWave >= entry.UnlockWave
+                && (entry.MaxWave <= 0 || currentWave <= entry.MaxWave);
         }
 
         private Vector2 GetRandomSpawnPosition()
