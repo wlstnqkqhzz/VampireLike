@@ -42,11 +42,16 @@ namespace VampireLike.Combat
 
         private float attackTimer;
         private bool isStopped;
+        private global::PlayerSpriteAnimator spriteAnimator;
+        private global::PlayerController playerController;
 
         private void Awake()
         {
             if (firePoint == null)
                 firePoint = transform;
+
+            spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
+            playerController = GetComponent<global::PlayerController>();
         }
 
         private void Update()
@@ -153,6 +158,12 @@ namespace VampireLike.Combat
 
             if (direction.sqrMagnitude <= 0f)
                 return;
+
+            if (spriteAnimator == null)
+                spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
+
+            if (spriteAnimator != null && (playerController == null || !playerController.IsMoving))
+                spriteAnimator.PlayAttack();
 
             int shotCount = Mathf.Max(1, projectileCount);
             float firstAngle = shotCount == 1 ? 0f : -projectileSpreadAngle * (shotCount - 1) * 0.5f;

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeType: 4
   displayName: 신속한 발걸음
-  description: 이동 속도 +10%
+  description: 이동 속도 +8%
   maxLevel: 5
-  multiplier: 1.1
+  multiplier: 1.08
   flatAmount: 0
   unlimited: 0

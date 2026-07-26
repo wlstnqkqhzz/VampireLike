@@ -36,6 +36,12 @@ namespace VampireLike.Combat
         [SerializeField]
         private LayerMask enemyLayerMask = 1 << 7;
 
+        [SerializeField]
+        private float deathSlowMotionScale = 0.25f;
+
+        [SerializeField]
+        private float gameOverDelay = 1.2f;
+
         private int currentHealth;
         private float invincibleTimer;
         private bool isDead;
@@ -44,6 +50,8 @@ namespace VampireLike.Combat
         private Color[] originalColors;
         private bool[] originalRendererEnabledStates;
         private Coroutine hitFlashRoutine;
+        private Coroutine deathRoutine;
+        private global::PlayerSpriteAnimator spriteAnimator;
 
         public bool IsDead => isDead;
 
@@ -52,6 +60,7 @@ namespace VampireLike.Combat
             // Play 재시작 시 이전 게임 오버 상태가 남지 않게 초기화한다.
             GameState.ResetGame();
             currentHealth = maxHealth;
+            spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
 
             if (GetComponent<GameOverUI>() == null)
                 gameObject.AddComponent<GameOverUI>();
@@ -101,6 +110,8 @@ namespace VampireLike.Combat
             hitFlashDuration = Mathf.Max(0f, hitFlashDuration);
             hitFlashInterval = Mathf.Max(0.01f, hitFlashInterval);
             contactCheckRadius = Mathf.Max(0.01f, contactCheckRadius);
+            deathSlowMotionScale = Mathf.Clamp(deathSlowMotionScale, 0.05f, 1f);
+            gameOverDelay = Mathf.Max(0f, gameOverDelay);
         }
 
         public void TakeDamage(int damage)
@@ -111,6 +122,13 @@ namespace VampireLike.Combat
 
             currentHealth -= damage;
             invincibleTimer = invincibleDuration;
+
+            if (spriteAnimator == null)
+                spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
+
+            if (spriteAnimator != null)
+                spriteAnimator.PlayHit();
+
             PlayHitFlash();
 
             if (currentHealth <= 0)
@@ -256,7 +274,19 @@ namespace VampireLike.Combat
             // 현재는 게임 오버 상태 전환과 이동/공격 정지만 처리한다. UI는 이후 단계에서 연결한다.
             isDead = true;
             currentHealth = 0;
-            GameState.SetGameOver();
+
+            if (spriteAnimator == null)
+                spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
+
+            if (hitFlashRoutine != null)
+            {
+                StopCoroutine(hitFlashRoutine);
+                hitFlashRoutine = null;
+                RestoreVisualColors();
+            }
+
+            if (spriteAnimator != null)
+                spriteAnimator.PlayDeath();
 
             global::PlayerController playerController = GetComponent<global::PlayerController>();
             PlayerAutoAttack playerAutoAttack = GetComponent<PlayerAutoAttack>();
@@ -270,6 +300,23 @@ namespace VampireLike.Combat
 
             if (rb != null)
                 rb.linearVelocity = Vector2.zero;
+
+            if (deathRoutine != null)
+                StopCoroutine(deathRoutine);
+
+            deathRoutine = StartCoroutine(ShowGameOverAfterDeath());
+        }
+
+        private IEnumerator ShowGameOverAfterDeath()
+        {
+            Time.timeScale = deathSlowMotionScale;
+
+            yield return new WaitForSecondsRealtime(gameOverDelay);
+
+            if (!GameState.IsGameOver)
+                GameState.SetGameOver();
+
+            deathRoutine = null;
         }
     }
 }

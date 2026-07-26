@@ -14,7 +14,9 @@ namespace VampireLike.Menu
             float attackIntervalMultiplier,
             float projectileDamageMultiplier,
             int bonusProjectileCount,
-            int bonusMaxHealth)
+            int bonusMaxHealth,
+            string animationResourceFolder,
+            bool invertHorizontalFacing)
         {
             Id = id;
             DisplayName = displayName;
@@ -25,6 +27,8 @@ namespace VampireLike.Menu
             ProjectileDamageMultiplier = projectileDamageMultiplier;
             BonusProjectileCount = bonusProjectileCount;
             BonusMaxHealth = bonusMaxHealth;
+            AnimationResourceFolder = animationResourceFolder;
+            InvertHorizontalFacing = invertHorizontalFacing;
         }
 
         public string Id { get; }
@@ -36,5 +40,7 @@ namespace VampireLike.Menu
         public float ProjectileDamageMultiplier { get; }
         public int BonusProjectileCount { get; }
         public int BonusMaxHealth { get; }
+        public string AnimationResourceFolder { get; }
+        public bool InvertHorizontalFacing { get; }
     }
 }

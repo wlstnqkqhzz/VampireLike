@@ -19,11 +19,21 @@ namespace VampireLike.Menu
             CharacterDefinition character = CharacterSelection.SelectedCharacter;
 
             global::PlayerController playerController = GetComponent<global::PlayerController>();
+            global::PlayerSpriteAnimator spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
             PlayerAutoAttack autoAttack = GetComponent<PlayerAutoAttack>();
             PlayerHealth playerHealth = GetComponent<PlayerHealth>();
 
+            if (spriteAnimator == null)
+                spriteAnimator = gameObject.AddComponent<global::PlayerSpriteAnimator>();
+
             if (playerController != null)
                 playerController.MultiplyMoveSpeed(character.MoveSpeedMultiplier);
+
+            if (spriteAnimator != null)
+            {
+                spriteAnimator.SetResourceFolder(character.AnimationResourceFolder);
+                spriteAnimator.SetInvertHorizontalFacing(character.InvertHorizontalFacing);
+            }
 
             if (autoAttack != null)
             {

@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     private static readonly Vector2 PlayerColliderSize = new Vector2(0.28f, 0.32f);
 
     [SerializeField]
-    private float moveSpeed = 5f;
+    private float moveSpeed = 4f;
 
     // 이동 애니메이션 프레임 전환 속도다.
     [SerializeField]
@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     private Collider2D playerCollider;
     private Vector2 moveInput;
     private SpriteRenderer visualRenderer;
+    private PlayerSpriteAnimator playerSpriteAnimator;
     private Sprite[][] walkFramesByDirection;
     private readonly Dictionary<object, float> moveSpeedMultipliers = new Dictionary<object, float>();
     private float currentMoveSpeedMultiplier = 1f;
@@ -49,6 +50,9 @@ public class PlayerController : MonoBehaviour
         Right = 3
     }
 
+    public Vector2 MoveInput => moveInput;
+    public bool IsMoving => moveInput.sqrMagnitude > 0.01f;
+
     private void Awake()
     {
         // Rigidbody2D/Collider2D가 없으면 자동으로 보강해 플레이어가 항상 물리 이동 가능하게 한다.
@@ -65,6 +69,11 @@ public class PlayerController : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.gravityScale = 0f;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        playerSpriteAnimator = GetComponent<PlayerSpriteAnimator>();
+
+        if (playerSpriteAnimator == null)
+            playerSpriteAnimator = gameObject.AddComponent<PlayerSpriteAnimator>();
 
         ConfigurePlayerCollider();
         ConfigureSpriteRenderer();
@@ -170,6 +179,13 @@ public class PlayerController : MonoBehaviour
             visualRenderer.sortingOrder = PlayerSortingOrder;
 
         visualRenderer.transform.localPosition = Vector3.zero;
+
+        if (playerSpriteAnimator != null)
+        {
+            playerSpriteAnimator.SetVisualRenderer(visualRenderer);
+            return;
+        }
+
         visualRenderer.transform.localScale = Vector3.one * PlayerVisualScale;
 
 #if UNITY_EDITOR
@@ -219,6 +235,9 @@ public class PlayerController : MonoBehaviour
     {
         // 방향이 바뀌거나 정지/이동 상태가 바뀌면 첫 프레임부터 다시 재생한다.
         if (visualRenderer == null)
+            return;
+
+        if (playerSpriteAnimator != null)
             return;
 
         bool isMoving = moveInput.sqrMagnitude > 0.01f;
