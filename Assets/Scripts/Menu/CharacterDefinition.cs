@@ -12,6 +12,8 @@ namespace VampireLike.Menu
             string description,
             float moveSpeedMultiplier,
             float attackIntervalMultiplier,
+            float projectileDamageMultiplier,
+            int bonusProjectileCount,
             int bonusMaxHealth)
         {
             Id = id;
@@ -20,6 +22,8 @@ namespace VampireLike.Menu
             Description = description;
             MoveSpeedMultiplier = moveSpeedMultiplier;
             AttackIntervalMultiplier = attackIntervalMultiplier;
+            ProjectileDamageMultiplier = projectileDamageMultiplier;
+            BonusProjectileCount = bonusProjectileCount;
             BonusMaxHealth = bonusMaxHealth;
         }
 
@@ -29,6 +33,8 @@ namespace VampireLike.Menu
         public string Description { get; }
         public float MoveSpeedMultiplier { get; }
         public float AttackIntervalMultiplier { get; }
+        public float ProjectileDamageMultiplier { get; }
+        public int BonusProjectileCount { get; }
         public int BonusMaxHealth { get; }
     }
 }

@@ -8,20 +8,24 @@ namespace VampireLike.Menu
         private static readonly CharacterDefinition[] characters =
         {
             new CharacterDefinition(
-                "vampire",
-                "뱀파이어",
-                "균형형",
-                "기본 이동과 공격 능력이 안정적인 첫 캐릭터입니다.",
-                1f,
-                1f,
-                0),
+                "kael",
+                "카엘",
+                "흑검 수호자",
+                "검은 갑주와 보랏빛 마력을 두른 전사입니다. 느리지만 튼튼하고 한 발의 피해가 강합니다.",
+                0.88f,
+                1.18f,
+                1.35f,
+                0,
+                15),
             new CharacterDefinition(
-                "hunter",
-                "헌터",
-                "속공형",
-                "이동과 공격이 조금 빠른 대신 생존 보너스는 없습니다.",
-                1.12f,
-                0.9f,
+                "selene",
+                "셀레네",
+                "월영 쌍검",
+                "달빛처럼 빠르게 파고드는 쌍검 암살자입니다. 빠르게 움직이며 처음부터 두 발을 쏩니다.",
+                1.35f,
+                0.68f,
+                0.75f,
+                1,
                 0)
         };
 

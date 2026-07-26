@@ -26,7 +26,11 @@ namespace VampireLike.Menu
                 playerController.MultiplyMoveSpeed(character.MoveSpeedMultiplier);
 
             if (autoAttack != null)
+            {
                 autoAttack.MultiplyAttackInterval(character.AttackIntervalMultiplier);
+                autoAttack.MultiplyProjectileDamage(character.ProjectileDamageMultiplier);
+                autoAttack.AddProjectileCount(character.BonusProjectileCount);
+            }
 
             if (playerHealth != null && character.BonusMaxHealth > 0)
                 playerHealth.IncreaseMaxHealth(character.BonusMaxHealth);
