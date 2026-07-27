@@ -47,6 +47,7 @@ namespace VampireLike.Combat
         private Coroutine burstRoutine;
         private global::PlayerSpriteAnimator spriteAnimator;
         private global::PlayerController playerController;
+        private PlayerSpecialUpgradeController specialUpgradeController;
 
         private void Awake()
         {
@@ -55,6 +56,7 @@ namespace VampireLike.Combat
 
             spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
             playerController = GetComponent<global::PlayerController>();
+            specialUpgradeController = GetComponent<PlayerSpecialUpgradeController>();
         }
 
         private void Update()
@@ -174,6 +176,9 @@ namespace VampireLike.Combat
                 yield break;
             }
 
+            if (specialUpgradeController == null)
+                specialUpgradeController = GetComponent<PlayerSpecialUpgradeController>();
+
             if (spriteAnimator == null)
                 spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
 
@@ -183,8 +188,15 @@ namespace VampireLike.Combat
             int shotCount = Mathf.Max(1, projectileCount);
             for (int i = 0; i < shotCount; i++)
             {
-                ProjectileController projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-                projectile.Launch(direction, projectileDamageMultiplier, projectilePierceCount);
+                Vector2[] directions = specialUpgradeController == null
+                    ? new[] { direction }
+                    : specialUpgradeController.GetProjectileDirections(direction);
+
+                foreach (Vector2 shotDirection in directions)
+                {
+                    ProjectileController projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+                    projectile.Launch(shotDirection, projectileDamageMultiplier, projectilePierceCount, specialUpgradeController);
+                }
 
                 if (i < shotCount - 1 && projectileBurstDelay > 0f)
                     yield return new WaitForSeconds(projectileBurstDelay);

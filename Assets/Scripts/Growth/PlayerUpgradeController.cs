@@ -18,6 +18,7 @@ namespace VampireLike.Growth
         private PlayerAutoAttack autoAttack;
         private PlayerHealth playerHealth;
         private PlayerExperience playerExperience;
+        private PlayerSpecialUpgradeController specialUpgradeController;
         private global::PlayerController playerController;
 
         public readonly struct UpgradeChoice
@@ -37,9 +38,9 @@ namespace VampireLike.Growth
                 get
                 {
                     if (Definition.Unlimited)
-                        return $"{Definition.DisplayName}\n{Definition.Description}";
+                        return $"[{Definition.GradeLabel}] {Definition.DisplayName}\n{Definition.Description}";
 
-                    return $"{Definition.DisplayName} Lv.{CurrentLevel + 1}/{Definition.MaxLevel}\n{Definition.Description}";
+                    return $"[{Definition.GradeLabel}] {Definition.DisplayName} Lv.{CurrentLevel + 1}/{Definition.MaxLevel}\n{Definition.Description}";
                 }
             }
         }
@@ -126,6 +127,38 @@ namespace VampireLike.Growth
                     if (playerExperience != null)
                         playerExperience.MultiplyPickupRadius(definition.Multiplier);
                     break;
+                case UpgradeType.ExplosiveShot:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddExplosiveShotLevel();
+                    break;
+                case UpgradeType.FrostShot:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddFrostShotLevel();
+                    break;
+                case UpgradeType.Vampirism:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddVampirismLevel();
+                    break;
+                case UpgradeType.Shockwave:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddShockwaveLevel();
+                    break;
+                case UpgradeType.ScatterShot:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddScatterShotLevel();
+                    break;
+                case UpgradeType.Shield:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddShieldLevel();
+                    break;
+                case UpgradeType.OrbitingBlade:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddOrbitingBladeLevel();
+                    break;
+                case UpgradeType.ChainRicochet:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddChainRicochetLevel();
+                    break;
             }
 
             GameSessionStats.RecordUpgrade(definition.DisplayName);
@@ -182,6 +215,12 @@ namespace VampireLike.Growth
 
             if (playerExperience == null)
                 playerExperience = GetComponent<PlayerExperience>();
+
+            if (specialUpgradeController == null)
+                specialUpgradeController = GetComponent<PlayerSpecialUpgradeController>();
+
+            if (specialUpgradeController == null)
+                specialUpgradeController = gameObject.AddComponent<PlayerSpecialUpgradeController>();
 
             if (playerController == null)
                 playerController = GetComponent<global::PlayerController>();

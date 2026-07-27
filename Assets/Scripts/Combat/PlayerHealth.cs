@@ -120,6 +120,11 @@ namespace VampireLike.Combat
             if (isDead || damage <= 0 || invincibleTimer > 0f)
                 return;
 
+            PlayerSpecialUpgradeController specialUpgradeController = GetComponent<PlayerSpecialUpgradeController>();
+
+            if (specialUpgradeController != null && specialUpgradeController.TryBlockDamage())
+                return;
+
             currentHealth -= damage;
             invincibleTimer = invincibleDuration;
 

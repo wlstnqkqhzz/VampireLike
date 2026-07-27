@@ -27,6 +27,7 @@ namespace VampireLike.Combat
         private float lifeTimer;
         private int effectiveDamage;
         private int remainingPierceCount;
+        private PlayerSpecialUpgradeController specialUpgradeController;
         private readonly HashSet<EnemyHealth> hitEnemies = new HashSet<EnemyHealth>();
 
         private void Awake()
@@ -74,6 +75,10 @@ namespace VampireLike.Combat
 
             hitEnemies.Add(enemyHealth);
             enemyHealth.TakeDamage(effectiveDamage);
+            specialUpgradeController?.HandleProjectileHit(enemyHealth, effectiveDamage, transform.position);
+
+            if (enemyHealth.IsDead)
+                specialUpgradeController?.HandleProjectileKill(enemyHealth, effectiveDamage, transform.position);
 
             if (remainingPierceCount > 0)
             {
@@ -101,9 +106,15 @@ namespace VampireLike.Combat
         /// </summary>
         public void Launch(Vector2 direction, float damageMultiplier, int pierceCount)
         {
+            Launch(direction, damageMultiplier, pierceCount, null);
+        }
+
+        public void Launch(Vector2 direction, float damageMultiplier, int pierceCount, PlayerSpecialUpgradeController ownerSpecialUpgradeController)
+        {
             if (direction.sqrMagnitude <= 0f)
                 return;
 
+            specialUpgradeController = ownerSpecialUpgradeController;
             moveDirection = direction.normalized;
             transform.right = moveDirection;
             effectiveDamage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, damageMultiplier)));

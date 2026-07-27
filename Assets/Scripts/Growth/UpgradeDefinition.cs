@@ -14,7 +14,15 @@ namespace VampireLike.Growth
         MoveSpeed,
         MaxHealth,
         Heal,
-        PickupRadius
+        PickupRadius,
+        ExplosiveShot,
+        FrostShot,
+        Vampirism,
+        Shockwave,
+        ScatterShot,
+        Shield,
+        OrbitingBlade,
+        ChainRicochet
     }
 
     /// <summary>
@@ -58,6 +66,15 @@ namespace VampireLike.Growth
         public float Multiplier => multiplier;
         public int FlatAmount => flatAmount;
         public bool Unlimited => unlimited;
+        public bool IsSpecialUpgrade => upgradeType == UpgradeType.ExplosiveShot
+            || upgradeType == UpgradeType.FrostShot
+            || upgradeType == UpgradeType.Vampirism
+            || upgradeType == UpgradeType.Shockwave
+            || upgradeType == UpgradeType.ScatterShot
+            || upgradeType == UpgradeType.Shield
+            || upgradeType == UpgradeType.OrbitingBlade
+            || upgradeType == UpgradeType.ChainRicochet;
+        public string GradeLabel => IsSpecialUpgrade ? "특수 강화" : "일반 강화";
 
         private void OnValidate()
         {

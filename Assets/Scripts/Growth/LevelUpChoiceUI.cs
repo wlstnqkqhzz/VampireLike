@@ -17,10 +17,16 @@ namespace VampireLike.Growth
 
         private GameObject choiceRoot;
         private Button[] choiceButtons;
+        private Image[] choiceButtonImages;
         private Text[] choiceTexts;
         private bool isShowing;
         private PlayerUpgradeController upgradeController;
         private List<PlayerUpgradeController.UpgradeChoice> currentChoices = new List<PlayerUpgradeController.UpgradeChoice>();
+
+        private static readonly Color NormalButtonColor = new Color(0.72f, 0.9f, 0.95f, 1f);
+        private static readonly Color NormalTextColor = new Color(0.06f, 0.1f, 0.12f, 1f);
+        private static readonly Color SpecialButtonColor = new Color(0.34f, 0.18f, 0.58f, 1f);
+        private static readonly Color SpecialTextColor = new Color(1f, 0.88f, 0.42f, 1f);
 
         private void Awake()
         {
@@ -53,6 +59,7 @@ namespace VampireLike.Growth
                     continue;
 
                 choiceTexts[i].text = currentChoices[i].ButtonText;
+                ApplyChoiceStyle(i, currentChoices[i].Definition.IsSpecialUpgrade);
                 int choiceIndex = i;
                 choiceButtons[i].onClick.RemoveAllListeners();
                 choiceButtons[i].onClick.AddListener(() => SelectChoice(choiceIndex));
@@ -116,14 +123,28 @@ namespace VampireLike.Growth
             CreateLabel(panel.transform, "레벨업", new Vector2(0f, 130f), 36, Color.white, new Vector2(520f, 52f));
 
             choiceButtons = new Button[ChoiceCount];
+            choiceButtonImages = new Image[ChoiceCount];
             choiceTexts = new Text[ChoiceCount];
 
             for (int i = 0; i < ChoiceCount; i++)
             {
-                Button button = CreateButton(panel.transform, new Vector2(0f, 62f - i * 82f), out Text buttonText);
+                Button button = CreateButton(panel.transform, new Vector2(0f, 62f - i * 82f), out Text buttonText, out Image buttonImage);
                 choiceButtons[i] = button;
+                choiceButtonImages[i] = buttonImage;
                 choiceTexts[i] = buttonText;
             }
+        }
+
+        private void ApplyChoiceStyle(int index, bool isSpecialUpgrade)
+        {
+            if (choiceButtonImages != null && index < choiceButtonImages.Length && choiceButtonImages[index] != null)
+                choiceButtonImages[index].color = isSpecialUpgrade ? SpecialButtonColor : NormalButtonColor;
+
+            if (choiceTexts == null || index >= choiceTexts.Length || choiceTexts[index] == null)
+                return;
+
+            choiceTexts[index].color = isSpecialUpgrade ? SpecialTextColor : NormalTextColor;
+            choiceTexts[index].fontStyle = isSpecialUpgrade ? FontStyle.Bold : FontStyle.Normal;
         }
 
         private static Canvas CreateCanvas()
@@ -190,7 +211,7 @@ namespace VampireLike.Growth
             return label;
         }
 
-        private static Button CreateButton(Transform parent, Vector2 position, out Text buttonText)
+        private static Button CreateButton(Transform parent, Vector2 position, out Text buttonText, out Image image)
         {
             GameObject buttonObject = new GameObject("Upgrade Choice Button");
             buttonObject.transform.SetParent(parent, false);
@@ -202,7 +223,7 @@ namespace VampireLike.Growth
             rectTransform.sizeDelta = new Vector2(520f, 64f);
             rectTransform.anchoredPosition = position;
 
-            Image image = buttonObject.AddComponent<Image>();
+            image = buttonObject.AddComponent<Image>();
             image.color = new Color(0.72f, 0.9f, 0.95f, 1f);
 
             Button button = buttonObject.AddComponent<Button>();
