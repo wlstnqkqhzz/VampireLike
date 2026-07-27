@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VampireLike.Audio;
 
 namespace VampireLike.Growth
 {
@@ -121,6 +122,7 @@ namespace VampireLike.Growth
 
             isCollected = true;
             collectorType = GemCollectorType.Player;
+            GameSfx.Play(SfxType.ExperiencePickup);
             playerExperience.AddExperience(experienceAmount);
             Destroy(gameObject);
         }

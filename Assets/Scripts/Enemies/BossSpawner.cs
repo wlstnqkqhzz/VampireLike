@@ -1,6 +1,7 @@
 using UnityEngine;
 using VampireLike.Combat;
 using System;
+using VampireLike.Audio;
 
 namespace VampireLike.Enemies
 {
@@ -202,6 +203,7 @@ namespace VampireLike.Enemies
             ApplyBossScaling(activeBoss, wave);
             SetWaveProgressPaused(true);
             Debug.Log($"Boss appeared - Wave {wave}");
+            GameSfx.Play(SfxType.BossAppear);
             BossSpawned?.Invoke(bossStage, activeBoss);
         }
 

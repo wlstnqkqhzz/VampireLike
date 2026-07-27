@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 
 namespace VampireLike.Combat
 {
@@ -42,12 +43,16 @@ namespace VampireLike.Combat
         [SerializeField]
         private int projectilePierceCount;
 
+        private Sprite projectileSpriteOverride;
+        private float projectileVisualScale = 1f;
+        private float projectileColliderRadius = -1f;
         private float attackTimer;
         private bool isStopped;
         private Coroutine burstRoutine;
         private global::PlayerSpriteAnimator spriteAnimator;
         private global::PlayerController playerController;
         private PlayerSpecialUpgradeController specialUpgradeController;
+        private PlayerEffectAnchors effectAnchors;
 
         private void Awake()
         {
@@ -57,6 +62,10 @@ namespace VampireLike.Combat
             spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
             playerController = GetComponent<global::PlayerController>();
             specialUpgradeController = GetComponent<PlayerSpecialUpgradeController>();
+            effectAnchors = GetComponent<PlayerEffectAnchors>();
+
+            if (effectAnchors == null)
+                effectAnchors = gameObject.AddComponent<PlayerEffectAnchors>();
         }
 
         private void Update()
@@ -141,12 +150,19 @@ namespace VampireLike.Combat
             projectilePierceCount = Mathf.Max(0, projectilePierceCount + amount);
         }
 
+        public void SetProjectileVisual(Sprite sprite, float visualScale, float colliderRadius)
+        {
+            projectileSpriteOverride = sprite;
+            projectileVisualScale = Mathf.Max(0.1f, visualScale);
+            projectileColliderRadius = colliderRadius;
+        }
+
         private EnemyHealth FindClosestEnemyInRange()
         {
             // EnemyHealth.ActiveEnemies를 순회해 매 프레임 FindObject 계열 호출을 피한다.
             EnemyHealth closestEnemy = null;
             float closestSqrDistance = attackRange * attackRange;
-            Vector2 origin = transform.position;
+            Vector2 origin = GetFirePosition();
 
             foreach (EnemyHealth enemy in EnemyHealth.ActiveEnemies)
             {
@@ -168,7 +184,8 @@ namespace VampireLike.Combat
         private IEnumerator FireBurstAt(Transform target)
         {
             // 발사 시점의 방향을 기준으로 직선 투사체를 만든다. 유도탄은 아니다.
-            Vector2 direction = ((Vector2)target.position - (Vector2)firePoint.position).normalized;
+            Vector2 firePosition = GetFirePosition();
+            Vector2 direction = ((Vector2)target.position - firePosition).normalized;
 
             if (direction.sqrMagnitude <= 0f)
             {
@@ -185,16 +202,20 @@ namespace VampireLike.Combat
             if (spriteAnimator != null && (playerController == null || !playerController.IsMoving))
                 spriteAnimator.PlayAttack();
 
+            GameSfx.Play(SfxType.PlayerShoot);
+
             int shotCount = Mathf.Max(1, projectileCount);
             for (int i = 0; i < shotCount; i++)
             {
+                firePosition = GetFirePosition();
                 Vector2[] directions = specialUpgradeController == null
                     ? new[] { direction }
                     : specialUpgradeController.GetProjectileDirections(direction);
 
                 foreach (Vector2 shotDirection in directions)
                 {
-                    ProjectileController projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+                    ProjectileController projectile = Instantiate(projectilePrefab, firePosition, Quaternion.identity);
+                    projectile.SetVisual(projectileSpriteOverride, projectileVisualScale, projectileColliderRadius);
                     projectile.Launch(shotDirection, projectileDamageMultiplier, projectilePierceCount, specialUpgradeController);
                 }
 
@@ -203,6 +224,17 @@ namespace VampireLike.Combat
             }
 
             burstRoutine = null;
+        }
+
+        private Vector2 GetFirePosition()
+        {
+            if (firePoint != null && firePoint != transform)
+                return firePoint.position;
+
+            if (effectAnchors == null)
+                effectAnchors = GetComponent<PlayerEffectAnchors>();
+
+            return effectAnchors == null ? transform.position : effectAnchors.EffectCenterPosition;
         }
     }
 }

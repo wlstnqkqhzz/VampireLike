@@ -40,9 +40,9 @@ namespace VampireLike.Combat
             if (circleSprite != null)
                 return circleSprite;
 
-            const int size = 32;
+            const int size = 96;
             Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            texture.filterMode = FilterMode.Point;
+            texture.filterMode = FilterMode.Bilinear;
             texture.wrapMode = TextureWrapMode.Clamp;
 
             Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
@@ -69,7 +69,7 @@ namespace VampireLike.Combat
             if (filledCircleSprite != null)
                 return filledCircleSprite;
 
-            const int size = 32;
+            const int size = 96;
             Texture2D texture = CreateTransparentTexture(size, size);
             Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
             float radius = size * 0.44f;
@@ -93,9 +93,9 @@ namespace VampireLike.Combat
             if (squareSprite != null)
                 return squareSprite;
 
-            const int size = 8;
+            const int size = 16;
             Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            texture.filterMode = FilterMode.Point;
+            texture.filterMode = FilterMode.Bilinear;
             texture.wrapMode = TextureWrapMode.Clamp;
 
             for (int y = 0; y < size; y++)
@@ -114,7 +114,7 @@ namespace VampireLike.Combat
             if (diamondSprite != null)
                 return diamondSprite;
 
-            const int size = 24;
+            const int size = 64;
             Texture2D texture = CreateTransparentTexture(size, size);
             Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
             float radius = size * 0.38f;
@@ -140,7 +140,7 @@ namespace VampireLike.Combat
             if (starSprite != null)
                 return starSprite;
 
-            const int size = 32;
+            const int size = 96;
             Texture2D texture = CreateTransparentTexture(size, size);
             Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
 
@@ -195,8 +195,8 @@ namespace VampireLike.Combat
             if (coneSprite != null)
                 return coneSprite;
 
-            const int width = 64;
-            const int height = 48;
+            const int width = 128;
+            const int height = 96;
             Texture2D texture = CreateTransparentTexture(width, height);
             Vector2 origin = new Vector2(4f, height * 0.5f);
             float maxDistance = width - 6f;
@@ -243,7 +243,7 @@ namespace VampireLike.Combat
         private static Texture2D CreateTransparentTexture(int width, int height)
         {
             Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
-            texture.filterMode = FilterMode.Point;
+            texture.filterMode = FilterMode.Bilinear;
             texture.wrapMode = TextureWrapMode.Clamp;
 
             for (int y = 0; y < height; y++)

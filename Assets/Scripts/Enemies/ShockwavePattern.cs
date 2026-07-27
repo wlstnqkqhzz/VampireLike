@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -82,17 +83,9 @@ namespace VampireLike.Enemies
         private GameObject CreateVisual(Vector2 center)
         {
             if (shockwaveVisualPrefab == null)
-            {
-                GameObject visual = new GameObject("Boss Shockwave Ring");
-                visual.transform.position = center;
+                return CombatVFX.PlayWarning(center, CombatVFXKind.Shockwave, 0.4f, expandDuration, 13);
 
-                SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
-                renderer.sprite = SpecialUpgradePulse.GetCircleSprite();
-                renderer.color = new Color(0.72f, 0.93f, 1f, 0.7f);
-                renderer.sortingOrder = 13;
-                return visual;
-            }
-
+            CombatVFX.PlayBurst(center, CombatVFXKind.Shockwave, 0.55f, 0.22f, 14);
             return Instantiate(shockwaveVisualPrefab, center, Quaternion.identity);
         }
 

@@ -52,11 +52,11 @@ namespace VampireLike.Enemies
 
         // 게임 시작 시 적 생성 시간 간격이다.
         [SerializeField]
-        private float spawnInterval = 2f;
+        private float spawnInterval = 1.4f;
 
         // 웨이브가 올라가도 더 이상 줄어들지 않을 최소 생성 간격이다.
         [SerializeField]
-        private float minimumSpawnInterval = 0.45f;
+        private float minimumSpawnInterval = 0.35f;
 
         // 시작 웨이브 번호다.
         [SerializeField]
@@ -68,7 +68,7 @@ namespace VampireLike.Enemies
 
         // 웨이브 상승 1회마다 생성 간격에 곱할 값이다. 0.9면 10% 빨라진다.
         [SerializeField]
-        private float spawnIntervalMultiplier = 0.9f;
+        private float spawnIntervalMultiplier = 0.88f;
 
         // 웨이브 변경을 콘솔에서도 확인할지 정한다.
         [SerializeField]
@@ -84,15 +84,15 @@ namespace VampireLike.Enemies
 
         // 게임 시작 시 유지할 최대 적 수다.
         [SerializeField]
-        private int maxEnemyCount = 30;
+        private int maxEnemyCount = 36;
 
         // 웨이브 상승 1회마다 늘어나는 최대 적 수다.
         [SerializeField]
-        private int maxEnemyCountIncrease = 5;
+        private int maxEnemyCountIncrease = 7;
 
         // 최대 적 수가 무한히 커지지 않도록 막는 상한이다.
         [SerializeField]
-        private int maxEnemyCountLimit = 120;
+        private int maxEnemyCountLimit = 160;
 
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
         private float spawnTimer;

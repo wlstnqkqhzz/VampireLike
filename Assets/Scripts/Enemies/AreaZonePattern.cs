@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -107,6 +108,7 @@ namespace VampireLike.Enemies
             if (zonePrefab != null)
                 ScaleZoneVisual(zone);
 
+            CombatVFX.CreateZoneVisual(zone.transform, GetVfxKind(), radius, fallbackZoneColor);
             return zone;
         }
 
@@ -134,6 +136,19 @@ namespace VampireLike.Enemies
             zone.transform.localScale = Vector3.one * radius * 2f;
 
             return zone;
+        }
+
+        private CombatVFXKind GetVfxKind()
+        {
+            string zoneName = zonePrefab == null ? string.Empty : zonePrefab.name.ToLowerInvariant();
+
+            if (zoneName.Contains("fire") || zoneName.Contains("flame"))
+                return CombatVFXKind.FireZone;
+
+            if (zoneName.Contains("frost") || zoneName.Contains("ice"))
+                return CombatVFXKind.FrostZone;
+
+            return CombatVFXKind.WebZone;
         }
 
         private Vector2 GetZonePosition()

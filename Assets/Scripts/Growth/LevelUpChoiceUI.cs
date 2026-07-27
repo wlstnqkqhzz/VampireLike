@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
+using VampireLike.Audio;
 
 namespace VampireLike.Growth
 {
@@ -88,6 +89,7 @@ namespace VampireLike.Growth
                 return;
 
             upgradeController.ApplyUpgrade(currentChoices[choiceIndex].Definition);
+            GameSfx.Play(SfxType.UpgradeSelect);
             Hide();
             Time.timeScale = 1f;
         }

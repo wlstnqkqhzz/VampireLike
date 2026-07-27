@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -75,31 +76,14 @@ namespace VampireLike.Enemies
         {
             Vector2 effectPosition = (Vector2)transform.position + direction * range * 0.5f;
             effectPosition = ClampEffectToCamera(effectPosition);
-
-            GameObject effect;
-
-            if (prefab == null)
-            {
-                effect = new GameObject(autoDestroy ? "Boss Cone Impact" : "Boss Cone Warning");
-                effect.transform.position = effectPosition;
-                effect.transform.rotation = Quaternion.FromToRotation(Vector3.right, direction);
-
-                SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
-                renderer.sprite = SpecialUpgradePulse.GetConeSprite();
-                renderer.color = autoDestroy ? new Color(1f, 0.35f, 0.12f, 0.72f) : new Color(1f, 0.15f, 0.08f, 0.34f);
-                renderer.sortingOrder = autoDestroy ? 14 : 12;
-            }
-            else
-            {
-                effect = Instantiate(prefab, effectPosition, Quaternion.FromToRotation(Vector3.right, direction));
-            }
-
-            effect.transform.localScale = Vector3.one * range;
-
-            if (autoDestroy)
-                Destroy(effect, effectLifetime);
-
-            return effect;
+            return CombatVFX.PlayCone(
+                effectPosition,
+                direction,
+                autoDestroy ? CombatVFXKind.ConeImpact : CombatVFXKind.ConeWarning,
+                range,
+                autoDestroy,
+                autoDestroy ? effectLifetime : prepareTime,
+                autoDestroy ? 15 : 12);
         }
 
         private Vector2 ClampEffectToCamera(Vector2 position)

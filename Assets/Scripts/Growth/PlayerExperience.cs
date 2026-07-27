@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using VampireLike.Combat;
+using VampireLike.Audio;
 
 namespace VampireLike.Growth
 {
@@ -122,6 +123,7 @@ namespace VampireLike.Growth
                 currentExperience -= experienceToNextLevel;
                 currentLevel++;
                 experienceToNextLevel = Mathf.CeilToInt(experienceToNextLevel * nextLevelExperienceMultiplier);
+                GameSfx.Play(SfxType.LevelUp);
                 Debug.Log($"Level Up! Level {currentLevel} / Next EXP: {currentExperience}/{experienceToNextLevel}");
                 hasPendingLevelUpChoice = true;
             }

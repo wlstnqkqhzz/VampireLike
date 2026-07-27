@@ -1,5 +1,6 @@
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -26,6 +27,7 @@ namespace VampireLike.Enemies
         private float turnSpeed;
         private float homingElapsedTime;
         private bool useHoming;
+        private bool isDestroying;
 
         public void Initialize(Vector2 moveDirection, float projectileSpeed, int projectileDamage, float projectileLifetime)
         {
@@ -58,6 +60,7 @@ namespace VampireLike.Enemies
 
             Collider2D projectileCollider = GetComponent<Collider2D>();
             projectileCollider.isTrigger = true;
+            CombatVFX.AttachTrail(gameObject, CombatVFXKind.Explosion, 0.07f, 0.18f);
         }
 
         private void Update()
@@ -65,7 +68,7 @@ namespace VampireLike.Enemies
             lifetime -= Time.deltaTime;
 
             if (lifetime <= 0f)
-                Destroy(gameObject);
+                DestroyProjectile(true);
         }
 
         private void FixedUpdate()
@@ -82,7 +85,8 @@ namespace VampireLike.Enemies
                 return;
 
             playerHealth.TakeDamage(damage);
-            Destroy(gameObject);
+            CombatVFX.PlayBurst(transform.position, CombatVFXKind.Explosion, 0.48f, 0.2f);
+            DestroyProjectile(false);
         }
 
         private void OnValidate()
@@ -107,6 +111,19 @@ namespace VampireLike.Enemies
             float nextAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, turnSpeed * Time.fixedDeltaTime);
             direction = new Vector2(Mathf.Cos(nextAngle * Mathf.Deg2Rad), Mathf.Sin(nextAngle * Mathf.Deg2Rad));
             homingElapsedTime += Time.fixedDeltaTime;
+        }
+
+        private void DestroyProjectile(bool playFadeEffect)
+        {
+            if (isDestroying)
+                return;
+
+            isDestroying = true;
+
+            if (playFadeEffect)
+                CombatVFX.PlayBurst(transform.position, CombatVFXKind.ArcaneImpact, 0.32f, 0.14f);
+
+            Destroy(gameObject);
         }
     }
 }

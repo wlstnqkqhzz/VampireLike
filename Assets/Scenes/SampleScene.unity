@@ -52412,17 +52412,17 @@ MonoBehaviour:
     maxWave: 0
     spawnWeight: 2
   player: {fileID: 1723042665}
-  spawnInterval: 1.9
-  minimumSpawnInterval: 0.55
+  spawnInterval: 1.35
+  minimumSpawnInterval: 0.35
   startingWave: 1
   waveDuration: 20
-  spawnIntervalMultiplier: 0.92
+  spawnIntervalMultiplier: 0.88
   logWaveChanges: 1
   minSpawnDistance: 4
   maxSpawnDistance: 6
-  maxEnemyCount: 24
-  maxEnemyCountIncrease: 4
-  maxEnemyCountLimit: 100
+  maxEnemyCount: 36
+  maxEnemyCountIncrease: 7
+  maxEnemyCountLimit: 160
 --- !u!114 &2200000003
 MonoBehaviour:
   m_ObjectHideFlags: 0

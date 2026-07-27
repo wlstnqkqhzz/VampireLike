@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using VampireLike.Combat;
 
 namespace VampireLike.Enemies
 {
@@ -23,15 +22,6 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float endLag = 0.25f;
 
-        [SerializeField]
-        private float warningLength = 3.2f;
-
-        [SerializeField]
-        private float warningWidth = 0.12f;
-
-        [SerializeField]
-        private Color warningColor = new Color(1f, 0.18f, 0.08f, 0.72f);
-
         protected override IEnumerator ExecutePattern()
         {
             if (Player == null || BossRigidbody == null)
@@ -45,12 +35,8 @@ namespace VampireLike.Enemies
 
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(0);
-            GameObject warning = CreateDashWarning(dashDirection);
 
             yield return new WaitForSeconds(prepareTime);
-
-            if (warning != null)
-                Destroy(warning);
 
             Boss.SetState(BossState.Attacking, false);
             Boss.FaceDirection(dashDirection);
@@ -70,23 +56,6 @@ namespace VampireLike.Enemies
             yield return new WaitForSeconds(endLag);
         }
 
-        private GameObject CreateDashWarning(Vector2 direction)
-        {
-            if (direction.sqrMagnitude <= 0.001f || warningLength <= 0f)
-                return null;
-
-            GameObject warning = new GameObject("Boss Dash Warning");
-            warning.transform.position = (Vector2)transform.position + direction.normalized * warningLength * 0.5f;
-            warning.transform.right = direction.normalized;
-            warning.transform.localScale = new Vector3(warningLength, warningWidth, 1f);
-
-            SpriteRenderer renderer = warning.AddComponent<SpriteRenderer>();
-            renderer.sprite = SpecialUpgradePulse.GetSquareSprite();
-            renderer.color = warningColor;
-            renderer.sortingOrder = 12;
-            return warning;
-        }
-
         protected override void OnValidate()
         {
             base.OnValidate();
@@ -94,8 +63,6 @@ namespace VampireLike.Enemies
             dashSpeed = Mathf.Max(0f, dashSpeed);
             dashDuration = Mathf.Max(0f, dashDuration);
             endLag = Mathf.Max(0f, endLag);
-            warningLength = Mathf.Max(0f, warningLength);
-            warningWidth = Mathf.Max(0.02f, warningWidth);
         }
     }
 }

@@ -21,7 +21,10 @@ namespace VampireLike.Menu
             int maxPlayerLevel,
             IReadOnlyDictionary<UpgradeType, int> normalUpgradeMaxLevels,
             string animationResourceFolder,
-            bool invertHorizontalFacing)
+            bool invertHorizontalFacing,
+            string projectileSpriteResourcePath,
+            float projectileVisualScale,
+            float projectileColliderRadius)
         {
             Id = id;
             DisplayName = displayName;
@@ -36,6 +39,9 @@ namespace VampireLike.Menu
             NormalUpgradeMaxLevels = normalUpgradeMaxLevels;
             AnimationResourceFolder = animationResourceFolder;
             InvertHorizontalFacing = invertHorizontalFacing;
+            ProjectileSpriteResourcePath = projectileSpriteResourcePath;
+            ProjectileVisualScale = projectileVisualScale;
+            ProjectileColliderRadius = projectileColliderRadius;
         }
 
         public string Id { get; }
@@ -51,6 +57,9 @@ namespace VampireLike.Menu
         public IReadOnlyDictionary<UpgradeType, int> NormalUpgradeMaxLevels { get; }
         public string AnimationResourceFolder { get; }
         public bool InvertHorizontalFacing { get; }
+        public string ProjectileSpriteResourcePath { get; }
+        public float ProjectileVisualScale { get; }
+        public float ProjectileColliderRadius { get; }
 
         public int GetMaxLevel(UpgradeDefinition definition)
         {

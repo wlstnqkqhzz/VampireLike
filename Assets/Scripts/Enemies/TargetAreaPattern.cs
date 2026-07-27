@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -90,12 +91,7 @@ namespace VampireLike.Enemies
 
         private GameObject CreateWarning(Vector2 position)
         {
-            if (warningPrefab == null)
-                return CreateWarningCircle(position);
-
-            GameObject warning = Instantiate(warningPrefab, position, Quaternion.identity);
-            ScaleEffectToRadius(warning);
-            return warning;
+            return CombatVFX.PlayWarning(position, CombatVFXKind.TargetWarning, radius * 2f, warningDuration, 12);
         }
 
         private Vector2[] GetTargetPositions()
@@ -137,25 +133,7 @@ namespace VampireLike.Enemies
 
         private void SpawnImpact(Vector2 position)
         {
-            if (impactPrefab == null)
-            {
-                GameObject fallbackImpact = new GameObject("Boss Target Area Impact");
-                fallbackImpact.transform.position = position;
-                fallbackImpact.transform.localScale = Vector3.one * radius * 2f;
-
-                SpriteRenderer renderer = fallbackImpact.AddComponent<SpriteRenderer>();
-                renderer.sprite = SpecialUpgradePulse.GetStarSprite();
-                renderer.color = new Color(1f, 0.36f, 0.12f, 0.74f);
-                renderer.sortingOrder = 14;
-
-                SpecialUpgradePulse pulse = fallbackImpact.AddComponent<SpecialUpgradePulse>();
-                pulse.Play(impactLifetime, 180f);
-                return;
-            }
-
-            GameObject impact = Instantiate(impactPrefab, position, Quaternion.identity);
-            ScaleEffectToRadius(impact);
-            Destroy(impact, impactLifetime);
+            CombatVFX.PlayBurst(position, CombatVFXKind.TargetImpact, radius * 1.25f, impactLifetime, 15);
         }
 
         private void ScaleEffectToRadius(GameObject effect)

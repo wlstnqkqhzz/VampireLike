@@ -32,7 +32,10 @@ namespace VampireLike.Menu
                     { UpgradeType.PickupRadius, 3 }
                 },
                 "PlayerAnimations/KaelProcessed",
-                true),
+                true,
+                "Projectiles/KaelSwordWave",
+                1.25f,
+                0.2f),
             new CharacterDefinition(
                 "selene",
                 "셀레네",
@@ -55,7 +58,10 @@ namespace VampireLike.Menu
                     { UpgradeType.PickupRadius, 5 }
                 },
                 "PlayerAnimations/SeleneProcessed",
-                false)
+                false,
+                "Projectiles/SeleneDagger",
+                0.75f,
+                0.09f)
         };
 
         private static int selectedIndex;

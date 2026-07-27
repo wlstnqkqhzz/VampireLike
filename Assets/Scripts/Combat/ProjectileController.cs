@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using VampireLike.VFX;
 
 namespace VampireLike.Combat
 {
@@ -23,11 +24,15 @@ namespace VampireLike.Combat
         private float lifeTime = 3f;
 
         private Rigidbody2D rb;
+        private SpriteRenderer spriteRenderer;
+        private CircleCollider2D circleCollider;
         private Vector2 moveDirection = Vector2.right;
         private float lifeTimer;
         private int effectiveDamage;
         private int remainingPierceCount;
         private PlayerSpecialUpgradeController specialUpgradeController;
+        private CombatVFXKind vfxKind = CombatVFXKind.ArcaneImpact;
+        private bool isDestroying;
         private readonly HashSet<EnemyHealth> hitEnemies = new HashSet<EnemyHealth>();
 
         private void Awake()
@@ -40,6 +45,8 @@ namespace VampireLike.Combat
 
             Collider2D projectileCollider = GetComponent<Collider2D>();
             projectileCollider.isTrigger = true;
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            circleCollider = projectileCollider as CircleCollider2D;
             effectiveDamage = damage;
         }
 
@@ -59,7 +66,7 @@ namespace VampireLike.Combat
             lifeTimer += Time.deltaTime;
 
             if (lifeTimer >= lifeTime)
-                Destroy(gameObject);
+                DestroyProjectile(true, 0.28f);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -75,6 +82,7 @@ namespace VampireLike.Combat
 
             hitEnemies.Add(enemyHealth);
             enemyHealth.TakeDamage(effectiveDamage);
+            CombatVFX.PlayBurst(transform.position, vfxKind, 0.42f, 0.18f);
             specialUpgradeController?.HandleProjectileHit(enemyHealth, effectiveDamage, transform.position);
 
             if (enemyHealth.IsDead)
@@ -86,7 +94,7 @@ namespace VampireLike.Combat
                 return;
             }
 
-            Destroy(gameObject);
+            DestroyProjectile(false, 0f);
         }
 
         private void OnValidate()
@@ -120,6 +128,43 @@ namespace VampireLike.Combat
             effectiveDamage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, damageMultiplier)));
             remainingPierceCount = Mathf.Max(0, pierceCount);
             hitEnemies.Clear();
+            CombatVFX.AttachTrail(gameObject, vfxKind, 0.08f, 0.16f);
+        }
+
+        public void SetVisual(Sprite sprite, float visualScale, float colliderRadius)
+        {
+            if (sprite == null)
+                return;
+
+            if (spriteRenderer == null)
+                spriteRenderer = GetComponent<SpriteRenderer>();
+
+            if (circleCollider == null)
+                circleCollider = GetComponent<CircleCollider2D>();
+
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sprite = sprite;
+                vfxKind = CombatVFX.KindFromProjectileSprite(sprite);
+            }
+
+            transform.localScale = new Vector3(Mathf.Max(0.1f, visualScale), Mathf.Max(0.1f, visualScale), 1f);
+
+            if (circleCollider != null && colliderRadius > 0f)
+                circleCollider.radius = colliderRadius;
+        }
+
+        private void DestroyProjectile(bool playFadeEffect, float effectSize)
+        {
+            if (isDestroying)
+                return;
+
+            isDestroying = true;
+
+            if (playFadeEffect)
+                CombatVFX.PlayBurst(transform.position, vfxKind, effectSize, 0.14f);
+
+            Destroy(gameObject);
         }
     }
 }

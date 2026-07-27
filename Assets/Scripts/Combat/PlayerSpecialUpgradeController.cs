@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VampireLike.Enemies;
+using VampireLike.Audio;
+using VampireLike.VFX;
 
 namespace VampireLike.Combat
 {
@@ -61,13 +63,16 @@ namespace VampireLike.Combat
         private float shieldRechargeReductionPerLevel = 2f;
 
         [SerializeField]
-        private float orbitRadius = 0.95f;
+        private float orbitRadius = 0.74f;
 
         [SerializeField]
         private float orbitDamageInterval = 0.55f;
 
         [SerializeField]
         private int orbitBladeDamage = 1;
+
+        [SerializeField]
+        private ShieldVFXController shieldVfxPrefab;
 
         private readonly Collider2D[] areaResults = new Collider2D[64];
         private readonly List<OrbitingBlade> orbitingBlades = new List<OrbitingBlade>();
@@ -83,11 +88,16 @@ namespace VampireLike.Combat
         private float shieldTimer;
         private bool shieldReady;
         private PlayerHealth playerHealth;
-        private SpecialUpgradeAura shieldAura;
+        private PlayerEffectAnchors effectAnchors;
+        private ShieldVFXController shieldVfx;
 
         private void Awake()
         {
             playerHealth = GetComponent<PlayerHealth>();
+            effectAnchors = GetComponent<PlayerEffectAnchors>();
+
+            if (effectAnchors == null)
+                effectAnchors = gameObject.AddComponent<PlayerEffectAnchors>();
         }
 
         private void OnValidate()
@@ -183,14 +193,18 @@ namespace VampireLike.Combat
 
         public bool TryBlockDamage()
         {
+            return TryBlockDamage(Vector2.zero);
+        }
+
+        public bool TryBlockDamage(Vector2 hitDirection)
+        {
             if (shieldLevel <= 0 || !shieldReady)
                 return false;
 
             shieldReady = false;
             shieldTimer = GetShieldRechargeDuration();
-            RemoveShieldAura();
-            CreatePulseEffect(transform.position, 0.85f, new Color(0.35f, 0.82f, 1f, 0.9f), 0.28f, SpecialUpgradePulse.GetDiamondSprite(), 180f);
-            CreatePulseEffect(transform.position, 1.05f, new Color(0.45f, 0.95f, 1f, 0.55f), 0.34f, SpecialUpgradePulse.GetCircleSprite(), -120f);
+            GameSfx.Play(SfxType.ShieldBlock);
+            BreakShieldVfx(hitDirection);
             return true;
         }
 
@@ -230,7 +244,7 @@ namespace VampireLike.Combat
 
             float multiplier = Mathf.Clamp(1f - frostSlowMultiplierPerLevel * frostShotLevel, 0.45f, 1f);
             statusEffects.ApplySlow(multiplier, frostDuration);
-            CreatePulseEffect(enemy.transform.position, 0.42f, new Color(0.55f, 0.9f, 1f, 0.78f), 0.2f, SpecialUpgradePulse.GetDiamondSprite(), 220f);
+            CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Frost, 0.62f, 0.24f);
         }
 
         private void CountShockwaveHit(int projectileDamage, Vector2 hitPosition)
@@ -243,8 +257,7 @@ namespace VampireLike.Combat
             projectileHitCount = 0;
             int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * shockwaveDamageMultiplier));
             ApplyAreaDamage(hitPosition, shockwaveRadius, damage, null);
-            CreatePulseEffect(hitPosition, shockwaveRadius, shockwaveColor, 0.34f, SpecialUpgradePulse.GetCircleSprite(), 120f);
-            CreatePulseEffect(hitPosition, shockwaveRadius * 0.58f, new Color(0.75f, 1f, 1f, 0.32f), 0.24f, SpecialUpgradePulse.GetFilledCircleSprite(), 0f);
+            CombatVFX.PlayBurst(hitPosition, CombatVFXKind.Shockwave, shockwaveRadius, 0.36f);
         }
 
         private int GetShockwaveHitInterval()
@@ -256,8 +269,7 @@ namespace VampireLike.Combat
         {
             int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * explosionDamageRatioPerLevel * explosiveShotLevel));
             ApplyAreaDamage(killPosition, explosionRadius, damage, killedEnemy);
-            CreatePulseEffect(killPosition, explosionRadius, explosionColor, 0.26f, SpecialUpgradePulse.GetStarSprite(), 260f);
-            CreatePulseEffect(killPosition, explosionRadius * 0.7f, new Color(1f, 0.85f, 0.18f, 0.45f), 0.2f, SpecialUpgradePulse.GetFilledCircleSprite(), 0f);
+            CombatVFX.PlayBurst(killPosition, CombatVFXKind.Explosion, explosionRadius, 0.32f);
         }
 
         private void ApplyAreaDamage(Vector2 center, float radius, int damage, EnemyHealth excludedEnemy)
@@ -293,7 +305,7 @@ namespace VampireLike.Combat
             if (Random.value <= chance)
             {
                 playerHealth.Heal(vampirismHealAmount);
-                CreatePulseEffect(transform.position, 0.5f, new Color(0.25f, 1f, 0.45f, 0.72f), 0.24f, SpecialUpgradePulse.GetDiamondSprite(), -180f);
+                CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.Vampirism, 0.62f, 0.3f);
             }
         }
 
@@ -311,8 +323,8 @@ namespace VampireLike.Combat
                 if (nextEnemy == null)
                     return;
 
-                CreateLineEffect(currentPosition, nextEnemy.transform.position, new Color(0.65f, 0.9f, 1f, 0.92f), 0.16f, 0.1f);
-                CreatePulseEffect(nextEnemy.transform.position, 0.36f, new Color(0.7f, 0.95f, 1f, 0.78f), 0.16f, SpecialUpgradePulse.GetStarSprite(), 240f);
+                CombatVFX.PlayLine(currentPosition, nextEnemy.transform.position, CombatVFXKind.Ricochet, 0.16f, 0.1f);
+                CombatVFX.PlayBurst(nextEnemy.transform.position, CombatVFXKind.Ricochet, 0.42f, 0.18f);
                 nextEnemy.TakeDamage(damage);
 
                 currentEnemy = nextEnemy;
@@ -361,8 +373,7 @@ namespace VampireLike.Combat
                 return;
 
             shieldReady = true;
-            CreatePulseEffect(transform.position, 0.75f, new Color(0.35f, 0.75f, 1f, 0.65f), 0.24f, SpecialUpgradePulse.GetCircleSprite(), 150f);
-            CreateShieldAura();
+            CreateShieldVfx();
         }
 
         private float GetShieldRechargeDuration()
@@ -388,7 +399,7 @@ namespace VampireLike.Combat
                     continue;
 
                 orbitingBlades[i].Configure(
-                    transform,
+                    GetOrbitCenter(),
                     orbitRadius,
                     120f + orbitingBladeLevel * 35f,
                     i * (360f / orbitingBlades.Count),
@@ -410,32 +421,91 @@ namespace VampireLike.Combat
         {
             if (shieldLevel <= 0 || !shieldReady || GameState.IsGameOver)
             {
-                RemoveShieldAura();
+                RemoveShieldVfx();
                 return;
             }
 
-            if (shieldAura == null)
-                CreateShieldAura();
+            if (shieldVfx == null)
+                CreateShieldVfx();
+
+            if (shieldVfx != null)
+                shieldVfx.SetShieldRatio(1f);
         }
 
-        private void CreateShieldAura()
+        private void CreateShieldVfx()
         {
-            if (shieldAura != null)
+            if (shieldVfx != null)
                 return;
 
-            GameObject auraObject = new GameObject("Shield Aura");
-            auraObject.transform.position = transform.position;
-            shieldAura = auraObject.AddComponent<SpecialUpgradeAura>();
-            shieldAura.Initialize(transform, SpecialUpgradePulse.GetCircleSprite(), new Color(0.38f, 0.82f, 1f, 0.62f), 1.35f, 120f, 5.5f, 0.08f);
+            ShieldVFXController prefab = shieldVfxPrefab;
+
+            if (prefab == null)
+                prefab = Resources.Load<ShieldVFXController>("VFX/ShieldVFX");
+
+            if (prefab != null)
+                shieldVfx = Instantiate(prefab, GetShieldCenterPosition(), Quaternion.identity);
+            else
+                shieldVfx = new GameObject("ShieldVFX").AddComponent<ShieldVFXController>();
+
+            shieldVfx.Initialize(GetShieldCenter());
+            shieldVfx.SetShieldRatio(1f);
         }
 
-        private void RemoveShieldAura()
+        private Transform GetEffectCenter()
         {
-            if (shieldAura == null)
+            if (effectAnchors == null)
+                effectAnchors = GetComponent<PlayerEffectAnchors>();
+
+            return effectAnchors == null || effectAnchors.EffectCenter == null ? transform : effectAnchors.EffectCenter;
+        }
+
+        private Transform GetShieldCenter()
+        {
+            if (effectAnchors == null)
+                effectAnchors = GetComponent<PlayerEffectAnchors>();
+
+            return effectAnchors == null || effectAnchors.ShieldCenter == null ? transform : effectAnchors.ShieldCenter;
+        }
+
+        private Transform GetOrbitCenter()
+        {
+            if (effectAnchors == null)
+                effectAnchors = GetComponent<PlayerEffectAnchors>();
+
+            return effectAnchors == null || effectAnchors.OrbitCenter == null ? transform : effectAnchors.OrbitCenter;
+        }
+
+        private Vector3 GetEffectCenterPosition()
+        {
+            return effectAnchors == null ? transform.position : effectAnchors.EffectCenterPosition;
+        }
+
+        private Vector3 GetShieldCenterPosition()
+        {
+            return effectAnchors == null ? transform.position : effectAnchors.ShieldCenterPosition;
+        }
+
+        private void RemoveShieldVfx()
+        {
+            if (shieldVfx == null)
                 return;
 
-            Destroy(shieldAura.gameObject);
-            shieldAura = null;
+            shieldVfx.PlayBreak();
+            shieldVfx = null;
+        }
+
+        private void BreakShieldVfx(Vector2 hitDirection)
+        {
+            if (shieldVfx == null)
+                CreateShieldVfx();
+
+            if (shieldVfx != null)
+            {
+                shieldVfx.PlayHit(hitDirection);
+                shieldVfx.PlayBreak();
+            }
+
+            shieldVfx = null;
         }
 
         private static void CreatePulseEffect(Vector2 position, float radius, Color color, float duration)

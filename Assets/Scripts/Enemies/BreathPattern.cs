@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -80,26 +81,14 @@ namespace VampireLike.Enemies
         private GameObject SpawnEffect(GameObject prefab, Vector2 direction, bool isBreath)
         {
             Vector2 effectPosition = (Vector2)transform.position + direction * range * 0.5f;
-            GameObject effect;
-
-            if (prefab == null)
-            {
-                effect = new GameObject(isBreath ? "Boss Breath Flame" : "Boss Breath Warning");
-                effect.transform.position = effectPosition;
-                effect.transform.rotation = Quaternion.FromToRotation(Vector3.right, direction);
-
-                SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
-                renderer.sprite = SpecialUpgradePulse.GetConeSprite();
-                renderer.color = isBreath ? new Color(1f, 0.32f, 0.06f, 0.7f) : new Color(1f, 0.75f, 0.14f, 0.34f);
-                renderer.sortingOrder = isBreath ? 14 : 12;
-            }
-            else
-            {
-                effect = Instantiate(prefab, effectPosition, Quaternion.FromToRotation(Vector3.right, direction));
-            }
-
-            effect.transform.localScale = Vector3.one * range;
-            return effect;
+            return CombatVFX.PlayCone(
+                effectPosition,
+                direction,
+                isBreath ? CombatVFXKind.FireZone : CombatVFXKind.ConeWarning,
+                range,
+                isBreath,
+                isBreath ? duration : prepareTime,
+                isBreath ? 15 : 12);
         }
 
         private void ApplyDamage(Vector2 direction)

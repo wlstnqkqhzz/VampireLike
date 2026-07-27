@@ -42,6 +42,9 @@ namespace VampireLike.Menu
                 autoAttack.MultiplyAttackInterval(character.AttackIntervalMultiplier);
                 autoAttack.MultiplyProjectileDamage(character.ProjectileDamageMultiplier);
                 autoAttack.AddProjectileCount(character.BonusProjectileCount);
+
+                Sprite projectileSprite = Resources.Load<Sprite>(character.ProjectileSpriteResourcePath);
+                autoAttack.SetProjectileVisual(projectileSprite, character.ProjectileVisualScale, character.ProjectileColliderRadius);
             }
 
             if (playerHealth != null && character.BonusMaxHealth > 0)

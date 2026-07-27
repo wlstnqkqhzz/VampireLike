@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using VampireLike.Growth;
 using VampireLike.Enemies;
+using VampireLike.Audio;
 
 namespace VampireLike.Combat
 {
@@ -86,6 +87,7 @@ namespace VampireLike.Combat
                 return;
             }
 
+            GameSfx.Play(SfxType.EnemyHit);
             PlayHitFlash();
         }
 
@@ -126,6 +128,7 @@ namespace VampireLike.Combat
         private void Die()
         {
             IsDead = true;
+            GameSfx.Play(SfxType.EnemyDeath);
             GameSessionStats.RecordKill(IsBossEnemy());
             Died?.Invoke(this);
             DropExperienceGem();

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using VampireLike.Audio;
 
 namespace VampireLike.Combat
 {
@@ -99,7 +100,7 @@ namespace VampireLike.Combat
             if (!other.CompareTag("Enemy") && other.GetComponentInParent<EnemyHealth>() == null)
                 return;
 
-            TakeDamage(GetContactDamage(other));
+            TakeDamage(GetContactDamage(other), (Vector2)transform.position - (Vector2)other.transform.position);
         }
 
         private void OnValidate()
@@ -116,17 +117,23 @@ namespace VampireLike.Combat
 
         public void TakeDamage(int damage)
         {
+            TakeDamage(damage, Vector2.zero);
+        }
+
+        public void TakeDamage(int damage, Vector2 hitDirection)
+        {
             // 무적 시간 중에는 반복 피해를 막는다.
             if (isDead || damage <= 0 || invincibleTimer > 0f)
                 return;
 
             PlayerSpecialUpgradeController specialUpgradeController = GetComponent<PlayerSpecialUpgradeController>();
 
-            if (specialUpgradeController != null && specialUpgradeController.TryBlockDamage())
+            if (specialUpgradeController != null && specialUpgradeController.TryBlockDamage(hitDirection))
                 return;
 
             currentHealth -= damage;
             invincibleTimer = invincibleDuration;
+            GameSfx.Play(SfxType.PlayerHit);
 
             if (spriteAnimator == null)
                 spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
@@ -161,6 +168,7 @@ namespace VampireLike.Combat
                 return;
 
             currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+            GameSfx.Play(SfxType.Heal);
         }
 
         private void CacheSpriteRenderer()
@@ -224,7 +232,7 @@ namespace VampireLike.Combat
 
                 if (enemyCollider != null && enemyCollider.GetComponentInParent<EnemyHealth>() != null)
                 {
-                    TakeDamage(GetContactDamage(enemyCollider.gameObject));
+                    TakeDamage(GetContactDamage(enemyCollider.gameObject), (Vector2)transform.position - (Vector2)enemyCollider.transform.position);
                     return;
                 }
             }
@@ -279,6 +287,7 @@ namespace VampireLike.Combat
             // 현재는 게임 오버 상태 전환과 이동/공격 정지만 처리한다. UI는 이후 단계에서 연결한다.
             isDead = true;
             currentHealth = 0;
+            GameSfx.Play(SfxType.GameOver);
 
             if (spriteAnimator == null)
                 spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
