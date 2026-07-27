@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.VFX;
 
@@ -60,6 +61,7 @@ namespace VampireLike.Enemies
             float elapsedTime = 0f;
             bool hasHitPlayer = false;
             GameObject visual = CreateVisual(center);
+            GameSfx.Play(SfxType.BossZone);
 
             while (elapsedTime < expandDuration && !Boss.IsDead)
             {

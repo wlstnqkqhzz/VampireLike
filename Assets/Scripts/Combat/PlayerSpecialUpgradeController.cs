@@ -244,6 +244,7 @@ namespace VampireLike.Combat
 
             float multiplier = Mathf.Clamp(1f - frostSlowMultiplierPerLevel * frostShotLevel, 0.45f, 1f);
             statusEffects.ApplySlow(multiplier, frostDuration);
+            GameSfx.Play(SfxType.SkillFrost);
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Frost, 0.62f, 0.24f);
         }
 
@@ -257,6 +258,7 @@ namespace VampireLike.Combat
             projectileHitCount = 0;
             int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * shockwaveDamageMultiplier));
             ApplyAreaDamage(hitPosition, shockwaveRadius, damage, null);
+            GameSfx.Play(SfxType.SkillShockwave);
             CombatVFX.PlayBurst(hitPosition, CombatVFXKind.Shockwave, shockwaveRadius, 0.36f);
         }
 
@@ -269,6 +271,7 @@ namespace VampireLike.Combat
         {
             int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * explosionDamageRatioPerLevel * explosiveShotLevel));
             ApplyAreaDamage(killPosition, explosionRadius, damage, killedEnemy);
+            GameSfx.Play(SfxType.SkillExplosion);
             CombatVFX.PlayBurst(killPosition, CombatVFXKind.Explosion, explosionRadius, 0.32f);
         }
 
@@ -305,6 +308,7 @@ namespace VampireLike.Combat
             if (Random.value <= chance)
             {
                 playerHealth.Heal(vampirismHealAmount);
+                GameSfx.Play(SfxType.SkillVampirism);
                 CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.Vampirism, 0.62f, 0.3f);
             }
         }
@@ -323,6 +327,7 @@ namespace VampireLike.Combat
                 if (nextEnemy == null)
                     return;
 
+                GameSfx.Play(SfxType.SkillRicochet);
                 CombatVFX.PlayLine(currentPosition, nextEnemy.transform.position, CombatVFXKind.Ricochet, 0.16f, 0.1f);
                 CombatVFX.PlayBurst(nextEnemy.transform.position, CombatVFXKind.Ricochet, 0.42f, 0.18f);
                 nextEnemy.TakeDamage(damage);
@@ -373,6 +378,7 @@ namespace VampireLike.Combat
                 return;
 
             shieldReady = true;
+            GameSfx.Play(SfxType.ShieldReady);
             CreateShieldVfx();
         }
 
@@ -490,6 +496,7 @@ namespace VampireLike.Combat
             if (shieldVfx == null)
                 return;
 
+            GameSfx.Play(SfxType.ShieldBreak);
             shieldVfx.PlayBreak();
             shieldVfx = null;
         }
@@ -502,6 +509,7 @@ namespace VampireLike.Combat
             if (shieldVfx != null)
             {
                 shieldVfx.PlayHit(hitDirection);
+                GameSfx.Play(SfxType.ShieldBreak);
                 shieldVfx.PlayBreak();
             }
 

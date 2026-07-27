@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.VFX;
 
@@ -108,6 +109,7 @@ namespace VampireLike.Enemies
             if (zonePrefab != null)
                 ScaleZoneVisual(zone);
 
+            GameSfx.Play(SfxType.BossZone);
             CombatVFX.CreateZoneVisual(zone.transform, GetVfxKind(), radius, fallbackZoneColor);
             return zone;
         }

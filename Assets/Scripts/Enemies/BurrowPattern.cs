@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.Combat;
 
 namespace VampireLike.Enemies
@@ -73,6 +74,7 @@ namespace VampireLike.Enemies
 
                 BossRigidbody.position = reappearPosition;
                 SetBurrowedVisualState(false);
+                GameSfx.Play(SfxType.BossZone);
 
                 if (i < count - 1)
                     yield return new WaitForSeconds(repeatDelay);

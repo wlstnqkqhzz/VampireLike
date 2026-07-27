@@ -43,6 +43,9 @@ namespace VampireLike.Combat
         [SerializeField]
         private int projectilePierceCount;
 
+        [SerializeField]
+        private SfxType attackSfxType = SfxType.PlayerShoot;
+
         private Sprite projectileSpriteOverride;
         private float projectileVisualScale = 1f;
         private float projectileColliderRadius = -1f;
@@ -157,6 +160,11 @@ namespace VampireLike.Combat
             projectileColliderRadius = colliderRadius;
         }
 
+        public void SetAttackSfx(SfxType sfxType)
+        {
+            attackSfxType = sfxType;
+        }
+
         private EnemyHealth FindClosestEnemyInRange()
         {
             // EnemyHealth.ActiveEnemies를 순회해 매 프레임 FindObject 계열 호출을 피한다.
@@ -202,7 +210,7 @@ namespace VampireLike.Combat
             if (spriteAnimator != null && (playerController == null || !playerController.IsMoving))
                 spriteAnimator.PlayAttack();
 
-            GameSfx.Play(SfxType.PlayerShoot);
+            GameSfx.Play(attackSfxType);
 
             int shotCount = Mathf.Max(1, projectileCount);
             for (int i = 0; i < shotCount; i++)
@@ -211,6 +219,9 @@ namespace VampireLike.Combat
                 Vector2[] directions = specialUpgradeController == null
                     ? new[] { direction }
                     : specialUpgradeController.GetProjectileDirections(direction);
+
+                if (directions.Length > 1)
+                    GameSfx.Play(SfxType.SkillScatter);
 
                 foreach (Vector2 shotDirection in directions)
                 {

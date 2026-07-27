@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.Growth;
 
@@ -188,6 +189,7 @@ namespace VampireLike.Enemies
 
             SetWaveProgressPaused(true);
             Debug.Log("Greed Lord appeared.");
+            GameSfx.Play(SfxType.BossAppear);
         }
 
         private void HandleHiddenBossDied(EnemyHealth defeatedBoss)

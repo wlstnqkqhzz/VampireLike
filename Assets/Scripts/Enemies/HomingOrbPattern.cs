@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 
 namespace VampireLike.Enemies
 {
@@ -60,6 +61,7 @@ namespace VampireLike.Enemies
                 Vector2 offset = Quaternion.Euler(0f, 0f, i * 360f / Mathf.Max(1, count)) * Vector2.right * spawnRadius;
                 EnemyProjectileController projectile = Instantiate(projectilePrefab, (Vector2)transform.position + offset, Quaternion.identity);
                 projectile.InitializeHoming(Player, direction, projectileSpeed, damage, projectileLifetime, homingDuration, turnSpeed);
+                GameSfx.Play(SfxType.BossProjectile);
 
                 if (spawnInterval > 0f)
                     yield return new WaitForSeconds(spawnInterval);

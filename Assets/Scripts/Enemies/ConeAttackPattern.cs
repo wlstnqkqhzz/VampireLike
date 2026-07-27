@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.VFX;
 
@@ -60,6 +61,7 @@ namespace VampireLike.Enemies
 
             if (!Boss.IsDead)
             {
+                GameSfx.Play(SfxType.BossDash);
                 SpawnEffect(impactPrefab, direction, true);
                 ApplyDamage(direction);
             }

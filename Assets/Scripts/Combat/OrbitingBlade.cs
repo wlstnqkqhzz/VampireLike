@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.VFX;
 
 namespace VampireLike.Combat
@@ -84,6 +85,7 @@ namespace VampireLike.Combat
 
                 enemy.TakeDamage(damage);
                 Vector3 hitPosition = hitCenter;
+                GameSfx.Play(SfxType.SkillOrbitBlade);
                 CombatVFX.PlayBurst(hitPosition, CombatVFXKind.ArcaneImpact, 0.32f, 0.14f);
                 nextDamageTimes[enemy] = Time.time + damageInterval;
             }

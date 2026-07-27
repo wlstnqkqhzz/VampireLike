@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.Combat;
 
 namespace VampireLike.Enemies
@@ -54,6 +55,7 @@ namespace VampireLike.Enemies
                 Boss.SetState(BossState.Teleporting, false);
                 SetVisible(false);
                 SetContactDamageEnabled(false);
+                GameSfx.Play(SfxType.BossTeleport);
 
                 yield return new WaitForSeconds(vanishDelay);
 

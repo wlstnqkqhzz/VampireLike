@@ -128,8 +128,9 @@ namespace VampireLike.Combat
         private void Die()
         {
             IsDead = true;
-            GameSfx.Play(SfxType.EnemyDeath);
-            GameSessionStats.RecordKill(IsBossEnemy());
+            bool isBoss = IsBossEnemy();
+            GameSfx.Play(isBoss ? SfxType.BossDeath : SfxType.EnemyDeath);
+            GameSessionStats.RecordKill(isBoss);
             Died?.Invoke(this);
             DropExperienceGem();
 

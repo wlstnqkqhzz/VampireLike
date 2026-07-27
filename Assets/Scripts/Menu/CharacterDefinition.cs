@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VampireLike.Audio;
 using VampireLike.Growth;
 
 namespace VampireLike.Menu
@@ -24,7 +25,8 @@ namespace VampireLike.Menu
             bool invertHorizontalFacing,
             string projectileSpriteResourcePath,
             float projectileVisualScale,
-            float projectileColliderRadius)
+            float projectileColliderRadius,
+            SfxType attackSfxType)
         {
             Id = id;
             DisplayName = displayName;
@@ -42,6 +44,7 @@ namespace VampireLike.Menu
             ProjectileSpriteResourcePath = projectileSpriteResourcePath;
             ProjectileVisualScale = projectileVisualScale;
             ProjectileColliderRadius = projectileColliderRadius;
+            AttackSfxType = attackSfxType;
         }
 
         public string Id { get; }
@@ -60,6 +63,7 @@ namespace VampireLike.Menu
         public string ProjectileSpriteResourcePath { get; }
         public float ProjectileVisualScale { get; }
         public float ProjectileColliderRadius { get; }
+        public SfxType AttackSfxType { get; }
 
         public int GetMaxLevel(UpgradeDefinition definition)
         {

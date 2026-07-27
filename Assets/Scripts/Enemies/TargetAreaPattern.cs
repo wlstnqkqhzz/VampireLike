@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.VFX;
 
@@ -133,6 +134,7 @@ namespace VampireLike.Enemies
 
         private void SpawnImpact(Vector2 position)
         {
+            GameSfx.Play(SfxType.BossZone);
             CombatVFX.PlayBurst(position, CombatVFXKind.TargetImpact, radius * 1.25f, impactLifetime, 15);
         }
 

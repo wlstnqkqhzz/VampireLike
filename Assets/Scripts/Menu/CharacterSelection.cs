@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VampireLike.Audio;
 using VampireLike.Growth;
 
 namespace VampireLike.Menu
@@ -35,7 +36,8 @@ namespace VampireLike.Menu
                 true,
                 "Projectiles/KaelSwordWave",
                 1.25f,
-                0.2f),
+                0.2f,
+                SfxType.KaelSwordWave),
             new CharacterDefinition(
                 "selene",
                 "셀레네",
@@ -61,7 +63,8 @@ namespace VampireLike.Menu
                 false,
                 "Projectiles/SeleneDagger",
                 0.75f,
-                0.09f)
+                0.09f,
+                SfxType.SeleneDaggerThrow)
         };
 
         private static int selectedIndex;

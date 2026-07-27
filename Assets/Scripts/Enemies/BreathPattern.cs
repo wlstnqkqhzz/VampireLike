@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.VFX;
 
@@ -58,6 +59,7 @@ namespace VampireLike.Enemies
 
             GameObject breath = SpawnEffect(breathPrefab, direction, true);
             Boss.SetState(BossState.Attacking, false);
+            GameSfx.Play(SfxType.BossZone);
 
             float elapsedTime = 0f;
             float nextDamageTime = 0f;

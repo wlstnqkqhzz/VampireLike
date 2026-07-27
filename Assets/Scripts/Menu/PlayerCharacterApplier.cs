@@ -45,6 +45,7 @@ namespace VampireLike.Menu
 
                 Sprite projectileSprite = Resources.Load<Sprite>(character.ProjectileSpriteResourcePath);
                 autoAttack.SetProjectileVisual(projectileSprite, character.ProjectileVisualScale, character.ProjectileColliderRadius);
+                autoAttack.SetAttackSfx(character.AttackSfxType);
             }
 
             if (playerHealth != null && character.BonusMaxHealth > 0)

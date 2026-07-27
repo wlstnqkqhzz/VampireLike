@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 
 namespace VampireLike.Enemies
 {
@@ -41,6 +42,7 @@ namespace VampireLike.Enemies
             Boss.SetState(BossState.Attacking, false);
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(1);
+            GameSfx.Play(SfxType.BossDash);
             float elapsedTime = 0f;
 
             while (elapsedTime < dashDuration && !Boss.IsDead)

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 
 namespace VampireLike.Enemies
 {
@@ -49,6 +50,8 @@ namespace VampireLike.Enemies
         {
             if (projectilePrefab == null || count <= 0)
                 return;
+
+            GameSfx.Play(SfxType.BossProjectile);
 
             for (int i = 0; i < count; i++)
             {
