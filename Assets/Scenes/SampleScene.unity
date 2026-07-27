@@ -42022,10 +42022,10 @@ MonoBehaviour:
   firePoint: {fileID: 0}
   attackInterval: 1
   attackRange: 6
-  minimumAttackInterval: 0.15
+  minimumAttackInterval: 0.25
   projectileDamageMultiplier: 1
   projectileCount: 1
-  projectileBurstDelay: 0.08
+  projectileBurstDelay: 0.12
   projectilePierceCount: 0
 --- !u!114 &1723042668
 MonoBehaviour:
@@ -42041,6 +42041,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerExperience
   currentExperience: 0
   currentLevel: 1
+  maxLevel: 50
   experienceToNextLevel: 6
   nextLevelExperienceMultiplier: 1.35
   pickupRadius: 0.45

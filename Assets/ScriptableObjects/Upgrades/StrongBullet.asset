@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeType: 0
   displayName: 강한 탄환
-  description: 투사체 공격력 +20%
+  description: 투사체 공격력 +15%
   maxLevel: 5
-  multiplier: 1.2
+  multiplier: 1.15
   flatAmount: 0
   unlimited: 0

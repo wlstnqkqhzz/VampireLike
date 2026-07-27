@@ -79,8 +79,8 @@ namespace VampireLike.Combat
 
         private static Sprite CreateBladeSprite()
         {
-            const int width = 16;
-            const int height = 8;
+            const int width = 24;
+            const int height = 10;
             Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
             texture.filterMode = FilterMode.Point;
             texture.wrapMode = TextureWrapMode.Clamp;
@@ -89,14 +89,26 @@ namespace VampireLike.Combat
             {
                 for (int x = 0; x < width; x++)
                 {
-                    bool blade = x >= y && x >= height - 1 - y;
-                    Color color = blade ? new Color(0.85f, 0.95f, 1f, 1f) : Color.clear;
+                    float normalizedX = x / (float)(width - 1);
+                    float centerY = (height - 1) * 0.5f + Mathf.Sin(normalizedX * Mathf.PI) * 1.5f;
+                    float thickness = Mathf.Lerp(1.2f, 3.2f, Mathf.Sin(normalizedX * Mathf.PI));
+                    bool blade = Mathf.Abs(y - centerY) <= thickness && x > 1 && x < width - 1;
+                    bool edge = blade && Mathf.Abs(y - centerY) > thickness - 1.1f;
+                    bool hilt = x <= 3 && Mathf.Abs(y - (height - 1) * 0.5f) <= 2f;
+                    Color color = Color.clear;
+
+                    if (blade)
+                        color = edge ? new Color(0.45f, 0.86f, 1f, 1f) : new Color(0.9f, 0.98f, 1f, 1f);
+
+                    if (hilt)
+                        color = new Color(0.45f, 0.28f, 0.9f, 1f);
+
                     texture.SetPixel(x, y, color);
                 }
             }
 
             texture.Apply();
-            return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 16f);
+            return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 18f);
         }
     }
 }

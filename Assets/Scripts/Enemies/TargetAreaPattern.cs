@@ -138,7 +138,20 @@ namespace VampireLike.Enemies
         private void SpawnImpact(Vector2 position)
         {
             if (impactPrefab == null)
+            {
+                GameObject fallbackImpact = new GameObject("Boss Target Area Impact");
+                fallbackImpact.transform.position = position;
+                fallbackImpact.transform.localScale = Vector3.one * radius * 2f;
+
+                SpriteRenderer renderer = fallbackImpact.AddComponent<SpriteRenderer>();
+                renderer.sprite = SpecialUpgradePulse.GetStarSprite();
+                renderer.color = new Color(1f, 0.36f, 0.12f, 0.74f);
+                renderer.sortingOrder = 14;
+
+                SpecialUpgradePulse pulse = fallbackImpact.AddComponent<SpecialUpgradePulse>();
+                pulse.Play(impactLifetime, 180f);
                 return;
+            }
 
             GameObject impact = Instantiate(impactPrefab, position, Quaternion.identity);
             ScaleEffectToRadius(impact);
@@ -162,6 +175,15 @@ namespace VampireLike.Enemies
         {
             GameObject warning = new GameObject("Boss Target Area Warning");
             warning.transform.position = position;
+
+            GameObject fill = new GameObject("Warning Fill");
+            fill.transform.SetParent(warning.transform, false);
+            fill.transform.localScale = Vector3.one * radius * 2f;
+
+            SpriteRenderer fillRenderer = fill.AddComponent<SpriteRenderer>();
+            fillRenderer.sprite = SpecialUpgradePulse.GetFilledCircleSprite();
+            fillRenderer.color = new Color(warningColor.r, warningColor.g, warningColor.b, warningColor.a * 0.35f);
+            fillRenderer.sortingOrder = 11;
 
             LineRenderer lineRenderer = warning.AddComponent<LineRenderer>();
             lineRenderer.useWorldSpace = false;

@@ -17,6 +17,10 @@ namespace VampireLike.Growth
         [SerializeField]
         private int currentLevel = 1;
 
+        // 선택한 캐릭터가 도달할 수 있는 최대 레벨입니다.
+        [SerializeField]
+        private int maxLevel = 50;
+
         // 다음 레벨까지 필요한 경험치다.
         [SerializeField]
         private int experienceToNextLevel = 5;
@@ -39,9 +43,10 @@ namespace VampireLike.Growth
 
         public int CurrentExperience => currentExperience;
         public int CurrentLevel => currentLevel;
+        public int MaxLevel => maxLevel;
         public int ExperienceToNextLevel => experienceToNextLevel;
         public float PickupRadius => pickupRadius;
-        public float ExperienceProgress => experienceToNextLevel <= 0 ? 0f : (float)currentExperience / experienceToNextLevel;
+        public float ExperienceProgress => currentLevel >= maxLevel ? 1f : experienceToNextLevel <= 0 ? 0f : (float)currentExperience / experienceToNextLevel;
         // HUD가 경험치 변화를 즉시 반영할 수 있도록 알림을 보낸다.
         public event Action<int, int, int> ExperienceChanged;
 
@@ -92,10 +97,18 @@ namespace VampireLike.Growth
             pickupRadius *= multiplier;
         }
 
+        public void SetMaxLevel(int value)
+        {
+            maxLevel = Mathf.Max(1, value);
+            currentLevel = Mathf.Min(currentLevel, maxLevel);
+            NotifyExperienceChanged();
+        }
+
         private void OnValidate()
         {
             currentExperience = Mathf.Max(0, currentExperience);
             currentLevel = Mathf.Max(1, currentLevel);
+            maxLevel = Mathf.Max(currentLevel, maxLevel);
             experienceToNextLevel = Mathf.Max(1, experienceToNextLevel);
             nextLevelExperienceMultiplier = Mathf.Max(1f, nextLevelExperienceMultiplier);
             pickupRadius = Mathf.Max(0.05f, pickupRadius);
@@ -104,13 +117,19 @@ namespace VampireLike.Growth
         private void CheckLevelUp()
         {
             // 한 번에 많은 경험치를 얻어도 필요한 만큼 레벨업을 처리한다.
-            while (currentExperience >= experienceToNextLevel)
+            while (currentLevel < maxLevel && currentExperience >= experienceToNextLevel)
             {
                 currentExperience -= experienceToNextLevel;
                 currentLevel++;
                 experienceToNextLevel = Mathf.CeilToInt(experienceToNextLevel * nextLevelExperienceMultiplier);
                 Debug.Log($"Level Up! Level {currentLevel} / Next EXP: {currentExperience}/{experienceToNextLevel}");
                 hasPendingLevelUpChoice = true;
+            }
+
+            if (currentLevel >= maxLevel)
+            {
+                currentExperience = Mathf.Min(currentExperience, experienceToNextLevel);
+                hasPendingLevelUpChoice = false;
             }
 
             if (hasPendingLevelUpChoice)

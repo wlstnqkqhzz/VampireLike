@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VampireLike.Combat;
 
 namespace VampireLike.Enemies
 {
@@ -126,22 +127,11 @@ namespace VampireLike.Enemies
             GameObject zone = new GameObject("Spider Web Zone");
             zone.AddComponent<CircleCollider2D>();
 
-            LineRenderer lineRenderer = zone.AddComponent<LineRenderer>();
-            lineRenderer.useWorldSpace = false;
-            lineRenderer.loop = true;
-            lineRenderer.positionCount = 40;
-            lineRenderer.startWidth = 0.035f;
-            lineRenderer.endWidth = 0.035f;
-            lineRenderer.sortingOrder = 11;
-            lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            lineRenderer.startColor = fallbackZoneColor;
-            lineRenderer.endColor = fallbackZoneColor;
-
-            for (int i = 0; i < lineRenderer.positionCount; i++)
-            {
-                float angle = Mathf.PI * 2f * i / lineRenderer.positionCount;
-                lineRenderer.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0f));
-            }
+            SpriteRenderer spriteRenderer = zone.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = SpecialUpgradePulse.GetWebSprite();
+            spriteRenderer.color = fallbackZoneColor;
+            spriteRenderer.sortingOrder = 10;
+            zone.transform.localScale = Vector3.one * radius * 2f;
 
             return zone;
         }

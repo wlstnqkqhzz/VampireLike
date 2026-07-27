@@ -16,28 +16,28 @@ namespace VampireLike.Combat
         private float explosionRadius = 1.45f;
 
         [SerializeField]
-        private float explosionDamageRatioPerLevel = 0.4f;
+        private float explosionDamageRatioPerLevel = 0.28f;
 
         [SerializeField]
         private float frostDuration = 2f;
 
         [SerializeField]
-        private float frostSlowMultiplierPerLevel = 0.1f;
+        private float frostSlowMultiplierPerLevel = 0.08f;
 
         [SerializeField]
-        private float vampirismChancePerLevel = 0.08f;
+        private float vampirismChancePerLevel = 0.05f;
 
         [SerializeField]
         private int vampirismHealAmount = 1;
 
         [SerializeField]
-        private int shockwaveBaseHitInterval = 7;
+        private int shockwaveBaseHitInterval = 9;
 
         [SerializeField]
         private float shockwaveRadius = 1.8f;
 
         [SerializeField]
-        private float shockwaveDamageMultiplier = 1f;
+        private float shockwaveDamageMultiplier = 0.75f;
 
         [SerializeField]
         private Color explosionColor = new Color(1f, 0.35f, 0.1f, 0.65f);
@@ -52,19 +52,19 @@ namespace VampireLike.Combat
         private float chainRicochetRadius = 2.4f;
 
         [SerializeField]
-        private float chainRicochetDamageRatio = 0.65f;
+        private float chainRicochetDamageRatio = 0.45f;
 
         [SerializeField]
-        private float shieldRechargeTime = 16f;
+        private float shieldRechargeTime = 22f;
 
         [SerializeField]
-        private float shieldRechargeReductionPerLevel = 3f;
+        private float shieldRechargeReductionPerLevel = 2f;
 
         [SerializeField]
         private float orbitRadius = 0.95f;
 
         [SerializeField]
-        private float orbitDamageInterval = 0.35f;
+        private float orbitDamageInterval = 0.55f;
 
         [SerializeField]
         private int orbitBladeDamage = 1;
@@ -83,6 +83,7 @@ namespace VampireLike.Combat
         private float shieldTimer;
         private bool shieldReady;
         private PlayerHealth playerHealth;
+        private SpecialUpgradeAura shieldAura;
 
         private void Awake()
         {
@@ -113,6 +114,7 @@ namespace VampireLike.Combat
         private void Update()
         {
             UpdateShieldRecharge();
+            UpdateShieldAura();
         }
 
         public void AddExplosiveShotLevel()
@@ -186,7 +188,9 @@ namespace VampireLike.Combat
 
             shieldReady = false;
             shieldTimer = GetShieldRechargeDuration();
-            CreatePulseEffect(transform.position, 0.8f, new Color(0.4f, 0.85f, 1f, 0.78f), 0.32f);
+            RemoveShieldAura();
+            CreatePulseEffect(transform.position, 0.85f, new Color(0.35f, 0.82f, 1f, 0.9f), 0.28f, SpecialUpgradePulse.GetDiamondSprite(), 180f);
+            CreatePulseEffect(transform.position, 1.05f, new Color(0.45f, 0.95f, 1f, 0.55f), 0.34f, SpecialUpgradePulse.GetCircleSprite(), -120f);
             return true;
         }
 
@@ -226,6 +230,7 @@ namespace VampireLike.Combat
 
             float multiplier = Mathf.Clamp(1f - frostSlowMultiplierPerLevel * frostShotLevel, 0.45f, 1f);
             statusEffects.ApplySlow(multiplier, frostDuration);
+            CreatePulseEffect(enemy.transform.position, 0.42f, new Color(0.55f, 0.9f, 1f, 0.78f), 0.2f, SpecialUpgradePulse.GetDiamondSprite(), 220f);
         }
 
         private void CountShockwaveHit(int projectileDamage, Vector2 hitPosition)
@@ -238,7 +243,8 @@ namespace VampireLike.Combat
             projectileHitCount = 0;
             int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * shockwaveDamageMultiplier));
             ApplyAreaDamage(hitPosition, shockwaveRadius, damage, null);
-            CreatePulseEffect(hitPosition, shockwaveRadius, shockwaveColor, 0.28f);
+            CreatePulseEffect(hitPosition, shockwaveRadius, shockwaveColor, 0.34f, SpecialUpgradePulse.GetCircleSprite(), 120f);
+            CreatePulseEffect(hitPosition, shockwaveRadius * 0.58f, new Color(0.75f, 1f, 1f, 0.32f), 0.24f, SpecialUpgradePulse.GetFilledCircleSprite(), 0f);
         }
 
         private int GetShockwaveHitInterval()
@@ -250,7 +256,8 @@ namespace VampireLike.Combat
         {
             int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * explosionDamageRatioPerLevel * explosiveShotLevel));
             ApplyAreaDamage(killPosition, explosionRadius, damage, killedEnemy);
-            CreatePulseEffect(killPosition, explosionRadius, explosionColor, 0.22f);
+            CreatePulseEffect(killPosition, explosionRadius, explosionColor, 0.26f, SpecialUpgradePulse.GetStarSprite(), 260f);
+            CreatePulseEffect(killPosition, explosionRadius * 0.7f, new Color(1f, 0.85f, 0.18f, 0.45f), 0.2f, SpecialUpgradePulse.GetFilledCircleSprite(), 0f);
         }
 
         private void ApplyAreaDamage(Vector2 center, float radius, int damage, EnemyHealth excludedEnemy)
@@ -284,7 +291,10 @@ namespace VampireLike.Combat
             float chance = Mathf.Clamp01(vampirismChancePerLevel * vampirismLevel);
 
             if (Random.value <= chance)
+            {
                 playerHealth.Heal(vampirismHealAmount);
+                CreatePulseEffect(transform.position, 0.5f, new Color(0.25f, 1f, 0.45f, 0.72f), 0.24f, SpecialUpgradePulse.GetDiamondSprite(), -180f);
+            }
         }
 
         private void TriggerChainRicochet(EnemyHealth firstEnemy, int projectileDamage, Vector2 startPosition)
@@ -301,7 +311,8 @@ namespace VampireLike.Combat
                 if (nextEnemy == null)
                     return;
 
-                CreateLineEffect(currentPosition, nextEnemy.transform.position, new Color(0.65f, 0.9f, 1f, 0.8f), 0.12f);
+                CreateLineEffect(currentPosition, nextEnemy.transform.position, new Color(0.65f, 0.9f, 1f, 0.92f), 0.16f, 0.1f);
+                CreatePulseEffect(nextEnemy.transform.position, 0.36f, new Color(0.7f, 0.95f, 1f, 0.78f), 0.16f, SpecialUpgradePulse.GetStarSprite(), 240f);
                 nextEnemy.TakeDamage(damage);
 
                 currentEnemy = nextEnemy;
@@ -350,7 +361,8 @@ namespace VampireLike.Combat
                 return;
 
             shieldReady = true;
-            CreatePulseEffect(transform.position, 0.65f, new Color(0.35f, 0.75f, 1f, 0.55f), 0.24f);
+            CreatePulseEffect(transform.position, 0.75f, new Color(0.35f, 0.75f, 1f, 0.65f), 0.24f, SpecialUpgradePulse.GetCircleSprite(), 150f);
+            CreateShieldAura();
         }
 
         private float GetShieldRechargeDuration()
@@ -394,22 +406,59 @@ namespace VampireLike.Combat
             return new Vector2(vector.x * cos - vector.y * sin, vector.x * sin + vector.y * cos);
         }
 
+        private void UpdateShieldAura()
+        {
+            if (shieldLevel <= 0 || !shieldReady || GameState.IsGameOver)
+            {
+                RemoveShieldAura();
+                return;
+            }
+
+            if (shieldAura == null)
+                CreateShieldAura();
+        }
+
+        private void CreateShieldAura()
+        {
+            if (shieldAura != null)
+                return;
+
+            GameObject auraObject = new GameObject("Shield Aura");
+            auraObject.transform.position = transform.position;
+            shieldAura = auraObject.AddComponent<SpecialUpgradeAura>();
+            shieldAura.Initialize(transform, SpecialUpgradePulse.GetCircleSprite(), new Color(0.38f, 0.82f, 1f, 0.62f), 1.35f, 120f, 5.5f, 0.08f);
+        }
+
+        private void RemoveShieldAura()
+        {
+            if (shieldAura == null)
+                return;
+
+            Destroy(shieldAura.gameObject);
+            shieldAura = null;
+        }
+
         private static void CreatePulseEffect(Vector2 position, float radius, Color color, float duration)
+        {
+            CreatePulseEffect(position, radius, color, duration, SpecialUpgradePulse.GetCircleSprite(), 0f);
+        }
+
+        private static void CreatePulseEffect(Vector2 position, float radius, Color color, float duration, Sprite sprite, float rotateSpeed)
         {
             GameObject effect = new GameObject("Special Upgrade Pulse");
             effect.transform.position = position;
             effect.transform.localScale = Vector3.one * radius * 2f;
 
             SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
-            renderer.sprite = SpecialUpgradePulse.GetCircleSprite();
+            renderer.sprite = sprite;
             renderer.color = color;
             renderer.sortingOrder = 14;
 
             SpecialUpgradePulse pulse = effect.AddComponent<SpecialUpgradePulse>();
-            pulse.Play(duration);
+            pulse.Play(duration, rotateSpeed);
         }
 
-        private static void CreateLineEffect(Vector2 from, Vector2 to, Color color, float duration)
+        private static void CreateLineEffect(Vector2 from, Vector2 to, Color color, float duration, float width)
         {
             Vector2 middle = (from + to) * 0.5f;
             Vector2 direction = to - from;
@@ -420,7 +469,7 @@ namespace VampireLike.Combat
             GameObject effect = new GameObject("Chain Ricochet Line");
             effect.transform.position = middle;
             effect.transform.right = direction.normalized;
-            effect.transform.localScale = new Vector3(direction.magnitude, 0.08f, 1f);
+            effect.transform.localScale = new Vector3(direction.magnitude, width, 1f);
 
             SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
             renderer.sprite = SpecialUpgradePulse.GetSquareSprite();

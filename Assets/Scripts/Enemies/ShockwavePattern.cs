@@ -82,7 +82,16 @@ namespace VampireLike.Enemies
         private GameObject CreateVisual(Vector2 center)
         {
             if (shockwaveVisualPrefab == null)
-                return null;
+            {
+                GameObject visual = new GameObject("Boss Shockwave Ring");
+                visual.transform.position = center;
+
+                SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
+                renderer.sprite = SpecialUpgradePulse.GetCircleSprite();
+                renderer.color = new Color(0.72f, 0.93f, 1f, 0.7f);
+                renderer.sortingOrder = 13;
+                return visual;
+            }
 
             return Instantiate(shockwaveVisualPrefab, center, Quaternion.identity);
         }

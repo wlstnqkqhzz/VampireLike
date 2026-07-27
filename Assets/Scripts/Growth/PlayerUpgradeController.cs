@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.Menu;
 
 namespace VampireLike.Growth
 {
@@ -24,14 +25,16 @@ namespace VampireLike.Growth
         public readonly struct UpgradeChoice
         {
             // UI가 표시할 강화 데이터와 현재 레벨을 함께 담는 선택지 구조체다.
-            public UpgradeChoice(UpgradeDefinition definition, int currentLevel)
+            public UpgradeChoice(UpgradeDefinition definition, int currentLevel, int maxLevel)
             {
                 Definition = definition;
                 CurrentLevel = currentLevel;
+                MaxLevel = maxLevel;
             }
 
             public UpgradeDefinition Definition { get; }
             public int CurrentLevel { get; }
+            public int MaxLevel { get; }
 
             public string ButtonText
             {
@@ -40,7 +43,7 @@ namespace VampireLike.Growth
                     if (Definition.Unlimited)
                         return $"[{Definition.GradeLabel}] {Definition.DisplayName}\n{Definition.Description}";
 
-                    return $"[{Definition.GradeLabel}] {Definition.DisplayName} Lv.{CurrentLevel + 1}/{Definition.MaxLevel}\n{Definition.Description}";
+                    return $"[{Definition.GradeLabel}] {Definition.DisplayName} Lv.{CurrentLevel + 1}/{MaxLevel}\n{Definition.Description}";
                 }
             }
         }
@@ -76,7 +79,7 @@ namespace VampireLike.Growth
                 int index = Random.Range(0, availableDefinitions.Count);
                 UpgradeDefinition definition = availableDefinitions[index];
                 availableDefinitions.RemoveAt(index);
-                choices.Add(new UpgradeChoice(definition, GetLevel(definition.UpgradeType)));
+                choices.Add(new UpgradeChoice(definition, GetLevel(definition.UpgradeType), GetMaxLevel(definition)));
             }
 
             return choices;
@@ -91,7 +94,7 @@ namespace VampireLike.Growth
             CacheComponents();
 
             if (!definition.Unlimited)
-                upgradeLevels[definition.UpgradeType] = Mathf.Min(GetLevel(definition.UpgradeType) + 1, definition.MaxLevel);
+                upgradeLevels[definition.UpgradeType] = Mathf.Min(GetLevel(definition.UpgradeType) + 1, GetMaxLevel(definition));
 
             switch (definition.UpgradeType)
             {
@@ -196,12 +199,17 @@ namespace VampireLike.Growth
             if (definition.Unlimited)
                 return true;
 
-            return GetLevel(definition.UpgradeType) < definition.MaxLevel;
+            return GetLevel(definition.UpgradeType) < GetMaxLevel(definition);
         }
 
         private int GetLevel(UpgradeType upgradeType)
         {
             return upgradeLevels.TryGetValue(upgradeType, out int level) ? level : 0;
+        }
+
+        private int GetMaxLevel(UpgradeDefinition definition)
+        {
+            return CharacterSelection.SelectedCharacter.GetMaxLevel(definition);
         }
 
         private void CacheComponents()

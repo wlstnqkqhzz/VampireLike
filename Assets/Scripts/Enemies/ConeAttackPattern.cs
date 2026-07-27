@@ -73,12 +73,27 @@ namespace VampireLike.Enemies
 
         private GameObject SpawnEffect(GameObject prefab, Vector2 direction, bool autoDestroy = false)
         {
-            if (prefab == null)
-                return null;
-
             Vector2 effectPosition = (Vector2)transform.position + direction * range * 0.5f;
             effectPosition = ClampEffectToCamera(effectPosition);
-            GameObject effect = Instantiate(prefab, effectPosition, Quaternion.FromToRotation(Vector3.right, direction));
+
+            GameObject effect;
+
+            if (prefab == null)
+            {
+                effect = new GameObject(autoDestroy ? "Boss Cone Impact" : "Boss Cone Warning");
+                effect.transform.position = effectPosition;
+                effect.transform.rotation = Quaternion.FromToRotation(Vector3.right, direction);
+
+                SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
+                renderer.sprite = SpecialUpgradePulse.GetConeSprite();
+                renderer.color = autoDestroy ? new Color(1f, 0.35f, 0.12f, 0.72f) : new Color(1f, 0.15f, 0.08f, 0.34f);
+                renderer.sortingOrder = autoDestroy ? 14 : 12;
+            }
+            else
+            {
+                effect = Instantiate(prefab, effectPosition, Quaternion.FromToRotation(Vector3.right, direction));
+            }
+
             effect.transform.localScale = Vector3.one * range;
 
             if (autoDestroy)

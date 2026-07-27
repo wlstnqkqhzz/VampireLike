@@ -26,7 +26,7 @@ namespace VampireLike.Combat
 
         // 공격 속도 강화가 누적되어도 이 값보다 빠르게는 공격하지 않는다.
         [SerializeField]
-        private float minimumAttackInterval = 0.15f;
+        private float minimumAttackInterval = 0.25f;
 
         // 투사체 피해 강화로 누적되는 공격력 배율이다.
         [SerializeField]
@@ -37,7 +37,7 @@ namespace VampireLike.Combat
 
         // 다중 발사 강화 시 같은 방향으로 이어서 쏘는 탄 사이의 시간 간격이다.
         [SerializeField]
-        private float projectileBurstDelay = 0.08f;
+        private float projectileBurstDelay = 0.12f;
 
         [SerializeField]
         private int projectilePierceCount;

@@ -49,13 +49,13 @@ namespace VampireLike.Enemies
             if (direction.sqrMagnitude <= 0.001f)
                 direction = Vector2.down;
 
-            GameObject warning = SpawnEffect(warningPrefab, direction);
+            GameObject warning = SpawnEffect(warningPrefab, direction, false);
             yield return new WaitForSeconds(prepareTime);
 
             if (warning != null)
                 Destroy(warning);
 
-            GameObject breath = SpawnEffect(breathPrefab, direction);
+            GameObject breath = SpawnEffect(breathPrefab, direction, true);
             Boss.SetState(BossState.Attacking, false);
 
             float elapsedTime = 0f;
@@ -77,13 +77,27 @@ namespace VampireLike.Enemies
                 Destroy(breath);
         }
 
-        private GameObject SpawnEffect(GameObject prefab, Vector2 direction)
+        private GameObject SpawnEffect(GameObject prefab, Vector2 direction, bool isBreath)
         {
-            if (prefab == null)
-                return null;
-
             Vector2 effectPosition = (Vector2)transform.position + direction * range * 0.5f;
-            GameObject effect = Instantiate(prefab, effectPosition, Quaternion.FromToRotation(Vector3.right, direction));
+            GameObject effect;
+
+            if (prefab == null)
+            {
+                effect = new GameObject(isBreath ? "Boss Breath Flame" : "Boss Breath Warning");
+                effect.transform.position = effectPosition;
+                effect.transform.rotation = Quaternion.FromToRotation(Vector3.right, direction);
+
+                SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
+                renderer.sprite = SpecialUpgradePulse.GetConeSprite();
+                renderer.color = isBreath ? new Color(1f, 0.32f, 0.06f, 0.7f) : new Color(1f, 0.75f, 0.14f, 0.34f);
+                renderer.sortingOrder = isBreath ? 14 : 12;
+            }
+            else
+            {
+                effect = Instantiate(prefab, effectPosition, Quaternion.FromToRotation(Vector3.right, direction));
+            }
+
             effect.transform.localScale = Vector3.one * range;
             return effect;
         }

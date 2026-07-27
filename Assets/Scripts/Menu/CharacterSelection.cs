@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using VampireLike.Growth;
+
 namespace VampireLike.Menu
 {
     /// <summary>
@@ -11,24 +14,46 @@ namespace VampireLike.Menu
                 "kael",
                 "카엘",
                 "흑검 수호자",
-                "검은 갑주와 보랏빛 마력을 두른 전사입니다. 느리지만 튼튼하고 한 발의 피해가 강합니다.",
+                "검은 갑주와 보랏빛 마력을 두른 전사입니다. 느리지만 단단하고 한 발의 피해가 강합니다.",
                 0.9f,
                 1.18f,
                 1.35f,
                 0,
                 15,
+                45,
+                new Dictionary<UpgradeType, int>
+                {
+                    { UpgradeType.ProjectileDamage, 6 },
+                    { UpgradeType.AttackInterval, 3 },
+                    { UpgradeType.ProjectileCount, 1 },
+                    { UpgradeType.ProjectilePierce, 3 },
+                    { UpgradeType.MoveSpeed, 3 },
+                    { UpgradeType.MaxHealth, 6 },
+                    { UpgradeType.PickupRadius, 3 }
+                },
                 "PlayerAnimations/KaelProcessed",
                 true),
             new CharacterDefinition(
                 "selene",
                 "셀레네",
                 "월영 쌍검",
-                "달빛처럼 빠르게 파고드는 쌍검 암살자입니다. 빠르게 움직이며 처음부터 두 발을 쏩니다.",
+                "달빛처럼 빠르게 파고드는 쌍검 암살자입니다. 기동성과 연사력이 높지만 한 발 피해와 체력은 낮습니다.",
                 1.18f,
                 0.68f,
                 0.75f,
                 1,
                 0,
+                55,
+                new Dictionary<UpgradeType, int>
+                {
+                    { UpgradeType.ProjectileDamage, 3 },
+                    { UpgradeType.AttackInterval, 6 },
+                    { UpgradeType.ProjectileCount, 4 },
+                    { UpgradeType.ProjectilePierce, 2 },
+                    { UpgradeType.MoveSpeed, 6 },
+                    { UpgradeType.MaxHealth, 3 },
+                    { UpgradeType.PickupRadius, 5 }
+                },
                 "PlayerAnimations/SeleneProcessed",
                 false)
         };

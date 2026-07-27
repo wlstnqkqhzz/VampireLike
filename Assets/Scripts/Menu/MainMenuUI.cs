@@ -8,8 +8,8 @@ namespace VampireLike.Menu
     /// </summary>
     public class MainMenuUI : MonoBehaviour
     {
-        private const float PanelWidth = 820f;
-        private const float PanelHeight = 600f;
+        private const float PanelWidth = 860f;
+        private const float PanelHeight = 640f;
 
         private GUIStyle titleStyle;
         private GUIStyle subtitleStyle;
@@ -17,6 +17,7 @@ namespace VampireLike.Menu
         private GUIStyle selectedCardStyle;
         private GUIStyle labelStyle;
         private GUIStyle descriptionStyle;
+        private GUIStyle statStyle;
         private GUIStyle buttonStyle;
         private int selectedIndex;
         private bool hasStarted;
@@ -95,15 +96,15 @@ namespace VampireLike.Menu
                 PanelHeight);
 
             GUI.Box(panelRect, GUIContent.none, cardStyle);
-            GUI.Label(new Rect(panelRect.x, panelRect.y + 34f, panelRect.width, 54f), "VampireLike", titleStyle);
-            GUI.Label(new Rect(panelRect.x, panelRect.y + 88f, panelRect.width, 32f), "캐릭터를 선택하고 생존을 시작하세요", subtitleStyle);
+            GUI.Label(new Rect(panelRect.x, panelRect.y + 28f, panelRect.width, 52f), "VampireLike", titleStyle);
+            GUI.Label(new Rect(panelRect.x, panelRect.y + 78f, panelRect.width, 30f), "캐릭터를 선택하고 생존을 시작하세요", subtitleStyle);
 
             CharacterDefinition[] characters = CharacterSelection.Characters;
-            float cardWidth = 330f;
-            float cardHeight = 300f;
-            float gap = 44f;
+            float cardWidth = 340f;
+            float cardHeight = 360f;
+            float gap = 48f;
             float startX = panelRect.center.x - cardWidth - gap * 0.5f;
-            float cardY = panelRect.y + 146f;
+            float cardY = panelRect.y + 132f;
 
             for (int i = 0; i < characters.Length; i++)
             {
@@ -112,7 +113,7 @@ namespace VampireLike.Menu
             }
 
             GUI.enabled = true;
-            Rect startButtonRect = new Rect(panelRect.center.x - 140f, panelRect.yMax - 72f, 280f, 48f);
+            Rect startButtonRect = new Rect(panelRect.center.x - 150f, panelRect.yMax - 72f, 300f, 48f);
 
             if (GUI.Button(startButtonRect, "게임 시작", buttonStyle))
                 StartGame();
@@ -127,9 +128,9 @@ namespace VampireLike.Menu
 
             GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 22f, cardRect.width - 36f, 34f), character.DisplayName, labelStyle);
             GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 58f, cardRect.width - 36f, 26f), character.Role, subtitleStyle);
-            GUI.Label(new Rect(cardRect.x + 26f, cardRect.y + 98f, cardRect.width - 52f, 92f), character.Description, descriptionStyle);
+            GUI.Label(new Rect(cardRect.x + 26f, cardRect.y + 96f, cardRect.width - 52f, 110f), character.Description, descriptionStyle);
 
-            string statText = $"이동 x{character.MoveSpeedMultiplier:0.00}\n공격 간격 x{character.AttackIntervalMultiplier:0.00}\n투사체 피해 x{character.ProjectileDamageMultiplier:0.00}";
+            string statText = $"이동 x{character.MoveSpeedMultiplier:0.00}\n공격 간격 x{character.AttackIntervalMultiplier:0.00}\n투사체 피해 x{character.ProjectileDamageMultiplier:0.00}\n최대 레벨 {character.MaxPlayerLevel}";
 
             if (character.BonusProjectileCount > 0)
                 statText += $"\n투사체 +{character.BonusProjectileCount}";
@@ -137,7 +138,7 @@ namespace VampireLike.Menu
             if (character.BonusMaxHealth > 0)
                 statText += $"\n최대 체력 +{character.BonusMaxHealth}";
 
-            GUI.Label(new Rect(cardRect.x + 26f, cardRect.y + 204f, cardRect.width - 52f, 76f), statText, descriptionStyle);
+            GUI.Label(new Rect(cardRect.x + 26f, cardRect.y + 222f, cardRect.width - 52f, 112f), statText, statStyle);
         }
 
         private void EnsureStyles()
@@ -156,7 +157,7 @@ namespace VampireLike.Menu
             subtitleStyle = new GUIStyle(GUI.skin.label)
             {
                 alignment = TextAnchor.MiddleCenter,
-                fontSize = 18,
+                fontSize = 17,
                 fontStyle = FontStyle.Bold
             };
             subtitleStyle.normal.textColor = new Color(0.82f, 0.9f, 0.78f, 1f);
@@ -176,6 +177,11 @@ namespace VampireLike.Menu
                 wordWrap = true
             };
             descriptionStyle.normal.textColor = new Color(0.9f, 0.95f, 0.86f, 1f);
+
+            statStyle = new GUIStyle(descriptionStyle)
+            {
+                fontSize = 14
+            };
 
             cardStyle = new GUIStyle(GUI.skin.box);
             cardStyle.normal.background = MakeTexture(new Color(0.05f, 0.07f, 0.06f, 0.94f));

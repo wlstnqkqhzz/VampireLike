@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeType: 1
   displayName: 신속한 공격
-  description: 공격 간격 12% 감소
+  description: 공격 간격 7% 감소
   maxLevel: 5
-  multiplier: 0.88
+  multiplier: 0.93
   flatAmount: 0
   unlimited: 0

@@ -1,5 +1,6 @@
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.Growth;
 
 namespace VampireLike.Menu
 {
@@ -22,6 +23,7 @@ namespace VampireLike.Menu
             global::PlayerSpriteAnimator spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
             PlayerAutoAttack autoAttack = GetComponent<PlayerAutoAttack>();
             PlayerHealth playerHealth = GetComponent<PlayerHealth>();
+            PlayerExperience playerExperience = GetComponent<PlayerExperience>();
 
             if (spriteAnimator == null)
                 spriteAnimator = gameObject.AddComponent<global::PlayerSpriteAnimator>();
@@ -44,6 +46,9 @@ namespace VampireLike.Menu
 
             if (playerHealth != null && character.BonusMaxHealth > 0)
                 playerHealth.IncreaseMaxHealth(character.BonusMaxHealth);
+
+            if (playerExperience != null)
+                playerExperience.SetMaxLevel(character.MaxPlayerLevel);
         }
     }
 }
