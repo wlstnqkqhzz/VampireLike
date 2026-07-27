@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace VampireLike.Combat
@@ -34,14 +35,16 @@ namespace VampireLike.Combat
         [SerializeField]
         private int projectileCount = 1;
 
+        // 다중 발사 강화 시 같은 방향으로 이어서 쏘는 탄 사이의 시간 간격이다.
         [SerializeField]
-        private float projectileSpreadAngle = 12f;
+        private float projectileBurstDelay = 0.08f;
 
         [SerializeField]
         private int projectilePierceCount;
 
         private float attackTimer;
         private bool isStopped;
+        private Coroutine burstRoutine;
         private global::PlayerSpriteAnimator spriteAnimator;
         private global::PlayerController playerController;
 
@@ -56,7 +59,7 @@ namespace VampireLike.Combat
 
         private void Update()
         {
-            if (isStopped || GameState.IsGameOver || projectilePrefab == null)
+            if (isStopped || GameState.IsGameOver || projectilePrefab == null || burstRoutine != null)
                 return;
 
             attackTimer += Time.deltaTime;
@@ -70,7 +73,7 @@ namespace VampireLike.Combat
                 return;
 
             attackTimer = 0f;
-            FireAt(target.transform);
+            burstRoutine = StartCoroutine(FireBurstAt(target.transform));
         }
 
         private void OnValidate()
@@ -80,8 +83,17 @@ namespace VampireLike.Combat
             attackRange = Mathf.Max(0f, attackRange);
             projectileDamageMultiplier = Mathf.Max(0.1f, projectileDamageMultiplier);
             projectileCount = Mathf.Max(1, projectileCount);
-            projectileSpreadAngle = Mathf.Max(0f, projectileSpreadAngle);
+            projectileBurstDelay = Mathf.Max(0f, projectileBurstDelay);
             projectilePierceCount = Mathf.Max(0, projectilePierceCount);
+        }
+
+        private void OnDisable()
+        {
+            if (burstRoutine == null)
+                return;
+
+            StopCoroutine(burstRoutine);
+            burstRoutine = null;
         }
 
         public void StopAttacking()
@@ -151,13 +163,16 @@ namespace VampireLike.Combat
             return closestEnemy;
         }
 
-        private void FireAt(Transform target)
+        private IEnumerator FireBurstAt(Transform target)
         {
             // 발사 시점의 방향을 기준으로 직선 투사체를 만든다. 유도탄은 아니다.
             Vector2 direction = ((Vector2)target.position - (Vector2)firePoint.position).normalized;
 
             if (direction.sqrMagnitude <= 0f)
-                return;
+            {
+                burstRoutine = null;
+                yield break;
+            }
 
             if (spriteAnimator == null)
                 spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
@@ -166,23 +181,16 @@ namespace VampireLike.Combat
                 spriteAnimator.PlayAttack();
 
             int shotCount = Mathf.Max(1, projectileCount);
-            float firstAngle = shotCount == 1 ? 0f : -projectileSpreadAngle * (shotCount - 1) * 0.5f;
-
             for (int i = 0; i < shotCount; i++)
             {
-                float angle = firstAngle + projectileSpreadAngle * i;
-                Vector2 shotDirection = Rotate(direction, angle);
                 ProjectileController projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-                projectile.Launch(shotDirection, projectileDamageMultiplier, projectilePierceCount);
-            }
-        }
+                projectile.Launch(direction, projectileDamageMultiplier, projectilePierceCount);
 
-        private static Vector2 Rotate(Vector2 vector, float degrees)
-        {
-            float radians = degrees * Mathf.Deg2Rad;
-            float sin = Mathf.Sin(radians);
-            float cos = Mathf.Cos(radians);
-            return new Vector2(vector.x * cos - vector.y * sin, vector.x * sin + vector.y * cos);
+                if (i < shotCount - 1 && projectileBurstDelay > 0f)
+                    yield return new WaitForSeconds(projectileBurstDelay);
+            }
+
+            burstRoutine = null;
         }
     }
 }
