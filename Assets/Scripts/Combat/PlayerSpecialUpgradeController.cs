@@ -72,6 +72,27 @@ namespace VampireLike.Combat
         private int orbitBladeDamage = 1;
 
         [SerializeField]
+        private float eclipseAuraBaseRadius = 1.25f;
+
+        [SerializeField]
+        private float eclipseAuraRadiusPerLevel = 0.35f;
+
+        [SerializeField]
+        private int eclipseAuraBaseDamage = 1;
+
+        [SerializeField]
+        private int eclipseAuraDamagePerLevel = 1;
+
+        [SerializeField]
+        private float eclipseAuraDamageInterval = 1f;
+
+        [SerializeField]
+        private float eclipseAuraIntervalReductionPerLevel = 0.12f;
+
+        [SerializeField]
+        private Color eclipseAuraColor = new Color(0.38f, 0.12f, 0.72f, 0.5f);
+
+        [SerializeField]
         private ShieldVFXController shieldVfxPrefab;
 
         private readonly Collider2D[] areaResults = new Collider2D[64];
@@ -84,12 +105,15 @@ namespace VampireLike.Combat
         private int shieldLevel;
         private int orbitingBladeLevel;
         private int chainRicochetLevel;
+        private int eclipseAuraLevel;
         private int projectileHitCount;
         private float shieldTimer;
+        private float eclipseAuraTimer;
         private bool shieldReady;
         private PlayerHealth playerHealth;
         private PlayerEffectAnchors effectAnchors;
         private ShieldVFXController shieldVfx;
+        private EclipseAuraVFX eclipseAuraVfx;
 
         private void Awake()
         {
@@ -119,12 +143,19 @@ namespace VampireLike.Combat
             orbitRadius = Mathf.Max(0.2f, orbitRadius);
             orbitDamageInterval = Mathf.Max(0.05f, orbitDamageInterval);
             orbitBladeDamage = Mathf.Max(1, orbitBladeDamage);
+            eclipseAuraBaseRadius = Mathf.Max(0.3f, eclipseAuraBaseRadius);
+            eclipseAuraRadiusPerLevel = Mathf.Max(0f, eclipseAuraRadiusPerLevel);
+            eclipseAuraBaseDamage = Mathf.Max(1, eclipseAuraBaseDamage);
+            eclipseAuraDamagePerLevel = Mathf.Max(0, eclipseAuraDamagePerLevel);
+            eclipseAuraDamageInterval = Mathf.Max(0.2f, eclipseAuraDamageInterval);
+            eclipseAuraIntervalReductionPerLevel = Mathf.Max(0f, eclipseAuraIntervalReductionPerLevel);
         }
 
         private void Update()
         {
             UpdateShieldRecharge();
             UpdateShieldAura();
+            UpdateEclipseAura();
         }
 
         public void AddExplosiveShotLevel()
@@ -169,6 +200,13 @@ namespace VampireLike.Combat
         public void AddChainRicochetLevel()
         {
             chainRicochetLevel++;
+        }
+
+        public void AddEclipseAuraLevel()
+        {
+            eclipseAuraLevel++;
+            eclipseAuraTimer = 0f;
+            RefreshEclipseAuraVfx();
         }
 
         public Vector2[] GetProjectileDirections(Vector2 baseDirection)
@@ -387,6 +425,60 @@ namespace VampireLike.Combat
             return Mathf.Max(5f, shieldRechargeTime - shieldRechargeReductionPerLevel * Mathf.Max(0, shieldLevel - 1));
         }
 
+        private void UpdateEclipseAura()
+        {
+            if (eclipseAuraLevel <= 0 || GameState.IsGameOver)
+            {
+                RemoveEclipseAuraVfx();
+                return;
+            }
+
+            RefreshEclipseAuraVfx();
+
+            if (Time.timeScale <= 0f)
+                return;
+
+            eclipseAuraTimer -= Time.deltaTime;
+
+            if (eclipseAuraTimer > 0f)
+                return;
+
+            eclipseAuraTimer = GetEclipseAuraDamageInterval();
+            Vector2 center = GetEffectCenterPosition();
+            ApplyAreaDamage(center, GetEclipseAuraRadius(), GetEclipseAuraDamage(), null);
+
+            if (eclipseAuraVfx != null)
+                eclipseAuraVfx.PlayDamagePulse();
+        }
+
+        private float GetEclipseAuraRadius()
+        {
+            return eclipseAuraBaseRadius + eclipseAuraRadiusPerLevel * Mathf.Max(0, eclipseAuraLevel - 1);
+        }
+
+        private int GetEclipseAuraDamage()
+        {
+            return eclipseAuraBaseDamage + eclipseAuraDamagePerLevel * Mathf.Max(0, eclipseAuraLevel - 1);
+        }
+
+        private float GetEclipseAuraDamageInterval()
+        {
+            return Mathf.Max(0.4f, eclipseAuraDamageInterval - eclipseAuraIntervalReductionPerLevel * Mathf.Max(0, eclipseAuraLevel - 1));
+        }
+
+        private void RefreshEclipseAuraVfx()
+        {
+            if (eclipseAuraVfx == null)
+            {
+                GameObject auraObject = new GameObject("Eclipse Aura VFX");
+                eclipseAuraVfx = auraObject.AddComponent<EclipseAuraVFX>();
+                eclipseAuraVfx.Initialize(GetEffectCenter(), GetEclipseAuraRadius(), eclipseAuraColor);
+                return;
+            }
+
+            eclipseAuraVfx.SetRadius(GetEclipseAuraRadius());
+        }
+
         private void RefreshOrbitingBlades()
         {
             int desiredCount = Mathf.Clamp(orbitingBladeLevel, 1, 3);
@@ -499,6 +591,15 @@ namespace VampireLike.Combat
             GameSfx.Play(SfxType.ShieldBreak);
             shieldVfx.PlayBreak();
             shieldVfx = null;
+        }
+
+        private void RemoveEclipseAuraVfx()
+        {
+            if (eclipseAuraVfx == null)
+                return;
+
+            eclipseAuraVfx.StopAura();
+            eclipseAuraVfx = null;
         }
 
         private void BreakShieldVfx(Vector2 hitDirection)

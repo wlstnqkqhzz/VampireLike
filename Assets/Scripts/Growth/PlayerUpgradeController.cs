@@ -162,6 +162,10 @@ namespace VampireLike.Growth
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddChainRicochetLevel();
                     break;
+                case UpgradeType.EclipseAura:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddEclipseAuraLevel();
+                    break;
             }
 
             GameSessionStats.RecordUpgrade(definition.DisplayName);
