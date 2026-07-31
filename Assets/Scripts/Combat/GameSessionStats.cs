@@ -5,7 +5,7 @@ using UnityEngine;
 namespace VampireLike.Combat
 {
     /// <summary>
-    /// Tracks simple run result values that are shown on the game over screen.
+    /// 게임 한 판의 결과 화면에 표시할 생존 기록을 모읍니다.
     /// </summary>
     public static class GameSessionStats
     {
@@ -66,20 +66,34 @@ namespace VampireLike.Combat
 
         public static string GetUpgradeSummary()
         {
+            return GetUpgradeSummary(0, " / ");
+        }
+
+        public static string GetUpgradeSummary(int maxItems, string separator)
+        {
             if (selectedUpgradeCounts.Count == 0)
                 return "선택한 강화 없음";
 
             StringBuilder builder = new StringBuilder();
+            int writtenCount = 0;
 
             foreach (KeyValuePair<string, int> pair in selectedUpgradeCounts)
             {
+                if (maxItems > 0 && writtenCount >= maxItems)
+                {
+                    builder.Append(separator).Append($"외 {selectedUpgradeCounts.Count - writtenCount}개");
+                    break;
+                }
+
                 if (builder.Length > 0)
-                    builder.Append(" / ");
+                    builder.Append(separator);
 
                 builder.Append(pair.Key);
 
                 if (pair.Value > 1)
                     builder.Append(" x").Append(pair.Value);
+
+                writtenCount++;
             }
 
             return builder.ToString();

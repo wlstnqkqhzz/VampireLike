@@ -5,11 +5,12 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VampireLike.Enemies;
 using VampireLike.Growth;
+using VampireLike.Menu;
 
 namespace VampireLike.Combat
 {
     /// <summary>
-    /// Shows the game over result panel when the player dies.
+    /// 플레이어 사망 후 생존 기록과 성장 결과를 보여주는 게임 오버 결과 화면입니다.
     /// </summary>
     public class GameOverUI : MonoBehaviour
     {
@@ -17,12 +18,12 @@ namespace VampireLike.Combat
         private const string RootName = "Game Over";
         private const string PanelName = "Game Over Panel";
         private const string TitleName = "Game Over Title";
-        private const string SurvivalTimeName = "Survival Time";
-        private const string WaveResultName = "Wave Result";
-        private const string LevelResultName = "Level Result";
-        private const string ExperienceResultName = "Experience Result";
-        private const string KillCountName = "Kill Count";
-        private const string BossKillCountName = "Boss Kill Count";
+        private const string SubtitleName = "Game Over Subtitle";
+        private const string CharacterName = "Character Result";
+        private const string MainStatsName = "Main Stats";
+        private const string CombatStatsName = "Combat Stats";
+        private const string GrowthStatsName = "Growth Stats";
+        private const string UpgradeHeaderName = "Upgrade Header";
         private const string UpgradeResultName = "Upgrade Result";
 
         [SerializeField]
@@ -36,12 +37,12 @@ namespace VampireLike.Combat
 
         private RectTransform gameOverPanel;
         private Text titleText;
-        private Text survivalTimeText;
-        private Text waveText;
-        private Text levelText;
-        private Text experienceText;
-        private Text killCountText;
-        private Text bossKillCountText;
+        private Text subtitleText;
+        private Text characterText;
+        private Text mainStatsText;
+        private Text combatStatsText;
+        private Text growthStatsText;
+        private Text upgradeHeaderText;
         private Text upgradeText;
         private bool isShowing;
 
@@ -126,7 +127,7 @@ namespace VampireLike.Combat
             StretchToParent(rootRect);
 
             Image backdrop = root.AddComponent<Image>();
-            backdrop.color = new Color(0f, 0f, 0f, 0.62f);
+            backdrop.color = new Color(0f, 0f, 0f, 0.72f);
 
             GameObject panel = new GameObject(PanelName);
             panel.transform.SetParent(root.transform, false);
@@ -134,11 +135,11 @@ namespace VampireLike.Combat
             CenterPanel(gameOverPanel);
 
             Image panelImage = panel.AddComponent<Image>();
-            panelImage.color = new Color(0.08f, 0.08f, 0.09f, 0.96f);
+            panelImage.color = new Color(0.045f, 0.052f, 0.055f, 0.97f);
 
             EnsureResultLabels();
-            restartButton = CreateButton(panel.transform, "다시 시작", new Vector2(0f, -158f));
-            quitButton = CreateButton(panel.transform, "게임 종료", new Vector2(0f, -216f));
+            restartButton = CreateButton(panel.transform, "다시 시작", new Vector2(-144f, -252f));
+            quitButton = CreateButton(panel.transform, "게임 종료", new Vector2(144f, -252f));
             BindButtons();
         }
 
@@ -197,12 +198,12 @@ namespace VampireLike.Combat
 
             gameOverPanel = panelTransform.GetComponent<RectTransform>();
             titleText = panelTransform.Find(TitleName)?.GetComponent<Text>();
-            survivalTimeText = panelTransform.Find(SurvivalTimeName)?.GetComponent<Text>();
-            waveText = panelTransform.Find(WaveResultName)?.GetComponent<Text>();
-            levelText = panelTransform.Find(LevelResultName)?.GetComponent<Text>();
-            experienceText = panelTransform.Find(ExperienceResultName)?.GetComponent<Text>();
-            killCountText = panelTransform.Find(KillCountName)?.GetComponent<Text>();
-            bossKillCountText = panelTransform.Find(BossKillCountName)?.GetComponent<Text>();
+            subtitleText = panelTransform.Find(SubtitleName)?.GetComponent<Text>();
+            characterText = panelTransform.Find(CharacterName)?.GetComponent<Text>();
+            mainStatsText = panelTransform.Find(MainStatsName)?.GetComponent<Text>();
+            combatStatsText = panelTransform.Find(CombatStatsName)?.GetComponent<Text>();
+            growthStatsText = panelTransform.Find(GrowthStatsName)?.GetComponent<Text>();
+            upgradeHeaderText = panelTransform.Find(UpgradeHeaderName)?.GetComponent<Text>();
             upgradeText = panelTransform.Find(UpgradeResultName)?.GetComponent<Text>();
         }
 
@@ -212,28 +213,29 @@ namespace VampireLike.Combat
                 return;
 
             if (titleText == null)
-                titleText = CreateLabel(gameOverPanel, "게임 오버", new Vector2(0f, 220f), 36, Color.white, new Vector2(420f, 56f), TitleName);
+                titleText = CreateLabel(gameOverPanel, "게임 오버", new Vector2(0f, 250f), 42, Color.white, new Vector2(560f, 54f), TitleName, FontStyle.Bold);
 
-            if (survivalTimeText == null)
-                survivalTimeText = CreateLabel(gameOverPanel, "생존 시간 00:00", new Vector2(0f, 164f), 20, new Color(0.9f, 0.95f, 0.88f, 1f), new Vector2(420f, 28f), SurvivalTimeName);
+            if (subtitleText == null)
+                subtitleText = CreateLabel(gameOverPanel, "이번 생존 기록", new Vector2(0f, 210f), 18, new Color(0.76f, 0.86f, 0.76f, 1f), new Vector2(560f, 28f), SubtitleName, FontStyle.Bold);
 
-            if (waveText == null)
-                waveText = CreateLabel(gameOverPanel, "도달 웨이브 -", new Vector2(0f, 124f), 18, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(420f, 26f), WaveResultName);
+            if (characterText == null)
+                characterText = CreateLabel(gameOverPanel, "캐릭터 -", new Vector2(0f, 166f), 22, new Color(0.92f, 0.96f, 0.9f, 1f), new Vector2(600f, 34f), CharacterName, FontStyle.Bold);
 
-            if (levelText == null)
-                levelText = CreateLabel(gameOverPanel, "레벨 -", new Vector2(0f, 92f), 18, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(420f, 26f), LevelResultName);
+            if (mainStatsText == null)
+                mainStatsText = CreateLabel(gameOverPanel, string.Empty, new Vector2(-210f, 78f), 18, new Color(0.88f, 0.94f, 0.86f, 1f), new Vector2(260f, 120f), MainStatsName, FontStyle.Bold);
 
-            if (experienceText == null)
-                experienceText = CreateLabel(gameOverPanel, "총 경험치 0", new Vector2(0f, 60f), 18, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(420f, 26f), ExperienceResultName);
+            if (combatStatsText == null)
+                combatStatsText = CreateLabel(gameOverPanel, string.Empty, new Vector2(0f, 78f), 18, new Color(0.88f, 0.94f, 0.86f, 1f), new Vector2(260f, 120f), CombatStatsName, FontStyle.Bold);
 
-            if (killCountText == null)
-                killCountText = CreateLabel(gameOverPanel, "일반 적 처치 0", new Vector2(0f, 28f), 18, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(420f, 26f), KillCountName);
+            if (growthStatsText == null)
+                growthStatsText = CreateLabel(gameOverPanel, string.Empty, new Vector2(210f, 78f), 18, new Color(0.88f, 0.94f, 0.86f, 1f), new Vector2(260f, 120f), GrowthStatsName, FontStyle.Bold);
 
-            if (bossKillCountText == null)
-                bossKillCountText = CreateLabel(gameOverPanel, "보스 처치 0", new Vector2(0f, -4f), 18, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(420f, 26f), BossKillCountName);
+            if (upgradeHeaderText == null)
+                upgradeHeaderText = CreateLabel(gameOverPanel, "선택한 강화", new Vector2(0f, -18f), 20, new Color(0.96f, 0.9f, 0.64f, 1f), new Vector2(560f, 30f), UpgradeHeaderName, FontStyle.Bold);
 
             if (upgradeText == null)
-                upgradeText = CreateLabel(gameOverPanel, "선택한 강화 없음", new Vector2(0f, -66f), 16, new Color(0.78f, 0.86f, 0.74f, 1f), new Vector2(420f, 72f), UpgradeResultName);
+                upgradeText = CreateLabel(gameOverPanel, "선택한 강화 없음", new Vector2(0f, -108f), 16, new Color(0.8f, 0.88f, 0.76f, 1f), new Vector2(600f, 136f), UpgradeResultName, FontStyle.Normal);
+
             PositionResultObjects();
         }
 
@@ -258,30 +260,39 @@ namespace VampireLike.Combat
         {
             PlayerExperience playerExperience = GetComponent<PlayerExperience>();
             EnemySpawner enemySpawner = FindFirstObjectByType<EnemySpawner>();
+            CharacterDefinition character = CharacterSelection.SelectedCharacter;
 
             if (titleText != null)
                 titleText.text = "게임 오버";
 
-            if (survivalTimeText != null)
-                survivalTimeText.text = $"생존 시간 {FormatTime(GameSessionStats.SurvivalTime)}";
+            if (subtitleText != null)
+                subtitleText.text = "이번 생존 기록";
 
-            if (waveText != null)
-                waveText.text = enemySpawner == null ? "도달 웨이브 -" : $"도달 웨이브 {enemySpawner.CurrentWave}";
+            if (characterText != null)
+                characterText.text = $"{character.DisplayName}  |  {character.Role}";
 
-            if (levelText != null)
-                levelText.text = playerExperience == null ? "레벨 -" : $"레벨 {playerExperience.CurrentLevel}";
+            if (mainStatsText != null)
+            {
+                string wave = enemySpawner == null ? "-" : enemySpawner.CurrentWave.ToString();
+                mainStatsText.text = $"생존 시간\n{FormatTime(GameSessionStats.SurvivalTime)}\n\n도달 웨이브\n{wave}";
+            }
 
-            if (experienceText != null)
-                experienceText.text = $"총 경험치 {GameSessionStats.TotalExperienceGained}";
+            if (combatStatsText != null)
+            {
+                combatStatsText.text = $"총 처치\n{GameSessionStats.KillCount}\n\n일반 / 보스\n{GameSessionStats.EnemyKillCount} / {GameSessionStats.BossKillCount}";
+            }
 
-            if (killCountText != null)
-                killCountText.text = $"일반 적 처치 {GameSessionStats.EnemyKillCount}";
+            if (growthStatsText != null)
+            {
+                string level = playerExperience == null ? "-" : playerExperience.CurrentLevel.ToString();
+                growthStatsText.text = $"도달 레벨\n{level}\n\n획득 경험치\n{GameSessionStats.TotalExperienceGained}";
+            }
 
-            if (bossKillCountText != null)
-                bossKillCountText.text = $"보스 처치 {GameSessionStats.BossKillCount}";
+            if (upgradeHeaderText != null)
+                upgradeHeaderText.text = "선택한 강화";
 
             if (upgradeText != null)
-                upgradeText.text = $"선택 강화\n{GameSessionStats.GetUpgradeSummary()}";
+                upgradeText.text = GameSessionStats.GetUpgradeSummary(6, "\n");
         }
 
         private static string FormatTime(float seconds)
@@ -307,26 +318,26 @@ namespace VampireLike.Combat
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(540f, 560f);
+            rectTransform.sizeDelta = new Vector2(720f, 620f);
             rectTransform.anchoredPosition = Vector2.zero;
         }
 
         private void PositionResultObjects()
         {
-            SetLabelPosition(titleText, new Vector2(0f, 220f), new Vector2(420f, 56f));
-            SetLabelPosition(survivalTimeText, new Vector2(0f, 164f), new Vector2(420f, 28f));
-            SetLabelPosition(waveText, new Vector2(0f, 124f), new Vector2(420f, 26f));
-            SetLabelPosition(levelText, new Vector2(0f, 92f), new Vector2(420f, 26f));
-            SetLabelPosition(experienceText, new Vector2(0f, 60f), new Vector2(420f, 26f));
-            SetLabelPosition(killCountText, new Vector2(0f, 28f), new Vector2(420f, 26f));
-            SetLabelPosition(bossKillCountText, new Vector2(0f, -4f), new Vector2(420f, 26f));
-            SetLabelPosition(upgradeText, new Vector2(0f, -66f), new Vector2(420f, 72f));
+            SetLabelPosition(titleText, new Vector2(0f, 250f), new Vector2(560f, 54f));
+            SetLabelPosition(subtitleText, new Vector2(0f, 210f), new Vector2(560f, 28f));
+            SetLabelPosition(characterText, new Vector2(0f, 166f), new Vector2(600f, 34f));
+            SetLabelPosition(mainStatsText, new Vector2(-210f, 78f), new Vector2(260f, 120f));
+            SetLabelPosition(combatStatsText, new Vector2(0f, 78f), new Vector2(260f, 120f));
+            SetLabelPosition(growthStatsText, new Vector2(210f, 78f), new Vector2(260f, 120f));
+            SetLabelPosition(upgradeHeaderText, new Vector2(0f, -18f), new Vector2(560f, 30f));
+            SetLabelPosition(upgradeText, new Vector2(0f, -108f), new Vector2(600f, 136f));
 
             if (restartButton != null)
-                SetRectPosition(restartButton.GetComponent<RectTransform>(), new Vector2(0f, -158f), new Vector2(250f, 44f));
+                SetRectPosition(restartButton.GetComponent<RectTransform>(), new Vector2(-144f, -252f), new Vector2(240f, 46f));
 
             if (quitButton != null)
-                SetRectPosition(quitButton.GetComponent<RectTransform>(), new Vector2(0f, -216f), new Vector2(250f, 44f));
+                SetRectPosition(quitButton.GetComponent<RectTransform>(), new Vector2(144f, -252f), new Vector2(240f, 46f));
         }
 
         private static void SetLabelPosition(Text label, Vector2 position, Vector2 size)
@@ -349,9 +360,9 @@ namespace VampireLike.Combat
             rectTransform.anchoredPosition = position;
         }
 
-        private static Text CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color, Vector2 size, string objectName = null)
+        private static Text CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color, Vector2 size, string objectName, FontStyle fontStyle)
         {
-            GameObject labelObject = new GameObject(string.IsNullOrEmpty(objectName) ? text : objectName);
+            GameObject labelObject = new GameObject(objectName);
             labelObject.transform.SetParent(parent, false);
 
             RectTransform rectTransform = labelObject.AddComponent<RectTransform>();
@@ -361,9 +372,12 @@ namespace VampireLike.Combat
             label.text = text;
             label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             label.fontSize = fontSize;
+            label.fontStyle = fontStyle;
             label.alignment = TextAnchor.MiddleCenter;
             label.color = color;
             label.raycastTarget = false;
+            label.horizontalOverflow = HorizontalWrapMode.Wrap;
+            label.verticalOverflow = VerticalWrapMode.Truncate;
             return label;
         }
 
@@ -373,13 +387,13 @@ namespace VampireLike.Combat
             buttonObject.transform.SetParent(parent, false);
 
             RectTransform rectTransform = buttonObject.AddComponent<RectTransform>();
-            SetRectPosition(rectTransform, position, new Vector2(250f, 44f));
+            SetRectPosition(rectTransform, position, new Vector2(240f, 46f));
 
             Image image = buttonObject.AddComponent<Image>();
-            image.color = new Color(0.82f, 0.9f, 0.76f, 1f);
+            image.color = new Color(0.78f, 0.88f, 0.7f, 1f);
 
             Button button = buttonObject.AddComponent<Button>();
-            CreateLabel(buttonObject.transform, text, Vector2.zero, 18, new Color(0.06f, 0.09f, 0.06f, 1f), new Vector2(230f, 40f));
+            CreateLabel(buttonObject.transform, text, Vector2.zero, 18, new Color(0.04f, 0.07f, 0.04f, 1f), new Vector2(220f, 42f), $"{text} Label", FontStyle.Bold);
             return button;
         }
     }
