@@ -30,6 +30,7 @@ namespace VampireLike.Combat
         private float lifeTimer;
         private int effectiveDamage;
         private int remainingPierceCount;
+        private int remainingReflectCount;
         private PlayerSpecialUpgradeController specialUpgradeController;
         private CombatVFXKind vfxKind = CombatVFXKind.ArcaneImpact;
         private bool isDestroying;
@@ -94,6 +95,9 @@ namespace VampireLike.Combat
                 return;
             }
 
+            if (TryReflectProjectile())
+                return;
+
             DestroyProjectile(false, 0f);
         }
 
@@ -127,8 +131,24 @@ namespace VampireLike.Combat
             transform.right = moveDirection;
             effectiveDamage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, damageMultiplier)));
             remainingPierceCount = Mathf.Max(0, pierceCount);
+            remainingReflectCount = specialUpgradeController == null ? 0 : specialUpgradeController.GetProjectileReflectCount();
             hitEnemies.Clear();
             CombatVFX.AttachTrail(gameObject, vfxKind, 0.08f, 0.16f);
+        }
+
+        private bool TryReflectProjectile()
+        {
+            if (remainingReflectCount <= 0 || specialUpgradeController == null)
+                return false;
+
+            if (!specialUpgradeController.TryGetProjectileReflectDirection(transform.position, hitEnemies, out Vector2 reflectedDirection))
+                return false;
+
+            remainingReflectCount--;
+            moveDirection = reflectedDirection.normalized;
+            transform.right = moveDirection;
+            lifeTimer = Mathf.Min(lifeTimer, lifeTime * 0.45f);
+            return true;
         }
 
         public void SetVisual(Sprite sprite, float visualScale, float colliderRadius)

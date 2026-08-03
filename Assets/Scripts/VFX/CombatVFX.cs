@@ -10,6 +10,7 @@ namespace VampireLike.VFX
         Frost,
         Shockwave,
         Ricochet,
+        ChainLightning,
         Vampirism,
         ConeWarning,
         ConeImpact,
@@ -194,6 +195,8 @@ namespace VampireLike.VFX
                     return new Color(0.78f, 0.95f, 1f, 0.62f);
                 case CombatVFXKind.Ricochet:
                     return new Color(0.5f, 0.95f, 1f, 0.86f);
+                case CombatVFXKind.ChainLightning:
+                    return new Color(0.52f, 0.9f, 1f, 0.88f);
                 case CombatVFXKind.Vampirism:
                     return new Color(0.18f, 1f, 0.46f, 0.74f);
                 case CombatVFXKind.WebZone:
@@ -218,6 +221,8 @@ namespace VampireLike.VFX
                     return new Color(0.86f, 1f, 1f, 0.92f);
                 case CombatVFXKind.Vampirism:
                     return new Color(0.92f, 1f, 0.65f, 0.86f);
+                case CombatVFXKind.ChainLightning:
+                    return new Color(0.98f, 1f, 0.58f, 0.92f);
                 case CombatVFXKind.WebZone:
                     return new Color(0.95f, 0.98f, 1f, 0.76f);
                 default:

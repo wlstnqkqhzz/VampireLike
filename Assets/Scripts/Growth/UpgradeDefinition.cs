@@ -23,7 +23,8 @@ namespace VampireLike.Growth
         Shield,
         OrbitingBlade,
         ChainRicochet,
-        EclipseAura
+        EclipseAura,
+        ProjectileReflect
     }
 
     /// <summary>
@@ -75,7 +76,8 @@ namespace VampireLike.Growth
             || upgradeType == UpgradeType.Shield
             || upgradeType == UpgradeType.OrbitingBlade
             || upgradeType == UpgradeType.ChainRicochet
-            || upgradeType == UpgradeType.EclipseAura;
+            || upgradeType == UpgradeType.EclipseAura
+            || upgradeType == UpgradeType.ProjectileReflect;
         public string GradeLabel => IsSpecialUpgrade ? "특수 강화" : "일반 강화";
 
         private void OnValidate()

@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4520e01b4faa49f3a8672574ac1b0ab3, type: 3}
-  m_Name: ChainRicochet
+  m_Name: ProjectileReflect
   m_EditorClassIdentifier: 
-  upgradeType: 15
-  displayName: 연쇄 번개
-  description: 적중한 적 주변으로 번개 피해 전이
+  upgradeType: 17
+  displayName: 반사탄
+  description: 적 적중 후 근처 다른 적에게 투사체 반사
   maxLevel: 3
   multiplier: 1
   flatAmount: 0

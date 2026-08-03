@@ -57,6 +57,9 @@ namespace VampireLike.Combat
         private float chainRicochetDamageRatio = 0.45f;
 
         [SerializeField]
+        private float projectileReflectSearchRadius = 4.2f;
+
+        [SerializeField]
         private float shieldRechargeTime = 22f;
 
         [SerializeField]
@@ -106,6 +109,7 @@ namespace VampireLike.Combat
         private int orbitingBladeLevel;
         private int chainRicochetLevel;
         private int eclipseAuraLevel;
+        private int projectileReflectLevel;
         private int projectileHitCount;
         private float shieldTimer;
         private float eclipseAuraTimer;
@@ -138,6 +142,7 @@ namespace VampireLike.Combat
             scatterAnglePerLevel = Mathf.Clamp(scatterAnglePerLevel, 1f, 20f);
             chainRicochetRadius = Mathf.Max(0.1f, chainRicochetRadius);
             chainRicochetDamageRatio = Mathf.Max(0.1f, chainRicochetDamageRatio);
+            projectileReflectSearchRadius = Mathf.Max(0.5f, projectileReflectSearchRadius);
             shieldRechargeTime = Mathf.Max(1f, shieldRechargeTime);
             shieldRechargeReductionPerLevel = Mathf.Max(0f, shieldRechargeReductionPerLevel);
             orbitRadius = Mathf.Max(0.2f, orbitRadius);
@@ -207,6 +212,16 @@ namespace VampireLike.Combat
             eclipseAuraLevel++;
             eclipseAuraTimer = 0f;
             RefreshEclipseAuraVfx();
+        }
+
+        public void AddProjectileReflectLevel()
+        {
+            projectileReflectLevel++;
+        }
+
+        public int GetProjectileReflectCount()
+        {
+            return Mathf.Clamp(projectileReflectLevel, 0, 3);
         }
 
         public Vector2[] GetProjectileDirections(Vector2 baseDirection)
@@ -366,8 +381,8 @@ namespace VampireLike.Combat
                     return;
 
                 GameSfx.Play(SfxType.SkillRicochet);
-                CombatVFX.PlayLine(currentPosition, nextEnemy.transform.position, CombatVFXKind.Ricochet, 0.16f, 0.1f);
-                CombatVFX.PlayBurst(nextEnemy.transform.position, CombatVFXKind.Ricochet, 0.42f, 0.18f);
+                CombatVFX.PlayLine(currentPosition, nextEnemy.transform.position, CombatVFXKind.ChainLightning, 0.13f, 0.08f);
+                CombatVFX.PlayBurst(nextEnemy.transform.position, CombatVFXKind.ChainLightning, 0.38f, 0.16f);
                 nextEnemy.TakeDamage(damage);
 
                 currentEnemy = nextEnemy;
@@ -403,6 +418,76 @@ namespace VampireLike.Combat
             }
 
             return closestEnemy;
+        }
+
+        public bool TryGetProjectileReflectDirection(Vector2 position, IReadOnlyCollection<EnemyHealth> ignoredEnemies, out Vector2 direction)
+        {
+            direction = Vector2.zero;
+
+            if (projectileReflectLevel <= 0)
+                return false;
+
+            EnemyHealth target = FindClosestProjectileReflectTarget(position, ignoredEnemies);
+
+            if (target == null)
+                return false;
+
+            direction = ((Vector2)target.transform.position - position).normalized;
+
+            if (direction.sqrMagnitude <= 0.001f)
+                return false;
+
+            GameSfx.Play(SfxType.SkillRicochet);
+            CombatVFX.PlayLine(position, target.transform.position, CombatVFXKind.Ricochet, 0.14f, 0.08f);
+            CombatVFX.PlayBurst(position, CombatVFXKind.Ricochet, 0.36f, 0.14f);
+            return true;
+        }
+
+        private EnemyHealth FindClosestProjectileReflectTarget(Vector2 position, IReadOnlyCollection<EnemyHealth> ignoredEnemies)
+        {
+            int hitCount = Physics2D.OverlapCircleNonAlloc(position, projectileReflectSearchRadius, areaResults, enemyLayerMask);
+            EnemyHealth closestEnemy = null;
+            float closestSqrDistance = projectileReflectSearchRadius * projectileReflectSearchRadius;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D hit = areaResults[i];
+
+                if (hit == null)
+                    continue;
+
+                EnemyHealth enemy = hit.GetComponentInParent<EnemyHealth>();
+
+                if (enemy == null || enemy.IsDead)
+                    continue;
+
+                if (IsIgnoredProjectileReflectEnemy(enemy, ignoredEnemies))
+                    continue;
+
+                float sqrDistance = ((Vector2)enemy.transform.position - position).sqrMagnitude;
+
+                if (sqrDistance > closestSqrDistance)
+                    continue;
+
+                closestEnemy = enemy;
+                closestSqrDistance = sqrDistance;
+            }
+
+            return closestEnemy;
+        }
+
+        private static bool IsIgnoredProjectileReflectEnemy(EnemyHealth enemy, IReadOnlyCollection<EnemyHealth> ignoredEnemies)
+        {
+            if (ignoredEnemies == null)
+                return false;
+
+            foreach (EnemyHealth ignoredEnemy in ignoredEnemies)
+            {
+                if (ignoredEnemy == enemy)
+                    return true;
+            }
+
+            return false;
         }
 
         private void UpdateShieldRecharge()

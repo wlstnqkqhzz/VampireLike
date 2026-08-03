@@ -166,6 +166,10 @@ namespace VampireLike.Growth
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddEclipseAuraLevel();
                     break;
+                case UpgradeType.ProjectileReflect:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddProjectileReflectLevel();
+                    break;
             }
 
             GameSessionStats.RecordUpgrade(definition.DisplayName);
