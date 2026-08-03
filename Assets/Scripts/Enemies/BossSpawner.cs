@@ -222,7 +222,7 @@ namespace VampireLike.Enemies
 
         private void SetWaveProgressPaused(bool paused)
         {
-            if (enemySpawner == null || hasPausedWaveProgress == paused)
+            if (enemySpawner == null)
                 return;
 
             hasPausedWaveProgress = paused;

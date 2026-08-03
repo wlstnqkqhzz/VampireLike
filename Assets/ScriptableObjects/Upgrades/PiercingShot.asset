@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 3
   displayName: 관통탄
   description: 관통 횟수 +1
-  maxLevel: 3
+  maxLevel: 2
   multiplier: 1
   flatAmount: 1
   unlimited: 0

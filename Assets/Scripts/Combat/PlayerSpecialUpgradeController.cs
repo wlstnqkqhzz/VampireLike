@@ -51,6 +51,12 @@ namespace VampireLike.Combat
         private float scatterAnglePerLevel = 10f;
 
         [SerializeField]
+        private int scatterMaxSideCount = 2;
+
+        [SerializeField]
+        private float scatterProjectileDamageMultiplier = 0.7f;
+
+        [SerializeField]
         private float chainRicochetRadius = 2.4f;
 
         [SerializeField]
@@ -140,6 +146,8 @@ namespace VampireLike.Combat
             shockwaveRadius = Mathf.Max(0.1f, shockwaveRadius);
             shockwaveDamageMultiplier = Mathf.Max(0.1f, shockwaveDamageMultiplier);
             scatterAnglePerLevel = Mathf.Clamp(scatterAnglePerLevel, 1f, 20f);
+            scatterMaxSideCount = Mathf.Clamp(scatterMaxSideCount, 1, 3);
+            scatterProjectileDamageMultiplier = Mathf.Clamp(scatterProjectileDamageMultiplier, 0.1f, 1f);
             chainRicochetRadius = Mathf.Max(0.1f, chainRicochetRadius);
             chainRicochetDamageRatio = Mathf.Max(0.1f, chainRicochetDamageRatio);
             projectileReflectSearchRadius = Mathf.Max(0.5f, projectileReflectSearchRadius);
@@ -229,7 +237,7 @@ namespace VampireLike.Combat
             if (scatterShotLevel <= 0)
                 return new[] { baseDirection };
 
-            int sideCount = Mathf.Clamp(scatterShotLevel, 1, 3);
+            int sideCount = Mathf.Clamp(scatterShotLevel, 1, scatterMaxSideCount);
             int directionCount = sideCount * 2 + 1;
             Vector2[] directions = new Vector2[directionCount];
             int index = 0;
@@ -242,6 +250,11 @@ namespace VampireLike.Combat
             }
 
             return directions;
+        }
+
+        public float GetProjectileDamageMultiplierForDirections(int directionCount)
+        {
+            return directionCount > 1 ? scatterProjectileDamageMultiplier : 1f;
         }
 
         public bool TryBlockDamage()

@@ -18,8 +18,8 @@ public class PlayerController : MonoBehaviour
     private const float MinimumMoveSpeedMultiplier = 0.25f;
     private const string PlayerVisualName = "PlayerVisual";
     private const string WalkSpritePath = "Assets/Art/Characters/Vampire/SeparateAnim/Walk.png";
-    private static readonly Vector2 PlayerColliderOffset = new Vector2(0f, -0.08f);
-    private static readonly Vector2 PlayerColliderSize = new Vector2(0.28f, 0.32f);
+    private static readonly Vector2 PlayerColliderOffset = new Vector2(0f, -0.03f);
+    private static readonly Vector2 PlayerColliderSize = new Vector2(0.22f, 0.26f);
 
     [SerializeField]
     private float moveSpeed = 4f;

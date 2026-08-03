@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VampireLike.Enemies;
 using VampireLike.Growth;
-using VampireLike.Menu;
 
 namespace VampireLike.Combat
 {
@@ -260,7 +259,6 @@ namespace VampireLike.Combat
         {
             PlayerExperience playerExperience = GetComponent<PlayerExperience>();
             EnemySpawner enemySpawner = FindFirstObjectByType<EnemySpawner>();
-            CharacterDefinition character = CharacterSelection.SelectedCharacter;
 
             if (titleText != null)
                 titleText.text = "게임 오버";
@@ -269,7 +267,7 @@ namespace VampireLike.Combat
                 subtitleText.text = "이번 생존 기록";
 
             if (characterText != null)
-                characterText.text = $"{character.DisplayName}  |  {character.Role}";
+                characterText.text = $"{GameSessionStats.CharacterDisplayName}  |  {GameSessionStats.CharacterRole}";
 
             if (mainStatsText != null)
             {

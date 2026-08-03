@@ -41250,6 +41250,7 @@ GameObject:
   m_Component:
   - component: {fileID: 264854031}
   - component: {fileID: 264854030}
+  - component: {fileID: 264854032}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -41269,6 +41270,22 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!114 &264854032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 264854029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c943b3962aa74844993770b2940bbd1b, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  floorTilemap: {fileID: 115836375}
+  wallThickness: 1
+  spawnInset: 0.75
+  rebuildOnStart: 1
 --- !u!4 &264854031
 Transform:
   m_ObjectHideFlags: 0
@@ -52414,17 +52431,20 @@ MonoBehaviour:
     maxWave: 0
     spawnWeight: 2
   player: {fileID: 1723042665}
-  spawnInterval: 1.35
-  minimumSpawnInterval: 0.35
+  spawnInterval: 1.15
+  minimumSpawnInterval: 0.25
   startingWave: 1
   waveDuration: 20
-  spawnIntervalMultiplier: 0.88
+  spawnIntervalMultiplier: 0.86
   logWaveChanges: 1
   minSpawnDistance: 4
   maxSpawnDistance: 6
-  maxEnemyCount: 36
-  maxEnemyCountIncrease: 7
-  maxEnemyCountLimit: 160
+  maxEnemyCount: 44
+  maxEnemyCountIncrease: 9
+  maxEnemyCountLimit: 220
+  enemiesPerSpawn: 1
+  extraEnemyEveryWaves: 8
+  maxEnemiesPerSpawn: 3
 --- !u!114 &2200000003
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -18,6 +18,8 @@ namespace VampireLike.Combat
         public static int BossKillCount { get; private set; }
         public static int TotalExperienceGained { get; private set; }
         public static bool HasEnded { get; private set; }
+        public static string CharacterDisplayName { get; private set; } = "카엘";
+        public static string CharacterRole { get; private set; } = "흑검 수호자";
         public static float SurvivalTime => Mathf.Max(0f, (HasEnded ? endedAt : Time.time) - startedAt);
 
         public static void Reset()
@@ -30,6 +32,15 @@ namespace VampireLike.Combat
             TotalExperienceGained = 0;
             HasEnded = false;
             selectedUpgradeCounts.Clear();
+        }
+
+        public static void RecordCharacter(string displayName, string role)
+        {
+            if (!string.IsNullOrWhiteSpace(displayName))
+                CharacterDisplayName = displayName;
+
+            if (!string.IsNullOrWhiteSpace(role))
+                CharacterRole = role;
         }
 
         public static void RecordKill(bool isBoss)

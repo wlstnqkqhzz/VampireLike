@@ -23,10 +23,10 @@ namespace VampireLike.Enemies
         private float stoppingDistance = 0f;
 
         [SerializeField]
-        private float separationRadius = 0.55f;
+        private float separationRadius = 0.38f;
 
         [SerializeField]
-        private float separationWeight = 0.45f;
+        private float separationWeight = 0.28f;
 
         [SerializeField]
         private LayerMask enemyLayerMask = 1 << 7;

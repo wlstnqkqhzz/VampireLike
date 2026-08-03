@@ -11,11 +11,26 @@ namespace VampireLike.Menu
         private const string GameSceneName = "SampleScene";
         private const string MainMenuObjectName = "Main Menu";
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void CreateMainMenu()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Initialize()
         {
-            Scene activeScene = SceneManager.GetActiveScene();
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void CreateMainMenuAfterInitialSceneLoad()
+        {
+            CreateMainMenu(SceneManager.GetActiveScene());
+        }
+
+        private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            CreateMainMenu(scene);
+        }
+
+        private static void CreateMainMenu(Scene activeScene)
+        {
             if (activeScene.name != GameSceneName)
                 return;
 

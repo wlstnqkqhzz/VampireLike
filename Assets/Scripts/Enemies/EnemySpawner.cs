@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.World;
 
 namespace VampireLike.Enemies
 {
@@ -52,11 +53,11 @@ namespace VampireLike.Enemies
 
         // 게임 시작 시 적 생성 시간 간격이다.
         [SerializeField]
-        private float spawnInterval = 1.4f;
+        private float spawnInterval = 1.15f;
 
         // 웨이브가 올라가도 더 이상 줄어들지 않을 최소 생성 간격이다.
         [SerializeField]
-        private float minimumSpawnInterval = 0.35f;
+        private float minimumSpawnInterval = 0.25f;
 
         // 시작 웨이브 번호다.
         [SerializeField]
@@ -68,7 +69,7 @@ namespace VampireLike.Enemies
 
         // 웨이브 상승 1회마다 생성 간격에 곱할 값이다. 0.9면 10% 빨라진다.
         [SerializeField]
-        private float spawnIntervalMultiplier = 0.88f;
+        private float spawnIntervalMultiplier = 0.86f;
 
         // 웨이브 변경을 콘솔에서도 확인할지 정한다.
         [SerializeField]
@@ -84,15 +85,24 @@ namespace VampireLike.Enemies
 
         // 게임 시작 시 유지할 최대 적 수다.
         [SerializeField]
-        private int maxEnemyCount = 36;
+        private int maxEnemyCount = 44;
 
         // 웨이브 상승 1회마다 늘어나는 최대 적 수다.
         [SerializeField]
-        private int maxEnemyCountIncrease = 7;
+        private int maxEnemyCountIncrease = 9;
 
         // 최대 적 수가 무한히 커지지 않도록 막는 상한이다.
         [SerializeField]
-        private int maxEnemyCountLimit = 160;
+        private int maxEnemyCountLimit = 220;
+
+        [SerializeField]
+        private int enemiesPerSpawn = 1;
+
+        [SerializeField]
+        private int extraEnemyEveryWaves = 8;
+
+        [SerializeField]
+        private int maxEnemiesPerSpawn = 3;
 
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
         private float spawnTimer;
@@ -138,7 +148,7 @@ namespace VampireLike.Enemies
                 return;
 
             spawnTimer = 0f;
-            SpawnEnemy();
+            SpawnEnemyBatch();
         }
 
         private void OnValidate()
@@ -153,6 +163,9 @@ namespace VampireLike.Enemies
             maxEnemyCount = Mathf.Max(0, maxEnemyCount);
             maxEnemyCountIncrease = Mathf.Max(0, maxEnemyCountIncrease);
             maxEnemyCountLimit = Mathf.Max(maxEnemyCount, maxEnemyCountLimit);
+            enemiesPerSpawn = Mathf.Max(1, enemiesPerSpawn);
+            extraEnemyEveryWaves = Mathf.Max(0, extraEnemyEveryWaves);
+            maxEnemiesPerSpawn = Mathf.Max(enemiesPerSpawn, maxEnemiesPerSpawn);
 
             if (enemySpawnEntries == null)
                 return;
@@ -192,6 +205,25 @@ namespace VampireLike.Enemies
         public void SetWaveProgressPaused(bool paused)
         {
             isWaveProgressPaused = paused;
+        }
+
+        private void SpawnEnemyBatch()
+        {
+            int spawnCount = GetSpawnCountForCurrentWave();
+
+            for (int i = 0; i < spawnCount; i++)
+            {
+                if (spawnedEnemies.Count >= currentMaxEnemyCount)
+                    return;
+
+                SpawnEnemy();
+            }
+        }
+
+        private int GetSpawnCountForCurrentWave()
+        {
+            int extraCount = extraEnemyEveryWaves <= 0 ? 0 : (currentWave - 1) / extraEnemyEveryWaves;
+            return Mathf.Clamp(enemiesPerSpawn + extraCount, 1, maxEnemiesPerSpawn);
         }
 
         private void SpawnEnemy()
@@ -252,10 +284,20 @@ namespace VampireLike.Enemies
         private Vector2 GetRandomSpawnPosition()
         {
             // 원형 방향을 무작위로 뽑고, 최소/최대 거리 사이에 적을 생성한다.
-            float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
-            float distance = UnityEngine.Random.Range(minSpawnDistance, maxSpawnDistance);
-            Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-            return (Vector2)player.position + direction * distance;
+            Vector2 playerPosition = player.position;
+
+            for (int i = 0; i < 16; i++)
+            {
+                float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+                float distance = UnityEngine.Random.Range(minSpawnDistance, maxSpawnDistance);
+                Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                Vector2 candidatePosition = MapBoundary.ClampToPlayableArea(playerPosition + direction * distance);
+
+                if ((candidatePosition - playerPosition).sqrMagnitude >= minSpawnDistance * minSpawnDistance * 0.64f)
+                    return candidatePosition;
+            }
+
+            return MapBoundary.ClampToPlayableArea(playerPosition + Vector2.right * minSpawnDistance);
         }
 
         private void RemoveMissingEnemies()

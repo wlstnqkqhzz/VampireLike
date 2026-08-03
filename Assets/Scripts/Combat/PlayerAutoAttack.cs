@@ -223,11 +223,15 @@ namespace VampireLike.Combat
                 if (directions.Length > 1)
                     GameSfx.Play(SfxType.SkillScatter);
 
+                float scatterDamageMultiplier = specialUpgradeController == null
+                    ? 1f
+                    : specialUpgradeController.GetProjectileDamageMultiplierForDirections(directions.Length);
+
                 foreach (Vector2 shotDirection in directions)
                 {
                     ProjectileController projectile = Instantiate(projectilePrefab, firePosition, Quaternion.identity);
                     projectile.SetVisual(projectileSpriteOverride, projectileVisualScale, projectileColliderRadius);
-                    projectile.Launch(shotDirection, projectileDamageMultiplier, projectilePierceCount, specialUpgradeController);
+                    projectile.Launch(shotDirection, projectileDamageMultiplier * scatterDamageMultiplier, projectilePierceCount, specialUpgradeController);
                 }
 
                 if (i < shotCount - 1 && projectileBurstDelay > 0f)
