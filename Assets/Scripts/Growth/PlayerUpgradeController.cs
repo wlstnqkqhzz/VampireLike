@@ -14,6 +14,17 @@ namespace VampireLike.Growth
         [SerializeField]
         private UpgradeDefinition[] upgradeDefinitions;
 
+        [Header("Choice Rarity")]
+        [SerializeField]
+        [Range(0f, 1f)]
+        private float specialUpgradeChance = 0.28f;
+
+        [SerializeField]
+        private int maxSpecialChoices = 1;
+
+        [SerializeField]
+        private bool forceAtLeastOneNormalChoice = true;
+
         // 강화 타입별 현재 레벨을 런타임에 기록한다.
         private readonly Dictionary<UpgradeType, int> upgradeLevels = new Dictionary<UpgradeType, int>();
         private PlayerAutoAttack autoAttack;
@@ -55,6 +66,9 @@ namespace VampireLike.Growth
 
         private void OnValidate()
         {
+            specialUpgradeChance = Mathf.Clamp01(specialUpgradeChance);
+            maxSpecialChoices = Mathf.Max(0, maxSpecialChoices);
+
             if (upgradeDefinitions == null)
                 return;
 
@@ -73,16 +87,87 @@ namespace VampireLike.Growth
             // 최대 레벨에 도달하지 않은 강화 중에서 중복 없이 랜덤 선택한다.
             List<UpgradeDefinition> availableDefinitions = GetAvailableDefinitions();
             List<UpgradeChoice> choices = new List<UpgradeChoice>();
+            List<UpgradeDefinition> normalDefinitions = new List<UpgradeDefinition>();
+            List<UpgradeDefinition> specialDefinitions = new List<UpgradeDefinition>();
 
-            while (choices.Count < count && availableDefinitions.Count > 0)
+            for (int i = 0; i < availableDefinitions.Count; i++)
             {
-                int index = Random.Range(0, availableDefinitions.Count);
-                UpgradeDefinition definition = availableDefinitions[index];
-                availableDefinitions.RemoveAt(index);
+                UpgradeDefinition definition = availableDefinitions[i];
+
+                if (definition.IsSpecialUpgrade)
+                    specialDefinitions.Add(definition);
+                else
+                    normalDefinitions.Add(definition);
+            }
+
+            bool hasNormalChoice = false;
+            int specialChoiceCount = 0;
+
+            while (choices.Count < count && (normalDefinitions.Count > 0 || specialDefinitions.Count > 0))
+            {
+                bool chooseSpecial = ShouldChooseSpecialChoice(
+                    choices.Count,
+                    count,
+                    hasNormalChoice,
+                    specialChoiceCount,
+                    normalDefinitions.Count,
+                    specialDefinitions.Count);
+
+                UpgradeDefinition definition = chooseSpecial
+                    ? TakeRandomDefinition(specialDefinitions)
+                    : TakeRandomDefinition(normalDefinitions);
+
+                if (definition == null)
+                    definition = TakeRandomDefinition(chooseSpecial ? normalDefinitions : specialDefinitions);
+
+                if (definition == null)
+                    break;
+
+                if (definition.IsSpecialUpgrade)
+                    specialChoiceCount++;
+                else
+                    hasNormalChoice = true;
+
                 choices.Add(new UpgradeChoice(definition, GetLevel(definition.UpgradeType), GetMaxLevel(definition)));
             }
 
             return choices;
+        }
+
+        private bool ShouldChooseSpecialChoice(
+            int currentChoiceCount,
+            int targetChoiceCount,
+            bool hasNormalChoice,
+            int currentSpecialChoiceCount,
+            int normalCount,
+            int specialCount)
+        {
+            if (specialCount <= 0)
+                return false;
+
+            if (normalCount <= 0)
+                return true;
+
+            if (currentSpecialChoiceCount >= maxSpecialChoices)
+                return false;
+
+            bool isLastChoice = currentChoiceCount >= targetChoiceCount - 1;
+
+            if (forceAtLeastOneNormalChoice && isLastChoice && !hasNormalChoice)
+                return false;
+
+            return Random.value < specialUpgradeChance;
+        }
+
+        private static UpgradeDefinition TakeRandomDefinition(List<UpgradeDefinition> definitions)
+        {
+            if (definitions == null || definitions.Count == 0)
+                return null;
+
+            int index = Random.Range(0, definitions.Count);
+            UpgradeDefinition definition = definitions[index];
+            definitions.RemoveAt(index);
+            return definition;
         }
 
         public void ApplyUpgrade(UpgradeDefinition definition)
