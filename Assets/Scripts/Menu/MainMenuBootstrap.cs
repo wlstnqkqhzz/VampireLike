@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VampireLike.Audio;
 
 namespace VampireLike.Menu
 {
@@ -32,7 +33,12 @@ namespace VampireLike.Menu
         private static void CreateMainMenu(Scene activeScene)
         {
             if (activeScene.name != MainMenuSceneName)
+            {
+                GameBgm.Stop();
                 return;
+            }
+
+            GameBgm.Play(BgmType.MainMenu);
 
             if (UnityEngine.Object.FindFirstObjectByType<MainMenuUI>() != null)
                 return;
