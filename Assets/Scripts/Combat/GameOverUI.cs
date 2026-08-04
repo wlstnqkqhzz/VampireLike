@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VampireLike.Enemies;
 using VampireLike.Growth;
+using VampireLike.Save;
 
 namespace VampireLike.Combat
 {
@@ -44,7 +45,9 @@ namespace VampireLike.Combat
         private Text growthStatsText;
         private Text upgradeHeaderText;
         private Text upgradeText;
+        private HighScoreResult highScoreResult;
         private bool isShowing;
+        private bool hasSubmittedRecord;
 
         private void Awake()
         {
@@ -259,19 +262,35 @@ namespace VampireLike.Combat
         {
             PlayerExperience playerExperience = GetComponent<PlayerExperience>();
             EnemySpawner enemySpawner = FindFirstObjectByType<EnemySpawner>();
+            int currentWave = enemySpawner == null ? 0 : enemySpawner.CurrentWave;
+            int currentLevel = playerExperience == null ? 0 : playerExperience.CurrentLevel;
+
+            if (!hasSubmittedRecord)
+            {
+                HighScoreRecord runRecord = new HighScoreRecord(
+                    GameSessionStats.SurvivalTime,
+                    currentWave,
+                    currentLevel,
+                    GameSessionStats.KillCount,
+                    GameSessionStats.BossKillCount,
+                    GameSessionStats.TotalExperienceGained);
+
+                highScoreResult = HighScoreManager.SubmitRun(GameSessionStats.CharacterId, runRecord);
+                hasSubmittedRecord = true;
+            }
 
             if (titleText != null)
                 titleText.text = "게임 오버";
 
             if (subtitleText != null)
-                subtitleText.text = "이번 생존 기록";
+                subtitleText.text = highScoreResult.HasNewRecord ? GetRecordMessage(highScoreResult) : "이번 생존 기록";
 
             if (characterText != null)
                 characterText.text = $"{GameSessionStats.CharacterDisplayName}  |  {GameSessionStats.CharacterRole}";
 
             if (mainStatsText != null)
             {
-                string wave = enemySpawner == null ? "-" : enemySpawner.CurrentWave.ToString();
+                string wave = currentWave <= 0 ? "-" : currentWave.ToString();
                 mainStatsText.text = $"생존 시간\n{FormatTime(GameSessionStats.SurvivalTime)}\n\n도달 웨이브\n{wave}";
             }
 
@@ -282,7 +301,7 @@ namespace VampireLike.Combat
 
             if (growthStatsText != null)
             {
-                string level = playerExperience == null ? "-" : playerExperience.CurrentLevel.ToString();
+                string level = currentLevel <= 0 ? "-" : currentLevel.ToString();
                 growthStatsText.text = $"도달 레벨\n{level}\n\n획득 경험치\n{GameSessionStats.TotalExperienceGained}";
             }
 
@@ -299,6 +318,17 @@ namespace VampireLike.Combat
             int minutes = totalSeconds / 60;
             int remainingSeconds = totalSeconds % 60;
             return $"{minutes:00}:{remainingSeconds:00}";
+        }
+
+        private static string GetRecordMessage(HighScoreResult result)
+        {
+            if (result.NewOverallRecord && result.NewCharacterRecord)
+                return "이번 생존 기록  |  전체 / 캐릭터 최고 기록 갱신";
+
+            if (result.NewOverallRecord)
+                return "이번 생존 기록  |  전체 최고 기록 갱신";
+
+            return "이번 생존 기록  |  캐릭터 최고 기록 갱신";
         }
 
         private static void StretchToParent(RectTransform rectTransform)

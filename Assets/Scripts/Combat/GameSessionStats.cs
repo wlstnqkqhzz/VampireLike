@@ -18,6 +18,7 @@ namespace VampireLike.Combat
         public static int BossKillCount { get; private set; }
         public static int TotalExperienceGained { get; private set; }
         public static bool HasEnded { get; private set; }
+        public static string CharacterId { get; private set; } = "kael";
         public static string CharacterDisplayName { get; private set; } = "카엘";
         public static string CharacterRole { get; private set; } = "흑검 수호자";
         public static float SurvivalTime => Mathf.Max(0f, (HasEnded ? endedAt : Time.time) - startedAt);
@@ -41,6 +42,14 @@ namespace VampireLike.Combat
 
             if (!string.IsNullOrWhiteSpace(role))
                 CharacterRole = role;
+        }
+
+        public static void RecordCharacter(string characterId, string displayName, string role)
+        {
+            if (!string.IsNullOrWhiteSpace(characterId))
+                CharacterId = characterId;
+
+            RecordCharacter(displayName, role);
         }
 
         public static void RecordKill(bool isBoss)

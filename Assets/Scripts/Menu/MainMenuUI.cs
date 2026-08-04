@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VampireLike.Audio;
 using VampireLike.Combat;
+using VampireLike.Save;
+using VampireLike.Settings;
 
 namespace VampireLike.Menu
 {
@@ -27,6 +30,8 @@ namespace VampireLike.Menu
         private GUIStyle buttonStyle;
         private GUIStyle secondaryButtonStyle;
         private GUIStyle footerStyle;
+        private GUIStyle optionLabelStyle;
+        private GUIStyle optionValueStyle;
         private Texture2D darkTexture;
         private Texture2D panelTexture;
         private Texture2D cardTexture;
@@ -64,8 +69,12 @@ namespace VampireLike.Menu
 
             if (currentScreen == MenuScreen.Title)
                 DrawTitleScreen();
-            else
+            else if (currentScreen == MenuScreen.CharacterSelect)
                 DrawCharacterSelectScreen();
+            else if (currentScreen == MenuScreen.Records)
+                DrawRecordsScreen();
+            else
+                DrawOptionsScreen();
         }
 
         private void OpenMenu()
@@ -128,21 +137,37 @@ namespace VampireLike.Menu
             GUI.Label(new Rect(panelRect.x, panelRect.y + 50f, panelRect.width, 58f), "VampireLike", titleStyle);
             GUI.Label(new Rect(panelRect.x, panelRect.y + 110f, panelRect.width, 30f), "어둠 속에서 끝없이 몰려드는 적을 버티세요", subtitleStyle);
 
-            Rect startButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 210f, 320f, 52f);
-            Rect optionButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 280f, 320f, 48f);
-            Rect quitButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 344f, 320f, 48f);
+            Rect startButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 190f, 320f, 52f);
+            Rect recordButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 258f, 320f, 48f);
+            Rect optionButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 320f, 320f, 48f);
+            Rect quitButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 382f, 320f, 48f);
 
             if (GUI.Button(startButtonRect, "게임 시작", buttonStyle))
             {
+                PlayMenuSfx();
                 noticeMessage = string.Empty;
                 currentScreen = MenuScreen.CharacterSelect;
             }
 
+            if (GUI.Button(recordButtonRect, "기록", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
+                noticeMessage = string.Empty;
+                currentScreen = MenuScreen.Records;
+            }
+
             if (GUI.Button(optionButtonRect, "옵션", secondaryButtonStyle))
-                ShowNotice("옵션 메뉴는 다음 단계에서 추가할 예정입니다.");
+            {
+                PlayMenuSfx();
+                noticeMessage = string.Empty;
+                currentScreen = MenuScreen.Options;
+            }
 
             if (GUI.Button(quitButtonRect, "게임 종료", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
                 QuitGame();
+            }
 
             string notice = Time.unscaledTime <= noticeUntilTime ? noticeMessage : "캐릭터를 선택하고 생존을 시작하세요";
             GUI.Label(new Rect(panelRect.x + 48f, panelRect.yMax - 74f, panelRect.width - 96f, 28f), notice, footerStyle);
@@ -172,10 +197,149 @@ namespace VampireLike.Menu
             Rect startButtonRect = new Rect(panelRect.center.x + 34f, panelRect.yMax - 72f, 220f, 48f);
 
             if (GUI.Button(backButtonRect, "뒤로", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
                 currentScreen = MenuScreen.Title;
+            }
 
             if (GUI.Button(startButtonRect, "생존 시작", buttonStyle))
+            {
+                PlayMenuSfx();
                 StartGame();
+            }
+        }
+
+        private void DrawOptionsScreen()
+        {
+            Rect panelRect = CenterRect(TitlePanelWidth, TitlePanelHeight);
+            GUI.Box(panelRect, GUIContent.none, panelStyle);
+            GUI.Label(new Rect(panelRect.x, panelRect.y + 36f, panelRect.width, 52f), "옵션", titleStyle);
+            GUI.Label(new Rect(panelRect.x, panelRect.y + 86f, panelRect.width, 30f), "게임 화면과 효과음 설정을 조정합니다", subtitleStyle);
+
+            DrawVolumeOption(panelRect, "전체 음량", GameOptions.MasterVolume, 150f, GameOptions.SetMasterVolume);
+            DrawVolumeOption(panelRect, "효과음 음량", GameOptions.SfxVolume, 218f, GameOptions.SetSfxVolume);
+            DrawFullscreenOption(panelRect, 286f);
+            DrawResolutionOption(panelRect, 354f);
+            GUI.Label(new Rect(panelRect.x + 96f, panelRect.y + 406f, panelRect.width - 192f, 28f), $"현재 적용: {GameOptions.AppliedScreenInfo}", footerStyle);
+
+            Rect resetRect = new Rect(panelRect.center.x - 244f, panelRect.yMax - 76f, 220f, 46f);
+            Rect backRect = new Rect(panelRect.center.x + 24f, panelRect.yMax - 76f, 220f, 46f);
+
+            if (GUI.Button(resetRect, "기본값", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
+                GameOptions.ResetToDefaults();
+            }
+
+            if (GUI.Button(backRect, "뒤로", buttonStyle))
+            {
+                PlayMenuSfx();
+                currentScreen = MenuScreen.Title;
+            }
+        }
+
+        private void DrawRecordsScreen()
+        {
+            Rect panelRect = CenterRect(TitlePanelWidth, TitlePanelHeight);
+            GUI.Box(panelRect, GUIContent.none, panelStyle);
+            GUI.Label(new Rect(panelRect.x, panelRect.y + 34f, panelRect.width, 52f), "기록", titleStyle);
+            GUI.Label(new Rect(panelRect.x, panelRect.y + 84f, panelRect.width, 30f), "지금까지의 최고 생존 기록입니다", subtitleStyle);
+
+            float cardWidth = 188f;
+            float cardHeight = 240f;
+            float gap = 22f;
+            float startX = panelRect.center.x - cardWidth * 1.5f - gap;
+            float cardY = panelRect.y + 142f;
+
+            DrawRecordCard(new Rect(startX, cardY, cardWidth, cardHeight), "전체 최고", HighScoreManager.GetOverallRecord());
+
+            CharacterDefinition[] characters = CharacterSelection.Characters;
+            for (int i = 0; i < characters.Length; i++)
+            {
+                CharacterDefinition character = characters[i];
+                Rect cardRect = new Rect(startX + (cardWidth + gap) * (i + 1), cardY, cardWidth, cardHeight);
+                DrawRecordCard(cardRect, character.DisplayName, HighScoreManager.GetCharacterRecord(character.Id));
+            }
+
+            Rect resetRect = new Rect(panelRect.center.x - 244f, panelRect.yMax - 76f, 220f, 46f);
+            Rect backRect = new Rect(panelRect.center.x + 24f, panelRect.yMax - 76f, 220f, 46f);
+
+            if (GUI.Button(resetRect, "기록 초기화", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
+                HighScoreManager.ResetAllRecords();
+            }
+
+            if (GUI.Button(backRect, "뒤로", buttonStyle))
+            {
+                PlayMenuSfx();
+                currentScreen = MenuScreen.Title;
+            }
+        }
+
+        private void DrawRecordCard(Rect cardRect, string title, HighScoreRecord record)
+        {
+            GUI.Box(cardRect, GUIContent.none, cardStyle);
+            GUI.Label(new Rect(cardRect.x + 12f, cardRect.y + 18f, cardRect.width - 24f, 32f), title, labelStyle);
+
+            string recordText = record.HasAnyRecord
+                ? $"생존 {FormatTime(record.SurvivalTime)}\n웨이브 {record.Wave}\n레벨 {record.Level}\n처치 {record.Kills}\n보스 {record.BossKills}\n경험치 {record.Experience}"
+                : "기록 없음";
+
+            GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 72f, cardRect.width - 36f, 140f), recordText, statStyle);
+        }
+
+        private void DrawVolumeOption(Rect panelRect, string label, float value, float yOffset, System.Action<float> setter)
+        {
+            Rect labelRect = new Rect(panelRect.x + 96f, panelRect.y + yOffset, 160f, 30f);
+            Rect sliderRect = new Rect(panelRect.x + 274f, panelRect.y + yOffset + 6f, 280f, 24f);
+            Rect valueRect = new Rect(panelRect.x + 570f, panelRect.y + yOffset, 70f, 30f);
+
+            GUI.Label(labelRect, label, optionLabelStyle);
+            float nextValue = GUI.HorizontalSlider(sliderRect, value, 0f, 1f);
+            GUI.Label(valueRect, $"{Mathf.RoundToInt(nextValue * 100f)}%", optionValueStyle);
+
+            if (!Mathf.Approximately(value, nextValue))
+                setter(nextValue);
+        }
+
+        private void DrawFullscreenOption(Rect panelRect, float yOffset)
+        {
+            Rect labelRect = new Rect(panelRect.x + 96f, panelRect.y + yOffset, 160f, 30f);
+            Rect buttonRect = new Rect(panelRect.x + 274f, panelRect.y + yOffset - 4f, 220f, 40f);
+
+            GUI.Label(labelRect, "화면 모드", optionLabelStyle);
+
+            if (GUI.Button(buttonRect, GameOptions.IsFullscreen ? "전체 화면" : "창 모드", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
+                GameOptions.SetFullscreen(!GameOptions.IsFullscreen);
+            }
+        }
+
+        private void DrawResolutionOption(Rect panelRect, float yOffset)
+        {
+            Rect labelRect = new Rect(panelRect.x + 96f, panelRect.y + yOffset, 160f, 30f);
+            Rect previousRect = new Rect(panelRect.x + 274f, panelRect.y + yOffset - 4f, 54f, 40f);
+            Rect valueRect = new Rect(panelRect.x + 336f, panelRect.y + yOffset, 160f, 30f);
+            Rect nextRect = new Rect(panelRect.x + 508f, panelRect.y + yOffset - 4f, 54f, 40f);
+            Vector2Int resolution = GameOptions.CurrentResolution;
+
+            GUI.Label(labelRect, "해상도", optionLabelStyle);
+
+            if (GUI.Button(previousRect, "<", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
+                GameOptions.SetResolutionIndex((GameOptions.ResolutionIndex - 1 + GameOptions.ResolutionCount) % GameOptions.ResolutionCount);
+            }
+
+            GUI.Label(valueRect, $"{resolution.x} x {resolution.y}", optionValueStyle);
+
+            if (GUI.Button(nextRect, ">", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
+                GameOptions.SetResolutionIndex((GameOptions.ResolutionIndex + 1) % GameOptions.ResolutionCount);
+            }
         }
 
         private void DrawCharacterCard(Rect cardRect, CharacterDefinition character, int index)
@@ -183,7 +347,10 @@ namespace VampireLike.Menu
             bool isSelected = selectedIndex == index;
 
             if (GUI.Button(cardRect, GUIContent.none, isSelected ? selectedCardStyle : cardStyle))
+            {
+                PlayMenuSfx();
                 selectedIndex = index;
+            }
 
             GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 22f, cardRect.width - 36f, 34f), character.DisplayName, labelStyle);
             GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 58f, cardRect.width - 36f, 26f), character.Role, subtitleStyle);
@@ -206,6 +373,11 @@ namespace VampireLike.Menu
             noticeUntilTime = Time.unscaledTime + 2f;
         }
 
+        private static void PlayMenuSfx()
+        {
+            GameSfx.Play(SfxType.UpgradeSelect);
+        }
+
         private static void QuitGame()
         {
 #if UNITY_EDITOR
@@ -222,6 +394,14 @@ namespace VampireLike.Menu
                 (Screen.height - height) * 0.5f,
                 width,
                 height);
+        }
+
+        private static string FormatTime(float seconds)
+        {
+            int totalSeconds = Mathf.FloorToInt(seconds);
+            int minutes = totalSeconds / 60;
+            int remainingSeconds = totalSeconds % 60;
+            return $"{minutes:00}:{remainingSeconds:00}";
         }
 
         private void EnsureStyles()
@@ -281,6 +461,22 @@ namespace VampireLike.Menu
             };
             footerStyle.normal.textColor = new Color(0.82f, 0.9f, 0.78f, 1f);
 
+            optionLabelStyle = new GUIStyle(GUI.skin.label)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                fontSize = 18,
+                fontStyle = FontStyle.Bold
+            };
+            optionLabelStyle.normal.textColor = new Color(0.9f, 0.95f, 0.86f, 1f);
+
+            optionValueStyle = new GUIStyle(GUI.skin.label)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = 18,
+                fontStyle = FontStyle.Bold
+            };
+            optionValueStyle.normal.textColor = Color.white;
+
             panelStyle = new GUIStyle(GUI.skin.box);
             panelStyle.normal.background = panelTexture;
 
@@ -315,7 +511,9 @@ namespace VampireLike.Menu
         private enum MenuScreen
         {
             Title,
-            CharacterSelect
+            CharacterSelect,
+            Records,
+            Options
         }
     }
 }

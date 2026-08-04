@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VampireLike.Settings;
 
 namespace VampireLike.Audio
 {
@@ -53,11 +54,11 @@ namespace VampireLike.Audio
             { SfxType.BossAppear, "boss_appear" },
             { SfxType.GameOver, "game_over" },
             { SfxType.Heal, "heal" },
-            { SfxType.ShieldBlock, "shield_block" },
+            { SfxType.ShieldBlock, "shield_block_sfx" },
             { SfxType.KaelSwordWave, "kael_sword_wave" },
             { SfxType.SeleneDaggerThrow, "selene_dagger_throw" },
-            { SfxType.ShieldReady, "shield_ready" },
-            { SfxType.ShieldBreak, "shield_break" },
+            { SfxType.ShieldReady, "shield_ready_sfx" },
+            { SfxType.ShieldBreak, "shield_break_sfx" },
             { SfxType.SkillExplosion, "skill_explosion" },
             { SfxType.SkillRicochet, "skill_ricochet" },
             { SfxType.SkillScatter, "skill_scatter" },
@@ -209,7 +210,7 @@ namespace VampireLike.Audio
             EnsureAudioSources();
             AudioSource source = GetNextSource();
             source.pitch = Random.Range(0.96f, 1.04f);
-            source.PlayOneShot(clip, GetVolume(type) * masterVolume);
+            source.PlayOneShot(clip, GetVolume(type) * masterVolume * GameOptions.MasterVolume * GameOptions.SfxVolume);
             LastPlayTimes[type] = Time.unscaledTime;
         }
 

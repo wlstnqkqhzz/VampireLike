@@ -210,8 +210,6 @@ namespace VampireLike.Combat
             if (spriteAnimator != null && (playerController == null || !playerController.IsMoving))
                 spriteAnimator.PlayAttack();
 
-            GameSfx.Play(attackSfxType);
-
             int shotCount = Mathf.Max(1, projectileCount);
             for (int i = 0; i < shotCount; i++)
             {

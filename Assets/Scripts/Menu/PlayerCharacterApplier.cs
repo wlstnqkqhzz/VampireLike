@@ -55,7 +55,7 @@ namespace VampireLike.Menu
 
             hasApplied = true;
             CharacterDefinition character = CharacterSelection.SelectedCharacter;
-            GameSessionStats.RecordCharacter(character.DisplayName, character.Role);
+            GameSessionStats.RecordCharacter(character.Id, character.DisplayName, character.Role);
 
             global::PlayerController playerController = GetComponent<global::PlayerController>();
             global::PlayerSpriteAnimator spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
