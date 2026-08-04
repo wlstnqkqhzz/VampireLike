@@ -33,6 +33,7 @@ namespace VampireLike.Enemies
 
         private Rigidbody2D rb;
         private Collider2D enemyCollider;
+        private EnemySpriteAnimator spriteAnimator;
         private readonly Collider2D[] separationResults = new Collider2D[8];
         private bool movementEnabled = true;
 
@@ -42,6 +43,10 @@ namespace VampireLike.Enemies
         {
             rb = GetComponent<Rigidbody2D>();
             enemyCollider = GetComponent<Collider2D>();
+            spriteAnimator = GetComponentInChildren<EnemySpriteAnimator>();
+
+            if (spriteAnimator == null)
+                spriteAnimator = GetComponentInChildren<SpriteRenderer>()?.gameObject.AddComponent<EnemySpriteAnimator>();
 
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.gravityScale = 0f;
@@ -63,7 +68,10 @@ namespace VampireLike.Enemies
             Vector2 toTarget = targetPosition - currentPosition;
 
             if (toTarget.sqrMagnitude <= stoppingDistance * stoppingDistance)
+            {
+                spriteAnimator?.PlayIdle();
                 return;
+            }
 
             Vector2 chaseDirection = toTarget.normalized;
             Vector2 separationDirection = GetSeparationDirection(currentPosition);
@@ -73,6 +81,9 @@ namespace VampireLike.Enemies
                 moveDirection = chaseDirection;
             else
                 moveDirection.Normalize();
+
+            spriteAnimator?.FaceDirection(moveDirection);
+            spriteAnimator?.PlayWalk();
 
             Vector2 nextPosition = currentPosition + moveDirection * moveSpeed * Time.fixedDeltaTime;
             rb.MovePosition(nextPosition);
@@ -97,6 +108,9 @@ namespace VampireLike.Enemies
 
             if (!movementEnabled && rb != null)
                 rb.linearVelocity = Vector2.zero;
+
+            if (!movementEnabled)
+                spriteAnimator?.PlayIdle();
         }
 
         private Vector2 GetSeparationDirection(Vector2 currentPosition)

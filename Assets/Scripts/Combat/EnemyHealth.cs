@@ -34,6 +34,7 @@ namespace VampireLike.Combat
         private int currentHealth;
         private SpriteRenderer spriteRenderer;
         private BossSpriteAnimator bossSpriteAnimator;
+        private EnemySpriteAnimator enemySpriteAnimator;
         private Color originalColor = Color.white;
         private Coroutine hitFlashRoutine;
 
@@ -49,6 +50,7 @@ namespace VampireLike.Combat
             currentHealth = maxHealth;
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             bossSpriteAnimator = GetComponentInChildren<BossSpriteAnimator>();
+            enemySpriteAnimator = GetComponentInChildren<EnemySpriteAnimator>();
 
             if (spriteRenderer != null)
                 originalColor = spriteRenderer.color;
@@ -80,6 +82,7 @@ namespace VampireLike.Combat
 
             currentHealth -= damage;
             bossSpriteAnimator?.PlayHit();
+            GetEnemySpriteAnimator()?.PlayHit();
 
             if (currentHealth <= 0)
             {
@@ -136,6 +139,9 @@ namespace VampireLike.Combat
 
             float deathDuration = bossSpriteAnimator == null ? 0f : bossSpriteAnimator.PlayDeath();
 
+            if (deathDuration <= 0f)
+                deathDuration = GetEnemySpriteAnimator()?.PlayDeath() ?? 0f;
+
             DisableAfterDeath();
 
             if (deathDuration > 0f)
@@ -147,6 +153,14 @@ namespace VampireLike.Combat
         private bool IsBossEnemy()
         {
             return GetComponent<BossController>() != null || GetComponent<GreedBossController>() != null;
+        }
+
+        private EnemySpriteAnimator GetEnemySpriteAnimator()
+        {
+            if (enemySpriteAnimator == null)
+                enemySpriteAnimator = GetComponentInChildren<EnemySpriteAnimator>();
+
+            return enemySpriteAnimator;
         }
 
         private void DisableAfterDeath()
