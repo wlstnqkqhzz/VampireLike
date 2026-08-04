@@ -82,7 +82,9 @@ namespace VampireLike.Combat
 
             currentHealth -= damage;
             bossSpriteAnimator?.PlayHit();
-            GetEnemySpriteAnimator()?.PlayHit();
+
+            if (bossSpriteAnimator == null)
+                GetEnemySpriteAnimator()?.PlayHit();
 
             if (currentHealth <= 0)
             {
@@ -139,7 +141,7 @@ namespace VampireLike.Combat
 
             float deathDuration = bossSpriteAnimator == null ? 0f : bossSpriteAnimator.PlayDeath();
 
-            if (deathDuration <= 0f)
+            if (deathDuration <= 0f && bossSpriteAnimator == null)
                 deathDuration = GetEnemySpriteAnimator()?.PlayDeath() ?? 0f;
 
             DisableAfterDeath();

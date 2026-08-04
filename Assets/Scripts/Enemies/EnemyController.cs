@@ -43,10 +43,10 @@ namespace VampireLike.Enemies
         {
             rb = GetComponent<Rigidbody2D>();
             enemyCollider = GetComponent<Collider2D>();
-            spriteAnimator = GetComponentInChildren<EnemySpriteAnimator>();
+            spriteAnimator = ShouldUseEnemySpriteAnimator() ? GetComponentInChildren<EnemySpriteAnimator>() : null;
 
             if (spriteAnimator == null)
-                spriteAnimator = GetComponentInChildren<SpriteRenderer>()?.gameObject.AddComponent<EnemySpriteAnimator>();
+                spriteAnimator = CreateEnemySpriteAnimatorIfNeeded();
 
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.gravityScale = 0f;
@@ -149,6 +149,22 @@ namespace VampireLike.Enemies
 
             // 뱀서라이크처럼 적들이 촘촘하게 몰릴 수 있도록 적끼리의 물리 밀어내기를 끈다.
             Physics2D.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
+        }
+
+        private bool ShouldUseEnemySpriteAnimator()
+        {
+            return GetComponent<BossController>() == null
+                && GetComponent<GreedBossController>() == null
+                && GetComponentInChildren<BossSpriteAnimator>() == null;
+        }
+
+        private EnemySpriteAnimator CreateEnemySpriteAnimatorIfNeeded()
+        {
+            if (!ShouldUseEnemySpriteAnimator())
+                return null;
+
+            SpriteRenderer targetRenderer = GetComponentInChildren<SpriteRenderer>();
+            return targetRenderer == null ? null : targetRenderer.gameObject.AddComponent<EnemySpriteAnimator>();
         }
     }
 }
