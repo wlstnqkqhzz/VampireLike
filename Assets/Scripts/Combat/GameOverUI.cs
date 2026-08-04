@@ -24,6 +24,7 @@ namespace VampireLike.Combat
         private const string GrowthStatsName = "Growth Stats";
         private const string UpgradeHeaderName = "Upgrade Header";
         private const string UpgradeResultName = "Upgrade Result";
+        private const string MainMenuSceneName = "MainMenuScene";
 
         [SerializeField]
         private GameObject gameOverRoot;
@@ -90,8 +91,7 @@ namespace VampireLike.Combat
         {
             Time.timeScale = 1f;
             GameState.ResetGame();
-            Scene activeScene = SceneManager.GetActiveScene();
-            SceneManager.LoadScene(activeScene.name);
+            SceneManager.LoadScene(MainMenuSceneName);
         }
 
         private void QuitGame()

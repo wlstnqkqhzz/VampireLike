@@ -4,11 +4,11 @@ using UnityEngine.SceneManagement;
 namespace VampireLike.Menu
 {
     /// <summary>
-    /// 게임 씬이 열리면 메인 메뉴 UI를 자동으로 생성합니다.
+    /// 메인 메뉴 씬이 열리면 메인 메뉴 UI를 자동으로 생성합니다.
     /// </summary>
     public static class MainMenuBootstrap
     {
-        private const string GameSceneName = "SampleScene";
+        private const string MainMenuSceneName = "MainMenuScene";
         private const string MainMenuObjectName = "Main Menu";
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -31,7 +31,7 @@ namespace VampireLike.Menu
 
         private static void CreateMainMenu(Scene activeScene)
         {
-            if (activeScene.name != GameSceneName)
+            if (activeScene.name != MainMenuSceneName)
                 return;
 
             if (UnityEngine.Object.FindFirstObjectByType<MainMenuUI>() != null)

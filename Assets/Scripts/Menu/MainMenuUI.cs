@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using VampireLike.Combat;
 
 namespace VampireLike.Menu
 {
     /// <summary>
-    /// 게임 실행 시 표시되는 메인 화면과 캐릭터 선택 화면을 순서대로 관리한다.
-    /// 별도 씬을 만들기 전까지는 즉시 모드 GUI로 간단하게 구성한다.
+    /// 메인 메뉴 씬에서 타이틀 화면과 캐릭터 선택 화면을 순서대로 관리한다.
+    /// 현재는 빠르게 테스트할 수 있도록 즉시 모드 GUI로 구성한다.
     /// </summary>
     public class MainMenuUI : MonoBehaviour
     {
@@ -13,6 +14,7 @@ namespace VampireLike.Menu
         private const float TitlePanelHeight = 520f;
         private const float CharacterPanelWidth = 860f;
         private const float CharacterPanelHeight = 640f;
+        private const string GameSceneName = "SampleScene";
 
         private GUIStyle titleStyle;
         private GUIStyle subtitleStyle;
@@ -76,12 +78,19 @@ namespace VampireLike.Menu
         private void StartGame()
         {
             CharacterSelection.Select(selectedIndex);
-            ApplySelectedCharacter();
             hasStarted = true;
             IsOpen = false;
             GameState.SetMainMenuOpen(false);
             Time.timeScale = 1f;
-            Destroy(gameObject);
+
+            if (SceneManager.GetActiveScene().name == GameSceneName)
+            {
+                ApplySelectedCharacter();
+                Destroy(gameObject);
+                return;
+            }
+
+            SceneManager.LoadScene(GameSceneName);
         }
 
         private static void ApplySelectedCharacter()
