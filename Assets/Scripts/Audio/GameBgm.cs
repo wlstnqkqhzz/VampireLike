@@ -5,13 +5,20 @@ namespace VampireLike.Audio
 {
     public enum BgmType
     {
-        MainMenu
+        MainMenu,
+        Battle,
+        Boss,
+        HiddenBoss
     }
 
     public class GameBgm : MonoBehaviour
     {
         private const string MusicRoot = "Music/";
         private const string MainMenuClipName = "main_menu_bgm";
+        private const string BattleClipName = "battle_bgm";
+        private const string HiddenBossClipName = "hidden_boss_bgm";
+        private const string BossClipPrefix = "boss_stage_";
+        private const string BossClipSuffix = "_bgm";
 
         private static GameBgm instance;
 
@@ -20,6 +27,7 @@ namespace VampireLike.Audio
 
         private AudioSource audioSource;
         private BgmType? currentBgm;
+        private int currentBossStage;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStaticState()
@@ -30,7 +38,19 @@ namespace VampireLike.Audio
         public static void Play(BgmType type)
         {
             EnsureInstance();
-            instance.PlayInternal(type);
+            instance.PlayInternal(type, 0);
+        }
+
+        public static void PlayBoss(int bossStage)
+        {
+            EnsureInstance();
+            instance.PlayInternal(BgmType.Boss, bossStage);
+        }
+
+        public static void PlayHiddenBoss()
+        {
+            EnsureInstance();
+            instance.PlayInternal(BgmType.HiddenBoss, 0);
         }
 
         public static void Stop()
@@ -39,6 +59,7 @@ namespace VampireLike.Audio
                 return;
 
             instance.currentBgm = null;
+            instance.currentBossStage = 0;
 
             if (instance.audioSource != null)
                 instance.audioSource.Stop();
@@ -72,7 +93,7 @@ namespace VampireLike.Audio
             if (audioSource == null)
                 return;
 
-            audioSource.volume = bgmVolume * GameOptions.MasterVolume;
+            audioSource.volume = GetAppliedVolume();
         }
 
         private void OnDestroy()
@@ -86,32 +107,58 @@ namespace VampireLike.Audio
             bgmVolume = Mathf.Clamp01(bgmVolume);
         }
 
-        private void PlayInternal(BgmType type)
+        private void PlayInternal(BgmType type, int bossStage)
         {
             EnsureAudioSource();
 
-            if (currentBgm == type && audioSource.isPlaying)
+            bossStage = Mathf.Max(0, bossStage);
+
+            if (currentBgm == type && currentBossStage == bossStage && audioSource.isPlaying)
                 return;
 
-            AudioClip clip = LoadClip(type);
+            AudioClip clip = LoadClip(type, bossStage);
 
             if (clip == null)
                 return;
 
             currentBgm = type;
+            currentBossStage = bossStage;
             audioSource.clip = clip;
             audioSource.loop = true;
-            audioSource.volume = bgmVolume * GameOptions.MasterVolume;
+            audioSource.volume = GetAppliedVolume();
             audioSource.Play();
         }
 
-        private static AudioClip LoadClip(BgmType type)
+        private float GetAppliedVolume()
         {
-            string clipName = type == BgmType.MainMenu ? MainMenuClipName : string.Empty;
+            return bgmVolume * GameOptions.MasterVolume * GameOptions.BgmVolume;
+        }
 
-            if (string.IsNullOrWhiteSpace(clipName))
+        private static AudioClip LoadClip(BgmType type, int bossStage)
+        {
+            switch (type)
+            {
+                case BgmType.MainMenu:
+                    return Resources.Load<AudioClip>(MusicRoot + MainMenuClipName);
+                case BgmType.Battle:
+                    return Resources.Load<AudioClip>(MusicRoot + BattleClipName);
+                case BgmType.Boss:
+                    AudioClip bossClip = LoadBossClip(bossStage);
+                    return bossClip != null ? bossClip : Resources.Load<AudioClip>(MusicRoot + BattleClipName);
+                case BgmType.HiddenBoss:
+                    AudioClip hiddenBossClip = Resources.Load<AudioClip>(MusicRoot + HiddenBossClipName);
+                    return hiddenBossClip != null ? hiddenBossClip : Resources.Load<AudioClip>(MusicRoot + BattleClipName);
+                default:
+                    return null;
+            }
+        }
+
+        private static AudioClip LoadBossClip(int bossStage)
+        {
+            if (bossStage <= 0)
                 return null;
 
+            string clipName = $"{BossClipPrefix}{bossStage:00}{BossClipSuffix}";
             return Resources.Load<AudioClip>(MusicRoot + clipName);
         }
 

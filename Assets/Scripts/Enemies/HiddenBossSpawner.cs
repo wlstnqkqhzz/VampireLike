@@ -190,6 +190,7 @@ namespace VampireLike.Enemies
             SetWaveProgressPaused(true);
             Debug.Log("Greed Lord appeared.");
             GameSfx.Play(SfxType.BossAppear);
+            GameBgm.PlayHiddenBoss();
         }
 
         private void HandleHiddenBossDied(EnemyHealth defeatedBoss)
@@ -201,6 +202,7 @@ namespace VampireLike.Enemies
             }
 
             SetWaveProgressPaused(false);
+            GameBgm.Play(BgmType.Battle);
         }
 
         private void DropAbsorbedExperienceReward(int absorbedExperience, Vector3 dropPosition)

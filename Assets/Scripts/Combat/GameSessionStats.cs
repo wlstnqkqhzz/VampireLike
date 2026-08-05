@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
 namespace VampireLike.Combat
 {
     /// <summary>
-    /// 게임 한 판의 결과 화면에 표시할 생존 기록을 모읍니다.
+    /// 寃뚯엫 ???먯쓽 寃곌낵 ?붾㈃???쒖떆???앹〈 湲곕줉??紐⑥쓭?덈떎.
     /// </summary>
     public static class GameSessionStats
     {

@@ -394,8 +394,8 @@ namespace VampireLike.Combat
                     return;
 
                 GameSfx.Play(SfxType.SkillRicochet);
-                CombatVFX.PlayLine(currentPosition, nextEnemy.transform.position, CombatVFXKind.ChainLightning, 0.13f, 0.08f);
-                CombatVFX.PlayBurst(nextEnemy.transform.position, CombatVFXKind.ChainLightning, 0.38f, 0.16f);
+                CombatVFX.PlayChainLightning(currentPosition, nextEnemy.transform.position, 0.24f, 0.075f);
+                CombatVFX.PlayBurst(nextEnemy.transform.position, CombatVFXKind.ChainLightning, 0.46f, 0.2f);
                 nextEnemy.TakeDamage(damage);
 
                 currentEnemy = nextEnemy;

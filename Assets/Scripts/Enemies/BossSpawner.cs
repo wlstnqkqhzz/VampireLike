@@ -204,6 +204,7 @@ namespace VampireLike.Enemies
             SetWaveProgressPaused(true);
             Debug.Log($"Boss appeared - Wave {wave}");
             GameSfx.Play(SfxType.BossAppear);
+            GameBgm.PlayBoss(bossStage);
             BossSpawned?.Invoke(bossStage, activeBoss);
         }
 
@@ -211,6 +212,7 @@ namespace VampireLike.Enemies
         {
             int defeatedStage = activeBossStage;
             BossDefeated?.Invoke(defeatedStage, defeatedBoss);
+            GameBgm.Play(BgmType.Battle);
             UnsubscribeActiveBossDeath();
         }
 

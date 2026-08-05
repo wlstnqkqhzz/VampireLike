@@ -1,13 +1,14 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace VampireLike.Settings
 {
     /// <summary>
-    /// 게임 옵션 값을 PlayerPrefs에 저장하고, 시작 시 다시 적용합니다.
+    /// 寃뚯엫 ?듭뀡 媛믪쓣 PlayerPrefs????ν븯怨? ?쒖옉 ???ㅼ떆 ?곸슜?⑸땲??
     /// </summary>
     public static class GameOptions
     {
         private const string MasterVolumeKey = "Options.MasterVolume";
+        private const string BgmVolumeKey = "Options.BgmVolume";
         private const string SfxVolumeKey = "Options.SfxVolume";
         private const string FullscreenKey = "Options.Fullscreen";
         private const string ResolutionIndexKey = "Options.ResolutionIndex";
@@ -21,6 +22,7 @@ namespace VampireLike.Settings
         };
 
         public static float MasterVolume { get; private set; } = 0.8f;
+        public static float BgmVolume { get; private set; } = 0.8f;
         public static float SfxVolume { get; private set; } = 0.8f;
         public static bool IsFullscreen { get; private set; } = true;
         public static int ResolutionIndex { get; private set; } = 2;
@@ -43,6 +45,12 @@ namespace VampireLike.Settings
         public static void SetMasterVolume(float volume)
         {
             MasterVolume = Mathf.Clamp01(volume);
+            Save();
+        }
+
+        public static void SetBgmVolume(float volume)
+        {
+            BgmVolume = Mathf.Clamp01(volume);
             Save();
         }
 
@@ -69,6 +77,7 @@ namespace VampireLike.Settings
         public static void ResetToDefaults()
         {
             MasterVolume = 0.8f;
+            BgmVolume = 0.8f;
             SfxVolume = 0.8f;
             IsFullscreen = true;
             ResolutionIndex = 2;
@@ -79,6 +88,7 @@ namespace VampireLike.Settings
         private static void Load()
         {
             MasterVolume = PlayerPrefs.GetFloat(MasterVolumeKey, 0.8f);
+            BgmVolume = PlayerPrefs.GetFloat(BgmVolumeKey, 0.8f);
             SfxVolume = PlayerPrefs.GetFloat(SfxVolumeKey, 0.8f);
             IsFullscreen = PlayerPrefs.GetInt(FullscreenKey, 1) == 1;
             ResolutionIndex = Mathf.Clamp(PlayerPrefs.GetInt(ResolutionIndexKey, 2), 0, SupportedResolutions.Length - 1);
@@ -87,6 +97,7 @@ namespace VampireLike.Settings
         private static void Save()
         {
             PlayerPrefs.SetFloat(MasterVolumeKey, MasterVolume);
+            PlayerPrefs.SetFloat(BgmVolumeKey, BgmVolume);
             PlayerPrefs.SetFloat(SfxVolumeKey, SfxVolume);
             PlayerPrefs.SetInt(FullscreenKey, IsFullscreen ? 1 : 0);
             PlayerPrefs.SetInt(ResolutionIndexKey, ResolutionIndex);

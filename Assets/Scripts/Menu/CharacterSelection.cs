@@ -13,9 +13,9 @@ namespace VampireLike.Menu
         {
             new CharacterDefinition(
                 "kael",
-                "카엘",
-                "흑검 수호자",
-                "검은 갑주와 보랏빛 마력을 두른 전사입니다. 느리지만 단단하고 한 발의 피해가 강합니다.",
+                "\uCE74\uC5D8",
+                "\uD751\uAC80 \uC218\uD638\uC790",
+                "\uB290\uB9AC\uC9C0\uB9CC \uB2E8\uB2E8\uD55C \uD751\uAC80 \uC804\uC0AC\uC785\uB2C8\uB2E4. \uB192\uC740 \uCCB4\uB825\uACFC \uAC15\uD55C \uD55C \uBC29\uC73C\uB85C \uC801\uC744 \uBC84\uD301\uB2C8\uB2E4.",
                 0.9f,
                 1.18f,
                 1.35f,
@@ -40,9 +40,9 @@ namespace VampireLike.Menu
                 SfxType.KaelSwordWave),
             new CharacterDefinition(
                 "selene",
-                "셀레네",
-                "월영 쌍검",
-                "달빛처럼 빠르게 파고드는 쌍검 암살자입니다. 기동성과 연사력이 높지만 한 발 피해와 체력은 낮습니다.",
+                "\uC140\uB808\uB124",
+                "\uC6D4\uC601 \uC30D\uAC80",
+                "\uB2EC\uBE5B\uCC98\uB7FC \uBE60\uB974\uAC8C \uD30C\uACE0\uB4DC\uB294 \uC30D\uAC80 \uC554\uC0B4\uC790\uC785\uB2C8\uB2E4. \uAE30\uB3D9\uC131\uACFC \uC5F0\uC0AC\uB825\uC774 \uB192\uC9C0\uB9CC \uCCB4\uB825\uC740 \uB0AE\uC2B5\uB2C8\uB2E4.",
                 1.18f,
                 0.68f,
                 0.75f,

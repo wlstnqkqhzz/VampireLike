@@ -129,6 +129,30 @@ namespace VampireLike.VFX
             effect.Play(duration, 1f, 1f, 0f, true);
         }
 
+        public static void PlayChainLightning(Vector2 from, Vector2 to, float duration = 0.22f, float width = 0.07f, int sortingOrder = 19)
+        {
+            duration *= DurationMultiplier;
+            width *= SizeMultiplier;
+            sortingOrder += SortingOffset;
+            Vector2 direction = to - from;
+
+            if (direction.sqrMagnitude <= 0.001f)
+                return;
+
+            GameObject root = new GameObject("VFX Chain Lightning Line");
+            LineRenderer glow = CreateLightningRenderer(root, "Glow", width * 2.8f, WithAlpha(GetMainColor(CombatVFXKind.ChainLightning), 0.34f), sortingOrder);
+            LineRenderer core = CreateLightningRenderer(root, "Core", width, GetSecondaryColor(CombatVFXKind.ChainLightning), sortingOrder + 1);
+            Vector3[] points = CreateLightningPoints(from, to, 7, width * 3.5f);
+
+            glow.positionCount = points.Length;
+            core.positionCount = points.Length;
+            glow.SetPositions(points);
+            core.SetPositions(points);
+
+            CombatVFXLineEffect effect = root.AddComponent<CombatVFXLineEffect>();
+            effect.Play(duration, glow, core);
+        }
+
         public static GameObject CreateZoneVisual(Transform parent, CombatVFXKind kind, float radius, Color tint, int sortingOrder = 10)
         {
             radius *= SizeMultiplier;
@@ -256,6 +280,49 @@ namespace VampireLike.VFX
             return new Color(color.r, color.g, color.b, Mathf.Clamp01(alpha * AlphaMultiplier));
         }
 
+        private static LineRenderer CreateLightningRenderer(GameObject parent, string name, float width, Color color, int sortingOrder)
+        {
+            GameObject child = new GameObject(name);
+            child.transform.SetParent(parent.transform, false);
+            LineRenderer lineRenderer = child.AddComponent<LineRenderer>();
+            lineRenderer.useWorldSpace = true;
+            lineRenderer.material = SharedTrailMaterial;
+            lineRenderer.textureMode = LineTextureMode.Stretch;
+            lineRenderer.alignment = LineAlignment.View;
+            lineRenderer.numCapVertices = 2;
+            lineRenderer.numCornerVertices = 2;
+            lineRenderer.startWidth = width;
+            lineRenderer.endWidth = width * 0.72f;
+            lineRenderer.startColor = color;
+            lineRenderer.endColor = color;
+            lineRenderer.sortingOrder = sortingOrder;
+            return lineRenderer;
+        }
+
+        private static Vector3[] CreateLightningPoints(Vector2 from, Vector2 to, int segments, float jitter)
+        {
+            segments = Mathf.Max(2, segments);
+            Vector3[] points = new Vector3[segments + 1];
+            Vector2 direction = to - from;
+            Vector2 normal = new Vector2(-direction.y, direction.x).normalized;
+
+            for (int i = 0; i <= segments; i++)
+            {
+                float t = i / (float)segments;
+                Vector2 point = Vector2.Lerp(from, to, t);
+
+                if (i > 0 && i < segments)
+                {
+                    float fade = Mathf.Sin(t * Mathf.PI);
+                    point += normal * Random.Range(-jitter, jitter) * fade;
+                }
+
+                points[i] = point;
+            }
+
+            return points;
+        }
+
         private static float SizeMultiplier => Settings == null ? 1f : Settings.SizeMultiplier;
         private static float DurationMultiplier => Settings == null ? 1f : Settings.DurationMultiplier;
         private static float AlphaMultiplier => Settings == null ? 1f : Settings.AlphaMultiplier;
@@ -309,6 +376,62 @@ namespace VampireLike.VFX
             }
 
             if (progress >= 1f && destroyWhenDone)
+                Destroy(gameObject);
+        }
+    }
+
+    public class CombatVFXLineEffect : MonoBehaviour
+    {
+        private LineRenderer[] lineRenderers;
+        private Color[] startColors;
+        private Color[] endColors;
+        private float duration;
+        private float elapsed;
+
+        public void Play(float effectDuration, params LineRenderer[] targets)
+        {
+            lineRenderers = targets;
+            duration = Mathf.Max(0.03f, effectDuration);
+            elapsed = 0f;
+            startColors = new Color[lineRenderers.Length];
+            endColors = new Color[lineRenderers.Length];
+
+            for (int i = 0; i < lineRenderers.Length; i++)
+            {
+                if (lineRenderers[i] == null)
+                    continue;
+
+                startColors[i] = lineRenderers[i].startColor;
+                endColors[i] = lineRenderers[i].endColor;
+            }
+        }
+
+        private void Update()
+        {
+            if (GameState.IsGameOver)
+                return;
+
+            elapsed += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            float alpha = Mathf.Lerp(1f, 0f, progress);
+
+            for (int i = 0; i < lineRenderers.Length; i++)
+            {
+                LineRenderer lineRenderer = lineRenderers[i];
+
+                if (lineRenderer == null)
+                    continue;
+
+                Color startColor = startColors[i];
+                Color endColor = endColors[i];
+                startColor.a *= alpha;
+                endColor.a *= alpha;
+                lineRenderer.startColor = startColor;
+                lineRenderer.endColor = endColor;
+                lineRenderer.widthMultiplier = Mathf.Lerp(1f, 0.55f, progress);
+            }
+
+            if (progress >= 1f)
                 Destroy(gameObject);
         }
     }

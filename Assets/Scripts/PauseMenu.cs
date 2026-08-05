@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
@@ -7,7 +7,7 @@ using VampireLike.Audio;
 using VampireLike.Settings;
 
 /// <summary>
-/// Escape 키로 일시정지 메뉴를 열고 닫으며, 계속하기/게임 종료 버튼을 처리한다.
+/// Escape ?ㅻ줈 ?쇱떆?뺤? 硫붾돱瑜??닿퀬 ?レ쑝硫? 怨꾩냽?섍린/寃뚯엫 醫낅즺 踰꾪듉??泥섎━?쒕떎.
 /// </summary>
 public class PauseMenu : MonoBehaviour
 {
@@ -19,20 +19,21 @@ public class PauseMenu : MonoBehaviour
     [SerializeField]
     private GameObject pauseMenuRoot;
 
-    // 일시정지 해제 버튼이다. 자동 생성 UI 또는 Inspector 연결 둘 다 지원한다.
+    // ?쇱떆?뺤? ?댁젣 踰꾪듉?대떎. ?먮룞 ?앹꽦 UI ?먮뒗 Inspector ?곌껐 ????吏?먰븳??
     [SerializeField]
     private Button resumeButton;
 
     [SerializeField]
     private Button optionsButton;
 
-    // 에디터에서는 Play Mode를 종료하고, 빌드에서는 애플리케이션을 종료한다.
+    // ?먮뵒?곗뿉?쒕뒗 Play Mode瑜?醫낅즺?섍퀬, 鍮뚮뱶?먯꽌???좏뵆由ъ??댁뀡??醫낅즺?쒕떎.
     [SerializeField]
     private Button quitButton;
 
     private RectTransform pausePanel;
     private RectTransform optionsPanel;
     private Slider masterVolumeSlider;
+    private Slider bgmVolumeSlider;
     private Slider sfxVolumeSlider;
     private Toggle fullscreenToggle;
     private Text resolutionText;
@@ -68,7 +69,7 @@ public class PauseMenu : MonoBehaviour
         if (VampireLike.Combat.GameState.IsGameOver || VampireLike.Combat.GameState.IsMainMenuOpen)
             return;
 
-        // New Input System 기준으로 Escape 입력을 직접 확인한다.
+        // New Input System 湲곗??쇰줈 Escape ?낅젰??吏곸젒 ?뺤씤?쒕떎.
         if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
             TogglePause();
     }
@@ -117,7 +118,7 @@ public class PauseMenu : MonoBehaviour
     private void SetPaused(bool paused)
     {
         isPaused = paused;
-        // Time.timeScale이 0이면 이동, 공격, 적 생성처럼 deltaTime 기반 동작이 멈춘다.
+        // Time.timeScale??0?대㈃ ?대룞, 怨듦꺽, ???앹꽦泥섎읆 deltaTime 湲곕컲 ?숈옉??硫덉텣??
         Time.timeScale = isPaused ? 0f : 1f;
         CenterPauseMenu();
 
@@ -130,7 +131,7 @@ public class PauseMenu : MonoBehaviour
 
     private void EnsurePauseMenu()
     {
-        // 씬에 이미 메뉴가 있으면 재사용하고, 없으면 런타임에 기본 UI를 만든다.
+        // ?ъ뿉 ?대? 硫붾돱媛 ?덉쑝硫??ъ궗?⑺븯怨? ?놁쑝硫??고??꾩뿉 湲곕낯 UI瑜?留뚮뱺??
         if (pauseMenuRoot != null)
         {
             CachePausePanel();
@@ -158,10 +159,10 @@ public class PauseMenu : MonoBehaviour
         Image panelImage = panel.AddComponent<Image>();
         panelImage.color = new Color(0.12f, 0.14f, 0.12f, 0.92f);
 
-        CreateLabel(panel.transform, "일시정지", new Vector2(0f, 58f), 30, Color.white);
-        resumeButton = CreateButton(panel.transform, "계속하기", new Vector2(0f, 18f));
-        optionsButton = CreateButton(panel.transform, "옵션", new Vector2(0f, -36f));
-        quitButton = CreateButton(panel.transform, "게임 종료", new Vector2(0f, -90f));
+        CreateLabel(panel.transform, "?쇱떆?뺤?", new Vector2(0f, 58f), 30, Color.white);
+        resumeButton = CreateButton(panel.transform, "怨꾩냽?섍린", new Vector2(0f, 18f));
+        optionsButton = CreateButton(panel.transform, "?듭뀡", new Vector2(0f, -36f));
+        quitButton = CreateButton(panel.transform, "寃뚯엫 醫낅즺", new Vector2(0f, -90f));
 
         CreateOptionsPanel(root.transform);
     }
@@ -189,7 +190,7 @@ public class PauseMenu : MonoBehaviour
 
     private static void EnsureEventSystem()
     {
-        // 버튼 클릭을 받을 EventSystem이 없으면 New Input System용 모듈과 함께 만든다.
+        // 踰꾪듉 ?대┃??諛쏆쓣 EventSystem???놁쑝硫?New Input System??紐⑤뱢怨??④퍡 留뚮뱺??
         if (FindFirstObjectByType<EventSystem>() != null)
             return;
 
@@ -252,7 +253,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = new Vector2(480f, 360f);
+        rectTransform.sizeDelta = new Vector2(500f, 430f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 
@@ -266,20 +267,22 @@ public class PauseMenu : MonoBehaviour
         Image panelImage = panel.AddComponent<Image>();
         panelImage.color = new Color(0.08f, 0.1f, 0.09f, 0.95f);
 
-        CreateLabel(panel.transform, "옵션", new Vector2(0f, 136f), 28, Color.white);
-        CreateLabel(panel.transform, "전체 음량", new Vector2(-150f, 78f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "효과음", new Vector2(-150f, 28f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "전체화면", new Vector2(-150f, -28f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "해상도", new Vector2(-150f, -82f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uC635\uC158", new Vector2(0f, 168f), 28, Color.white);
+        CreateLabel(panel.transform, "\uC804\uCCB4 \uC74C\uB7C9", new Vector2(-155f, 112f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uBC30\uACBD \uC74C\uC545", new Vector2(-155f, 62f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uD6A8\uACFC\uC74C", new Vector2(-155f, 12f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uC804\uCCB4\uD654\uBA74", new Vector2(-155f, -44f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uD574\uC0C1\uB3C4", new Vector2(-155f, -98f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
 
-        masterVolumeSlider = CreateSlider(panel.transform, new Vector2(90f, 78f));
-        sfxVolumeSlider = CreateSlider(panel.transform, new Vector2(90f, 28f));
-        fullscreenToggle = CreateToggle(panel.transform, new Vector2(22f, -28f));
-        previousResolutionButton = CreateButton(panel.transform, "<", new Vector2(-6f, -82f), new Vector2(46f, 36f));
-        resolutionText = CreateText(panel.transform, string.Empty, new Vector2(90f, -82f), 16, Color.white, new Vector2(150f, 34f));
-        nextResolutionButton = CreateButton(panel.transform, ">", new Vector2(186f, -82f), new Vector2(46f, 36f));
-        appliedScreenText = CreateText(panel.transform, string.Empty, new Vector2(0f, -114f), 14, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(360f, 26f));
-        optionsBackButton = CreateButton(panel.transform, "뒤로", new Vector2(0f, -142f));
+        masterVolumeSlider = CreateSlider(panel.transform, new Vector2(92f, 112f));
+        bgmVolumeSlider = CreateSlider(panel.transform, new Vector2(92f, 62f));
+        sfxVolumeSlider = CreateSlider(panel.transform, new Vector2(92f, 12f));
+        fullscreenToggle = CreateToggle(panel.transform, new Vector2(24f, -44f));
+        previousResolutionButton = CreateButton(panel.transform, "<", new Vector2(-4f, -98f), new Vector2(46f, 36f));
+        resolutionText = CreateText(panel.transform, string.Empty, new Vector2(92f, -98f), 16, Color.white, new Vector2(150f, 34f));
+        nextResolutionButton = CreateButton(panel.transform, ">", new Vector2(188f, -98f), new Vector2(46f, 36f));
+        appliedScreenText = CreateText(panel.transform, string.Empty, new Vector2(0f, -136f), 14, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(380f, 26f));
+        optionsBackButton = CreateButton(panel.transform, "\uB4A4\uB85C", new Vector2(0f, -174f));
         RefreshOptionsControls();
         panel.SetActive(false);
     }
@@ -311,6 +314,9 @@ public class PauseMenu : MonoBehaviour
         if (masterVolumeSlider != null)
             masterVolumeSlider.onValueChanged.AddListener(GameOptions.SetMasterVolume);
 
+        if (bgmVolumeSlider != null)
+            bgmVolumeSlider.onValueChanged.AddListener(GameOptions.SetBgmVolume);
+
         if (sfxVolumeSlider != null)
             sfxVolumeSlider.onValueChanged.AddListener(GameOptions.SetSfxVolume);
 
@@ -331,6 +337,9 @@ public class PauseMenu : MonoBehaviour
     {
         if (masterVolumeSlider != null)
             masterVolumeSlider.onValueChanged.RemoveListener(GameOptions.SetMasterVolume);
+
+        if (bgmVolumeSlider != null)
+            bgmVolumeSlider.onValueChanged.RemoveListener(GameOptions.SetBgmVolume);
 
         if (sfxVolumeSlider != null)
             sfxVolumeSlider.onValueChanged.RemoveListener(GameOptions.SetSfxVolume);
@@ -367,6 +376,9 @@ public class PauseMenu : MonoBehaviour
         if (masterVolumeSlider != null)
             masterVolumeSlider.SetValueWithoutNotify(GameOptions.MasterVolume);
 
+        if (bgmVolumeSlider != null)
+            bgmVolumeSlider.SetValueWithoutNotify(GameOptions.BgmVolume);
+
         if (sfxVolumeSlider != null)
             sfxVolumeSlider.SetValueWithoutNotify(GameOptions.SfxVolume);
 
@@ -380,7 +392,7 @@ public class PauseMenu : MonoBehaviour
         }
 
         if (appliedScreenText != null)
-            appliedScreenText.text = $"현재 적용: {GameOptions.AppliedScreenInfo}";
+            appliedScreenText.text = $"\uD604\uC7AC \uC801\uC6A9: {GameOptions.AppliedScreenInfo}";
     }
 
     private static void CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color)
@@ -522,7 +534,7 @@ public class PauseMenu : MonoBehaviour
         checkRect.sizeDelta = new Vector2(24f, 24f);
         checkRect.anchoredPosition = new Vector2(18f, 0f);
 
-        Text label = CreateText(toggleObject.transform, "켜짐", new Vector2(42f, 0f), 16, Color.white, new Vector2(90f, 28f));
+        Text label = CreateText(toggleObject.transform, "耳쒖쭚", new Vector2(42f, 0f), 16, Color.white, new Vector2(90f, 28f));
         label.alignment = TextAnchor.MiddleLeft;
 
         Toggle toggle = toggleObject.AddComponent<Toggle>();

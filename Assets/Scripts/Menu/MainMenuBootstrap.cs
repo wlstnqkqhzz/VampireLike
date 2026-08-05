@@ -34,7 +34,7 @@ namespace VampireLike.Menu
         {
             if (activeScene.name != MainMenuSceneName)
             {
-                GameBgm.Stop();
+                GameBgm.Play(BgmType.Battle);
                 return;
             }
 

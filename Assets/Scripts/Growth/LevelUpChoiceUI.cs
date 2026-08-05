@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -8,7 +8,7 @@ using VampireLike.Audio;
 namespace VampireLike.Growth
 {
     /// <summary>
-    /// 플레이어 레벨업 시 강화 선택지 3개를 화면에 보여주고, 선택된 강화를 적용한다.
+    /// ?뚮젅?댁뼱 ?덈꺼????媛뺥솕 ?좏깮吏 3媛쒕? ?붾㈃??蹂댁뿬二쇨퀬, ?좏깮??媛뺥솕瑜??곸슜?쒕떎.
     /// </summary>
     public class LevelUpChoiceUI : MonoBehaviour
     {
@@ -45,7 +45,7 @@ namespace VampireLike.Growth
         {
             EnsureUI();
 
-            // 강화 컨트롤러에서 현재 선택 가능한 강화 3개를 랜덤으로 받아온다.
+            // 媛뺥솕 而⑦듃濡ㅻ윭?먯꽌 ?꾩옱 ?좏깮 媛?ν븳 媛뺥솕 3媛쒕? ?쒕뜡?쇰줈 諛쏆븘?⑤떎.
             currentChoices = upgradeController.GetRandomChoices(ChoiceCount);
 
             if (currentChoices.Count == 0)
@@ -122,7 +122,7 @@ namespace VampireLike.Growth
             Image panelImage = panel.AddComponent<Image>();
             panelImage.color = new Color(0.1f, 0.13f, 0.15f, 0.96f);
 
-            CreateLabel(panel.transform, "레벨업", new Vector2(0f, 130f), 36, Color.white, new Vector2(520f, 52f));
+            CreateLabel(panel.transform, "레벨 업", new Vector2(0f, 130f), 36, Color.white, new Vector2(520f, 52f));
 
             choiceButtons = new Button[ChoiceCount];
             choiceButtonImages = new Image[ChoiceCount];
@@ -172,7 +172,7 @@ namespace VampireLike.Growth
 
         private static void EnsureEventSystem()
         {
-            // 버튼 클릭을 받을 EventSystem이 없으면 New Input System용 모듈과 함께 만든다.
+            // 踰꾪듉 ?대┃??諛쏆쓣 EventSystem???놁쑝硫?New Input System??紐⑤뱢怨??④퍡 留뚮뱺??
             if (FindFirstObjectByType<EventSystem>() != null)
                 return;
 
