@@ -25,6 +25,14 @@ namespace VampireLike.Growth
         [SerializeField]
         private bool forceAtLeastOneNormalChoice = true;
 
+        [Header("Character Exclusive Choices")]
+        [SerializeField]
+        [Range(0f, 1f)]
+        private float characterExclusiveUpgradeChance = 0.3f;
+
+        [SerializeField]
+        private int maxCharacterExclusiveChoices = 1;
+
         // 강화 타입별 현재 레벨을 런타임에 기록한다.
         private readonly Dictionary<UpgradeType, int> upgradeLevels = new Dictionary<UpgradeType, int>();
         private PlayerAutoAttack autoAttack;
@@ -68,6 +76,8 @@ namespace VampireLike.Growth
         {
             specialUpgradeChance = Mathf.Clamp01(specialUpgradeChance);
             maxSpecialChoices = Mathf.Max(0, maxSpecialChoices);
+            characterExclusiveUpgradeChance = Mathf.Clamp01(characterExclusiveUpgradeChance);
+            maxCharacterExclusiveChoices = Mathf.Max(0, maxCharacterExclusiveChoices);
 
             if (upgradeDefinitions == null)
                 return;
@@ -89,12 +99,15 @@ namespace VampireLike.Growth
             List<UpgradeChoice> choices = new List<UpgradeChoice>();
             List<UpgradeDefinition> normalDefinitions = new List<UpgradeDefinition>();
             List<UpgradeDefinition> specialDefinitions = new List<UpgradeDefinition>();
+            List<UpgradeDefinition> characterDefinitions = new List<UpgradeDefinition>();
 
             for (int i = 0; i < availableDefinitions.Count; i++)
             {
                 UpgradeDefinition definition = availableDefinitions[i];
 
-                if (definition.IsSpecialUpgrade)
+                if (definition.IsCharacterExclusiveUpgrade)
+                    characterDefinitions.Add(definition);
+                else if (definition.IsSpecialUpgrade)
                     specialDefinitions.Add(definition);
                 else
                     normalDefinitions.Add(definition);
@@ -102,10 +115,19 @@ namespace VampireLike.Growth
 
             bool hasNormalChoice = false;
             int specialChoiceCount = 0;
+            int characterChoiceCount = 0;
 
-            while (choices.Count < count && (normalDefinitions.Count > 0 || specialDefinitions.Count > 0))
+            while (choices.Count < count && (normalDefinitions.Count > 0 || specialDefinitions.Count > 0 || characterDefinitions.Count > 0))
             {
-                bool chooseSpecial = ShouldChooseSpecialChoice(
+                bool chooseCharacter = ShouldChooseCharacterExclusiveChoice(
+                    choices.Count,
+                    count,
+                    hasNormalChoice,
+                    characterChoiceCount,
+                    normalDefinitions.Count,
+                    characterDefinitions.Count);
+
+                bool chooseSpecial = !chooseCharacter && ShouldChooseSpecialChoice(
                     choices.Count,
                     count,
                     hasNormalChoice,
@@ -113,17 +135,30 @@ namespace VampireLike.Growth
                     normalDefinitions.Count,
                     specialDefinitions.Count);
 
-                UpgradeDefinition definition = chooseSpecial
-                    ? TakeRandomDefinition(specialDefinitions)
-                    : TakeRandomDefinition(normalDefinitions);
+                UpgradeDefinition definition = null;
+
+                if (chooseCharacter)
+                    definition = TakeRandomDefinition(characterDefinitions);
+                else if (chooseSpecial)
+                    definition = TakeRandomDefinition(specialDefinitions);
+                else
+                    definition = TakeRandomDefinition(normalDefinitions);
 
                 if (definition == null)
-                    definition = TakeRandomDefinition(chooseSpecial ? normalDefinitions : specialDefinitions);
+                    definition = TakeRandomDefinition(normalDefinitions);
+
+                if (definition == null)
+                    definition = TakeRandomDefinition(specialDefinitions);
+
+                if (definition == null)
+                    definition = TakeRandomDefinition(characterDefinitions);
 
                 if (definition == null)
                     break;
 
-                if (definition.IsSpecialUpgrade)
+                if (definition.IsCharacterExclusiveUpgrade)
+                    characterChoiceCount++;
+                else if (definition.IsSpecialUpgrade)
                     specialChoiceCount++;
                 else
                     hasNormalChoice = true;
@@ -145,11 +180,11 @@ namespace VampireLike.Growth
             if (specialCount <= 0)
                 return false;
 
-            if (normalCount <= 0)
-                return true;
-
             if (currentSpecialChoiceCount >= maxSpecialChoices)
                 return false;
+
+            if (normalCount <= 0)
+                return true;
 
             bool isLastChoice = currentChoiceCount >= targetChoiceCount - 1;
 
@@ -157,6 +192,31 @@ namespace VampireLike.Growth
                 return false;
 
             return Random.value < specialUpgradeChance;
+        }
+
+        private bool ShouldChooseCharacterExclusiveChoice(
+            int currentChoiceCount,
+            int targetChoiceCount,
+            bool hasNormalChoice,
+            int currentCharacterChoiceCount,
+            int normalCount,
+            int characterCount)
+        {
+            if (characterCount <= 0)
+                return false;
+
+            if (currentCharacterChoiceCount >= maxCharacterExclusiveChoices)
+                return false;
+
+            if (normalCount <= 0)
+                return true;
+
+            bool isLastChoice = currentChoiceCount >= targetChoiceCount - 1;
+
+            if (forceAtLeastOneNormalChoice && isLastChoice && !hasNormalChoice)
+                return false;
+
+            return Random.value < characterExclusiveUpgradeChance;
         }
 
         private static UpgradeDefinition TakeRandomDefinition(List<UpgradeDefinition> definitions)
@@ -252,6 +312,46 @@ namespace VampireLike.Growth
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddProjectileReflectLevel();
                     break;
+                case UpgradeType.KaelBlackSwordWave:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddKaelBlackSwordWaveLevel();
+                    break;
+                case UpgradeType.KaelGuardianResolve:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddKaelGuardianResolveLevel();
+                    break;
+                case UpgradeType.KaelManaSlash:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddKaelManaSlashLevel();
+                    break;
+                case UpgradeType.KaelBlackIronBarrier:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddKaelBlackIronBarrierLevel();
+                    break;
+                case UpgradeType.KaelExecutionBlade:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddKaelExecutionBladeLevel();
+                    break;
+                case UpgradeType.SeleneMoonShadowClone:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddSeleneMoonShadowCloneLevel();
+                    break;
+                case UpgradeType.SeleneShadowStep:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddSeleneShadowStepLevel();
+                    break;
+                case UpgradeType.SeleneTwinMoonFlurry:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddSeleneTwinMoonFlurryLevel();
+                    break;
+                case UpgradeType.SeleneMoonlightMark:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddSeleneMoonlightMarkLevel();
+                    break;
+                case UpgradeType.SeleneSilentBlade:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddSeleneSilentBladeLevel();
+                    break;
             }
 
             GameSessionStats.RecordUpgrade(definition.DisplayName);
@@ -270,6 +370,9 @@ namespace VampireLike.Growth
             foreach (UpgradeDefinition definition in upgradeDefinitions)
             {
                 if (definition == null || !CanApply(definition))
+                    continue;
+
+                if (!definition.CanAppearForCharacter(CharacterSelection.SelectedCharacter.Id))
                     continue;
 
                 if (!definition.Unlimited && !addedLimitedTypes.Add(definition.UpgradeType))

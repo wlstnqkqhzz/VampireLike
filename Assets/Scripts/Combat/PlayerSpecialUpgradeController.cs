@@ -104,8 +104,71 @@ namespace VampireLike.Combat
         [SerializeField]
         private ShieldVFXController shieldVfxPrefab;
 
+        [Header("Character Exclusive - Kael")]
+        [SerializeField]
+        private float kaelBlackSwordWaveRadius = 0.85f;
+
+        [SerializeField]
+        private float kaelBlackSwordWaveDamageRatio = 0.18f;
+
+        [SerializeField]
+        private float kaelGuardianResolveHealthThreshold = 0.5f;
+
+        [SerializeField]
+        private float kaelGuardianResolveBlockChancePerLevel = 0.12f;
+
+        [SerializeField]
+        private int kaelManaSlashBaseHitInterval = 6;
+
+        [SerializeField]
+        private float kaelManaSlashDamageRatio = 1.15f;
+
+        [SerializeField]
+        private float kaelManaSlashRadius = 1.45f;
+
+        [SerializeField]
+        private float kaelBlackIronBarrierCooldown = 18f;
+
+        [SerializeField]
+        private float kaelBlackIronBarrierCooldownReductionPerLevel = 3f;
+
+        [SerializeField]
+        private float kaelExecutionHealthThreshold = 0.35f;
+
+        [SerializeField]
+        private float kaelExecutionDamageRatioPerLevel = 0.25f;
+
+        [Header("Character Exclusive - Selene")]
+        [SerializeField]
+        private float seleneMoonShadowCloneChancePerLevel = 0.18f;
+
+        [SerializeField]
+        private float seleneShadowStepBonusInvinciblePerLevel = 0.18f;
+
+        [SerializeField]
+        private int seleneTwinMoonFlurryBaseInterval = 8;
+
+        [SerializeField]
+        private float seleneTwinMoonFlurryAngle = 12f;
+
+        [SerializeField]
+        private int seleneMoonlightMarkRequiredStacks = 3;
+
+        [SerializeField]
+        private float seleneMoonlightMarkDamageRatioPerLevel = 0.42f;
+
+        [SerializeField]
+        private float seleneSilentBladeChancePerLevel = 0.16f;
+
+        [SerializeField]
+        private float seleneSilentBladeRadius = 2.3f;
+
+        [SerializeField]
+        private float seleneSilentBladeDamageRatio = 0.55f;
+
         private readonly Collider2D[] areaResults = new Collider2D[64];
         private readonly List<OrbitingBlade> orbitingBlades = new List<OrbitingBlade>();
+        private readonly Dictionary<EnemyHealth, int> moonlightMarkStacks = new Dictionary<EnemyHealth, int>();
         private int explosiveShotLevel;
         private int frostShotLevel;
         private int vampirismLevel;
@@ -116,9 +179,22 @@ namespace VampireLike.Combat
         private int chainRicochetLevel;
         private int eclipseAuraLevel;
         private int projectileReflectLevel;
+        private int kaelBlackSwordWaveLevel;
+        private int kaelGuardianResolveLevel;
+        private int kaelManaSlashLevel;
+        private int kaelBlackIronBarrierLevel;
+        private int kaelExecutionBladeLevel;
+        private int seleneMoonShadowCloneLevel;
+        private int seleneShadowStepLevel;
+        private int seleneTwinMoonFlurryLevel;
+        private int seleneMoonlightMarkLevel;
+        private int seleneSilentBladeLevel;
         private int projectileHitCount;
+        private int kaelManaSlashHitCount;
+        private int seleneTwinMoonFlurryAttackCount;
         private float shieldTimer;
         private float eclipseAuraTimer;
+        private float kaelBlackIronBarrierTimer;
         private bool shieldReady;
         private PlayerHealth playerHealth;
         private PlayerEffectAnchors effectAnchors;
@@ -162,6 +238,26 @@ namespace VampireLike.Combat
             eclipseAuraDamagePerLevel = Mathf.Max(0, eclipseAuraDamagePerLevel);
             eclipseAuraDamageInterval = Mathf.Max(0.2f, eclipseAuraDamageInterval);
             eclipseAuraIntervalReductionPerLevel = Mathf.Max(0f, eclipseAuraIntervalReductionPerLevel);
+            kaelBlackSwordWaveRadius = Mathf.Max(0.1f, kaelBlackSwordWaveRadius);
+            kaelBlackSwordWaveDamageRatio = Mathf.Max(0.01f, kaelBlackSwordWaveDamageRatio);
+            kaelGuardianResolveHealthThreshold = Mathf.Clamp01(kaelGuardianResolveHealthThreshold);
+            kaelGuardianResolveBlockChancePerLevel = Mathf.Clamp01(kaelGuardianResolveBlockChancePerLevel);
+            kaelManaSlashBaseHitInterval = Mathf.Max(1, kaelManaSlashBaseHitInterval);
+            kaelManaSlashDamageRatio = Mathf.Max(0.1f, kaelManaSlashDamageRatio);
+            kaelManaSlashRadius = Mathf.Max(0.1f, kaelManaSlashRadius);
+            kaelBlackIronBarrierCooldown = Mathf.Max(1f, kaelBlackIronBarrierCooldown);
+            kaelBlackIronBarrierCooldownReductionPerLevel = Mathf.Max(0f, kaelBlackIronBarrierCooldownReductionPerLevel);
+            kaelExecutionHealthThreshold = Mathf.Clamp01(kaelExecutionHealthThreshold);
+            kaelExecutionDamageRatioPerLevel = Mathf.Max(0.01f, kaelExecutionDamageRatioPerLevel);
+            seleneMoonShadowCloneChancePerLevel = Mathf.Clamp01(seleneMoonShadowCloneChancePerLevel);
+            seleneShadowStepBonusInvinciblePerLevel = Mathf.Max(0f, seleneShadowStepBonusInvinciblePerLevel);
+            seleneTwinMoonFlurryBaseInterval = Mathf.Max(1, seleneTwinMoonFlurryBaseInterval);
+            seleneTwinMoonFlurryAngle = Mathf.Clamp(seleneTwinMoonFlurryAngle, 1f, 35f);
+            seleneMoonlightMarkRequiredStacks = Mathf.Max(2, seleneMoonlightMarkRequiredStacks);
+            seleneMoonlightMarkDamageRatioPerLevel = Mathf.Max(0.01f, seleneMoonlightMarkDamageRatioPerLevel);
+            seleneSilentBladeChancePerLevel = Mathf.Clamp01(seleneSilentBladeChancePerLevel);
+            seleneSilentBladeRadius = Mathf.Max(0.3f, seleneSilentBladeRadius);
+            seleneSilentBladeDamageRatio = Mathf.Max(0.1f, seleneSilentBladeDamageRatio);
         }
 
         private void Update()
@@ -169,6 +265,7 @@ namespace VampireLike.Combat
             UpdateShieldRecharge();
             UpdateShieldAura();
             UpdateEclipseAura();
+            UpdateCharacterExclusiveTimers();
         }
 
         public void AddExplosiveShotLevel()
@@ -227,6 +324,57 @@ namespace VampireLike.Combat
             projectileReflectLevel++;
         }
 
+        public void AddKaelBlackSwordWaveLevel()
+        {
+            kaelBlackSwordWaveLevel++;
+        }
+
+        public void AddKaelGuardianResolveLevel()
+        {
+            kaelGuardianResolveLevel++;
+        }
+
+        public void AddKaelManaSlashLevel()
+        {
+            kaelManaSlashLevel++;
+        }
+
+        public void AddKaelBlackIronBarrierLevel()
+        {
+            kaelBlackIronBarrierLevel++;
+            kaelBlackIronBarrierTimer = Mathf.Min(kaelBlackIronBarrierTimer, GetKaelBlackIronBarrierCooldown());
+        }
+
+        public void AddKaelExecutionBladeLevel()
+        {
+            kaelExecutionBladeLevel++;
+        }
+
+        public void AddSeleneMoonShadowCloneLevel()
+        {
+            seleneMoonShadowCloneLevel++;
+        }
+
+        public void AddSeleneShadowStepLevel()
+        {
+            seleneShadowStepLevel++;
+        }
+
+        public void AddSeleneTwinMoonFlurryLevel()
+        {
+            seleneTwinMoonFlurryLevel++;
+        }
+
+        public void AddSeleneMoonlightMarkLevel()
+        {
+            seleneMoonlightMarkLevel++;
+        }
+
+        public void AddSeleneSilentBladeLevel()
+        {
+            seleneSilentBladeLevel++;
+        }
+
         public int GetProjectileReflectCount()
         {
             return Mathf.Clamp(projectileReflectLevel, 0, 3);
@@ -234,22 +382,38 @@ namespace VampireLike.Combat
 
         public Vector2[] GetProjectileDirections(Vector2 baseDirection)
         {
+            List<Vector2> directions = new List<Vector2>();
+
             if (scatterShotLevel <= 0)
-                return new[] { baseDirection };
-
-            int sideCount = Mathf.Clamp(scatterShotLevel, 1, scatterMaxSideCount);
-            int directionCount = sideCount * 2 + 1;
-            Vector2[] directions = new Vector2[directionCount];
-            int index = 0;
-
-            for (int i = -sideCount; i <= sideCount; i++)
             {
-                float angle = i * scatterAnglePerLevel;
-                directions[index] = Rotate(baseDirection, angle).normalized;
-                index++;
+                directions.Add(baseDirection);
+            }
+            else
+            {
+                int sideCount = Mathf.Clamp(scatterShotLevel, 1, scatterMaxSideCount);
+
+                for (int i = -sideCount; i <= sideCount; i++)
+                {
+                    float angle = i * scatterAnglePerLevel;
+                    directions.Add(Rotate(baseDirection, angle).normalized);
+                }
             }
 
-            return directions;
+            if (seleneTwinMoonFlurryLevel > 0 && ShouldTriggerSeleneTwinMoonFlurry())
+            {
+                directions.Add(Rotate(baseDirection, -seleneTwinMoonFlurryAngle).normalized);
+                directions.Add(Rotate(baseDirection, seleneTwinMoonFlurryAngle).normalized);
+                GameSfx.Play(SfxType.SkillScatter);
+                CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.Ricochet, 0.42f, 0.16f);
+            }
+
+            if (seleneMoonShadowCloneLevel > 0 && Random.value < seleneMoonShadowCloneChancePerLevel * seleneMoonShadowCloneLevel)
+            {
+                directions.Add(Rotate(baseDirection, Random.Range(-5f, 5f)).normalized);
+                CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.ChainLightning, 0.36f, 0.14f);
+            }
+
+            return directions.ToArray();
         }
 
         public float GetProjectileDamageMultiplierForDirections(int directionCount)
@@ -264,6 +428,12 @@ namespace VampireLike.Combat
 
         public bool TryBlockDamage(Vector2 hitDirection)
         {
+            if (TryBlockWithKaelBlackIronBarrier(hitDirection))
+                return true;
+
+            if (TryBlockWithKaelGuardianResolve(hitDirection))
+                return true;
+
             if (shieldLevel <= 0 || !shieldReady)
                 return false;
 
@@ -272,6 +442,19 @@ namespace VampireLike.Combat
             GameSfx.Play(SfxType.ShieldBlock);
             BreakShieldVfx(hitDirection);
             return true;
+        }
+
+        public float GetBonusInvincibleDuration()
+        {
+            return seleneShadowStepBonusInvinciblePerLevel * Mathf.Max(0, seleneShadowStepLevel);
+        }
+
+        public void NotifyPlayerDamaged()
+        {
+            if (seleneShadowStepLevel <= 0)
+                return;
+
+            CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.Ricochet, 0.58f, 0.2f);
         }
 
         public void HandleProjectileHit(EnemyHealth enemy, float projectileDamage, Vector2 hitPosition)
@@ -287,6 +470,21 @@ namespace VampireLike.Combat
 
             if (chainRicochetLevel > 0)
                 TriggerChainRicochet(enemy, projectileDamage, hitPosition);
+
+            if (kaelBlackSwordWaveLevel > 0)
+                TriggerKaelBlackSwordWave(enemy, projectileDamage, hitPosition);
+
+            if (kaelManaSlashLevel > 0)
+                CountKaelManaSlash(projectileDamage, hitPosition);
+
+            if (kaelExecutionBladeLevel > 0 && !enemy.IsDead)
+                TryKaelExecutionBlade(enemy, projectileDamage);
+
+            if (seleneMoonlightMarkLevel > 0 && !enemy.IsDead)
+                ApplySeleneMoonlightMark(enemy, projectileDamage);
+
+            if (seleneSilentBladeLevel > 0)
+                TrySeleneSilentBlade(enemy, projectileDamage, hitPosition);
         }
 
         public void HandleProjectileKill(EnemyHealth killedEnemy, float projectileDamage, Vector2 killPosition)
@@ -359,6 +557,84 @@ namespace VampireLike.Combat
 
                 enemy.TakeDamage(damage);
             }
+        }
+
+        private void TriggerKaelBlackSwordWave(EnemyHealth hitEnemy, float projectileDamage, Vector2 hitPosition)
+        {
+            float radius = kaelBlackSwordWaveRadius + 0.12f * Mathf.Max(0, kaelBlackSwordWaveLevel - 1);
+            float damage = projectileDamage * kaelBlackSwordWaveDamageRatio * kaelBlackSwordWaveLevel;
+            ApplyAreaDamage(hitPosition, radius, damage, hitEnemy);
+            CombatVFX.PlayBurst(hitPosition, CombatVFXKind.ArcaneImpact, radius, 0.2f);
+        }
+
+        private void CountKaelManaSlash(float projectileDamage, Vector2 hitPosition)
+        {
+            kaelManaSlashHitCount++;
+
+            if (kaelManaSlashHitCount < GetKaelManaSlashInterval())
+                return;
+
+            kaelManaSlashHitCount = 0;
+            ApplyAreaDamage(hitPosition, kaelManaSlashRadius, projectileDamage * kaelManaSlashDamageRatio, null);
+            GameSfx.Play(SfxType.SkillShockwave);
+            CombatVFX.PlayBurst(hitPosition, CombatVFXKind.Shockwave, kaelManaSlashRadius, 0.28f);
+        }
+
+        private int GetKaelManaSlashInterval()
+        {
+            return Mathf.Max(3, kaelManaSlashBaseHitInterval - Mathf.Max(0, kaelManaSlashLevel - 1));
+        }
+
+        private void TryKaelExecutionBlade(EnemyHealth enemy, float projectileDamage)
+        {
+            float threshold = Mathf.Clamp01(kaelExecutionHealthThreshold + 0.04f * Mathf.Max(0, kaelExecutionBladeLevel - 1));
+
+            if (enemy.HealthProgress > threshold)
+                return;
+
+            float damage = projectileDamage * kaelExecutionDamageRatioPerLevel * kaelExecutionBladeLevel;
+            enemy.TakeDamage(damage);
+            CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Explosion, 0.36f, 0.14f);
+        }
+
+        private void ApplySeleneMoonlightMark(EnemyHealth enemy, float projectileDamage)
+        {
+            if (!moonlightMarkStacks.TryGetValue(enemy, out int stacks))
+                stacks = 0;
+
+            stacks++;
+
+            if (stacks < seleneMoonlightMarkRequiredStacks)
+            {
+                moonlightMarkStacks[enemy] = stacks;
+                CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Ricochet, 0.28f, 0.1f);
+                return;
+            }
+
+            moonlightMarkStacks.Remove(enemy);
+            float damage = projectileDamage * seleneMoonlightMarkDamageRatioPerLevel * seleneMoonlightMarkLevel;
+            enemy.TakeDamage(damage);
+            GameSfx.Play(SfxType.SkillRicochet);
+            CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.ChainLightning, 0.58f, 0.18f);
+        }
+
+        private void TrySeleneSilentBlade(EnemyHealth firstEnemy, float projectileDamage, Vector2 startPosition)
+        {
+            float chance = seleneSilentBladeChancePerLevel * seleneSilentBladeLevel;
+
+            if (Random.value > chance)
+                return;
+
+            EnemyHealth target = FindClosestEnemyAround(GetEffectCenterPosition(), seleneSilentBladeRadius, firstEnemy);
+
+            if (target == null)
+                return;
+
+            float damage = projectileDamage * seleneSilentBladeDamageRatio;
+            target.TakeDamage(damage);
+            GameSfx.Play(SfxType.SeleneDaggerThrow);
+            CombatVFX.PlayLine(startPosition, target.transform.position, CombatVFXKind.Ricochet, 0.12f, 0.06f);
+            CombatVFX.PlayBurst(target.transform.position, CombatVFXKind.Ricochet, 0.34f, 0.12f);
         }
 
         private void TryVampirismHeal()
@@ -487,6 +763,93 @@ namespace VampireLike.Combat
             }
 
             return closestEnemy;
+        }
+
+        private EnemyHealth FindClosestEnemyAround(Vector2 position, float radius, EnemyHealth excludedEnemy)
+        {
+            int hitCount = Physics2D.OverlapCircleNonAlloc(position, radius, areaResults, enemyLayerMask);
+            EnemyHealth closestEnemy = null;
+            float closestSqrDistance = radius * radius;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D hit = areaResults[i];
+
+                if (hit == null)
+                    continue;
+
+                EnemyHealth enemy = hit.GetComponentInParent<EnemyHealth>();
+
+                if (enemy == null || enemy == excludedEnemy || enemy.IsDead)
+                    continue;
+
+                float sqrDistance = ((Vector2)enemy.transform.position - position).sqrMagnitude;
+
+                if (sqrDistance > closestSqrDistance)
+                    continue;
+
+                closestEnemy = enemy;
+                closestSqrDistance = sqrDistance;
+            }
+
+            return closestEnemy;
+        }
+
+        private bool ShouldTriggerSeleneTwinMoonFlurry()
+        {
+            seleneTwinMoonFlurryAttackCount++;
+            int interval = Mathf.Max(3, seleneTwinMoonFlurryBaseInterval - Mathf.Max(0, seleneTwinMoonFlurryLevel - 1));
+
+            if (seleneTwinMoonFlurryAttackCount < interval)
+                return false;
+
+            seleneTwinMoonFlurryAttackCount = 0;
+            return true;
+        }
+
+        private bool TryBlockWithKaelBlackIronBarrier(Vector2 hitDirection)
+        {
+            if (kaelBlackIronBarrierLevel <= 0 || kaelBlackIronBarrierTimer > 0f)
+                return false;
+
+            kaelBlackIronBarrierTimer = GetKaelBlackIronBarrierCooldown();
+            GameSfx.Play(SfxType.ShieldBlock);
+            CombatVFX.PlayBurst(GetShieldCenterPosition(), CombatVFXKind.Shockwave, 0.72f, 0.2f);
+            return true;
+        }
+
+        private bool TryBlockWithKaelGuardianResolve(Vector2 hitDirection)
+        {
+            if (kaelGuardianResolveLevel <= 0)
+                return false;
+
+            if (playerHealth == null)
+                playerHealth = GetComponent<PlayerHealth>();
+
+            if (playerHealth == null || playerHealth.HealthProgress > kaelGuardianResolveHealthThreshold)
+                return false;
+
+            float chance = Mathf.Clamp01(kaelGuardianResolveBlockChancePerLevel * kaelGuardianResolveLevel);
+
+            if (Random.value > chance)
+                return false;
+
+            GameSfx.Play(SfxType.ShieldBlock);
+            CombatVFX.PlayBurst(GetShieldCenterPosition(), CombatVFXKind.Vampirism, 0.58f, 0.18f);
+            return true;
+        }
+
+        private float GetKaelBlackIronBarrierCooldown()
+        {
+            return Mathf.Max(6f, kaelBlackIronBarrierCooldown - kaelBlackIronBarrierCooldownReductionPerLevel * Mathf.Max(0, kaelBlackIronBarrierLevel - 1));
+        }
+
+        private void UpdateCharacterExclusiveTimers()
+        {
+            if (kaelBlackIronBarrierTimer <= 0f || GameState.IsGameOver || Time.timeScale <= 0f)
+                return;
+
+            kaelBlackIronBarrierTimer -= Time.deltaTime;
         }
 
         private static bool IsIgnoredProjectileReflectEnemy(EnemyHealth enemy, IReadOnlyCollection<EnemyHealth> ignoredEnemies)

@@ -23,6 +23,22 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float endLag = 0.25f;
 
+        [SerializeField]
+        private float minimumTriggerDistance = 0.55f;
+
+        [SerializeField]
+        private float maximumTriggerDistance = 3.8f;
+
+        protected override bool CanExecutePattern()
+        {
+            if (Player == null || BossRigidbody == null)
+                return false;
+
+            float sqrDistance = ((Vector2)Player.position - BossRigidbody.position).sqrMagnitude;
+            return sqrDistance >= minimumTriggerDistance * minimumTriggerDistance
+                && sqrDistance <= maximumTriggerDistance * maximumTriggerDistance;
+        }
+
         protected override IEnumerator ExecutePattern()
         {
             if (Player == null || BossRigidbody == null)
@@ -65,6 +81,8 @@ namespace VampireLike.Enemies
             dashSpeed = Mathf.Max(0f, dashSpeed);
             dashDuration = Mathf.Max(0f, dashDuration);
             endLag = Mathf.Max(0f, endLag);
+            minimumTriggerDistance = Mathf.Max(0f, minimumTriggerDistance);
+            maximumTriggerDistance = Mathf.Max(minimumTriggerDistance, maximumTriggerDistance);
         }
     }
 }

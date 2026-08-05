@@ -70,7 +70,7 @@ namespace VampireLike.Menu
             if (definition == null)
                 return 0;
 
-            if (definition.Unlimited || definition.IsSpecialUpgrade)
+            if (definition.Unlimited || definition.IsSpecialUpgrade || definition.IsCharacterExclusiveUpgrade)
                 return definition.MaxLevel;
 
             if (NormalUpgradeMaxLevels != null

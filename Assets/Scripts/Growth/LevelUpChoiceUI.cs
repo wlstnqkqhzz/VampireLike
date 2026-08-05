@@ -28,6 +28,8 @@ namespace VampireLike.Growth
         private static readonly Color NormalTextColor = new Color(0.06f, 0.1f, 0.12f, 1f);
         private static readonly Color SpecialButtonColor = new Color(0.34f, 0.18f, 0.58f, 1f);
         private static readonly Color SpecialTextColor = new Color(1f, 0.88f, 0.42f, 1f);
+        private static readonly Color CharacterButtonColor = new Color(0.18f, 0.14f, 0.08f, 1f);
+        private static readonly Color CharacterTextColor = new Color(1f, 0.78f, 0.28f, 1f);
 
         private void Awake()
         {
@@ -60,7 +62,7 @@ namespace VampireLike.Growth
                     continue;
 
                 choiceTexts[i].text = currentChoices[i].ButtonText;
-                ApplyChoiceStyle(i, currentChoices[i].Definition.IsSpecialUpgrade);
+                ApplyChoiceStyle(i, currentChoices[i].Definition);
                 int choiceIndex = i;
                 choiceButtons[i].onClick.RemoveAllListeners();
                 choiceButtons[i].onClick.AddListener(() => SelectChoice(choiceIndex));
@@ -137,16 +139,28 @@ namespace VampireLike.Growth
             }
         }
 
-        private void ApplyChoiceStyle(int index, bool isSpecialUpgrade)
+        private void ApplyChoiceStyle(int index, UpgradeDefinition definition)
         {
+            bool isCharacterUpgrade = definition != null && definition.IsCharacterExclusiveUpgrade;
+            bool isSpecialUpgrade = definition != null && definition.IsSpecialUpgrade;
+
             if (choiceButtonImages != null && index < choiceButtonImages.Length && choiceButtonImages[index] != null)
-                choiceButtonImages[index].color = isSpecialUpgrade ? SpecialButtonColor : NormalButtonColor;
+            {
+                if (isCharacterUpgrade)
+                    choiceButtonImages[index].color = CharacterButtonColor;
+                else
+                    choiceButtonImages[index].color = isSpecialUpgrade ? SpecialButtonColor : NormalButtonColor;
+            }
 
             if (choiceTexts == null || index >= choiceTexts.Length || choiceTexts[index] == null)
                 return;
 
-            choiceTexts[index].color = isSpecialUpgrade ? SpecialTextColor : NormalTextColor;
-            choiceTexts[index].fontStyle = isSpecialUpgrade ? FontStyle.Bold : FontStyle.Normal;
+            if (isCharacterUpgrade)
+                choiceTexts[index].color = CharacterTextColor;
+            else
+                choiceTexts[index].color = isSpecialUpgrade ? SpecialTextColor : NormalTextColor;
+
+            choiceTexts[index].fontStyle = isCharacterUpgrade || isSpecialUpgrade ? FontStyle.Bold : FontStyle.Normal;
         }
 
         private static Canvas CreateCanvas()

@@ -55,6 +55,9 @@ namespace VampireLike.Combat
         private global::PlayerSpriteAnimator spriteAnimator;
 
         public bool IsDead => isDead;
+        public int MaxHealth => maxHealth;
+        public int CurrentHealth => currentHealth;
+        public float HealthProgress => maxHealth <= 0 ? 0f : Mathf.Clamp01((float)currentHealth / maxHealth);
 
         private void Awake()
         {
@@ -133,6 +136,13 @@ namespace VampireLike.Combat
 
             currentHealth -= damage;
             invincibleTimer = invincibleDuration;
+
+            if (specialUpgradeController != null)
+            {
+                invincibleTimer += specialUpgradeController.GetBonusInvincibleDuration();
+                specialUpgradeController.NotifyPlayerDamaged();
+            }
+
             GameSfx.Play(SfxType.PlayerHit);
 
             if (spriteAnimator == null)

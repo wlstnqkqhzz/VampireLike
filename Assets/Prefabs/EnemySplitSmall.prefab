@@ -176,8 +176,8 @@ MonoBehaviour:
   target: {fileID: 0}
   moveSpeed: 2.1
   stoppingDistance: 0
-  separationRadius: 0.26
-  separationWeight: 0.24
+  separationRadius: 0.32
+  separationWeight: 0.26
   enemyLayerMask:
     serializedVersion: 2
     m_Bits: 128

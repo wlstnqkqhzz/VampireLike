@@ -24,7 +24,17 @@ namespace VampireLike.Growth
         OrbitingBlade,
         ChainRicochet,
         EclipseAura,
-        ProjectileReflect
+        ProjectileReflect,
+        KaelBlackSwordWave,
+        KaelGuardianResolve,
+        KaelManaSlash,
+        KaelBlackIronBarrier,
+        KaelExecutionBlade,
+        SeleneMoonShadowClone,
+        SeleneShadowStep,
+        SeleneTwinMoonFlurry,
+        SeleneMoonlightMark,
+        SeleneSilentBlade
     }
 
     /// <summary>
@@ -61,6 +71,9 @@ namespace VampireLike.Growth
         [SerializeField]
         private bool unlimited;
 
+        [SerializeField]
+        private string requiredCharacterId;
+
         public UpgradeType UpgradeType => upgradeType;
         public string DisplayName => displayName;
         public string Description => description;
@@ -68,6 +81,8 @@ namespace VampireLike.Growth
         public float Multiplier => multiplier;
         public int FlatAmount => flatAmount;
         public bool Unlimited => unlimited;
+        public string RequiredCharacterId => requiredCharacterId;
+        public bool IsCharacterExclusiveUpgrade => !string.IsNullOrWhiteSpace(requiredCharacterId);
         public bool IsSpecialUpgrade => upgradeType == UpgradeType.ExplosiveShot
             || upgradeType == UpgradeType.FrostShot
             || upgradeType == UpgradeType.Vampirism
@@ -78,7 +93,15 @@ namespace VampireLike.Growth
             || upgradeType == UpgradeType.ChainRicochet
             || upgradeType == UpgradeType.EclipseAura
             || upgradeType == UpgradeType.ProjectileReflect;
-        public string GradeLabel => IsSpecialUpgrade ? "특수 강화" : "일반 강화";
+        public string GradeLabel => IsCharacterExclusiveUpgrade ? "전용 강화" : IsSpecialUpgrade ? "특수 강화" : "일반 강화";
+
+        public bool CanAppearForCharacter(string characterId)
+        {
+            if (!IsCharacterExclusiveUpgrade)
+                return true;
+
+            return string.Equals(requiredCharacterId, characterId, System.StringComparison.OrdinalIgnoreCase);
+        }
 
         private void OnValidate()
         {
