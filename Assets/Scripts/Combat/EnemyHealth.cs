@@ -31,7 +31,7 @@ namespace VampireLike.Combat
         [SerializeField]
         private int experienceRewardOverride;
 
-        private int currentHealth;
+        private float currentHealth;
         private SpriteRenderer spriteRenderer;
         private BossSpriteAnimator bossSpriteAnimator;
         private EnemySpriteAnimator enemySpriteAnimator;
@@ -41,8 +41,8 @@ namespace VampireLike.Combat
         public static IReadOnlyList<EnemyHealth> ActiveEnemies => activeEnemies;
         public bool IsDead { get; private set; }
         public int MaxHealth => maxHealth;
-        public int CurrentHealth => currentHealth;
-        public float HealthProgress => maxHealth <= 0 ? 0f : Mathf.Clamp01((float)currentHealth / maxHealth);
+        public int CurrentHealth => Mathf.CeilToInt(currentHealth);
+        public float HealthProgress => maxHealth <= 0 ? 0f : Mathf.Clamp01(currentHealth / maxHealth);
         public event Action<EnemyHealth> Died;
 
         private void Awake()
@@ -75,6 +75,11 @@ namespace VampireLike.Combat
         }
 
         public void TakeDamage(int damage)
+        {
+            TakeDamage((float)damage);
+        }
+
+        public void TakeDamage(float damage)
         {
             // 이미 죽었거나 잘못된 피해량이면 무시한다.
             if (IsDead || damage <= 0)

@@ -44,6 +44,11 @@ namespace VampireLike.Menu
         private bool hasStarted;
         private string noticeMessage = string.Empty;
         private float noticeUntilTime;
+        private float pendingMasterVolume;
+        private float pendingBgmVolume;
+        private float pendingSfxVolume;
+        private bool pendingFullscreen;
+        private int pendingResolutionIndex;
 
         public static bool IsOpen { get; private set; }
 
@@ -160,6 +165,7 @@ namespace VampireLike.Menu
             {
                 PlayMenuSfx();
                 noticeMessage = string.Empty;
+                LoadPendingOptions();
                 currentScreen = MenuScreen.Options;
             }
 
@@ -216,20 +222,28 @@ namespace VampireLike.Menu
             GUI.Label(new Rect(panelRect.x, panelRect.y + 34f, panelRect.width, 52f), "\uC635\uC158", titleStyle);
             GUI.Label(new Rect(panelRect.x, panelRect.y + 82f, panelRect.width, 30f), "\uAC8C\uC784 \uD654\uBA74\uACFC \uC74C\uB7C9\uC744 \uC870\uC815\uD569\uB2C8\uB2E4", subtitleStyle);
 
-            DrawVolumeOption(panelRect, "\uC804\uCCB4 \uC74C\uB7C9", GameOptions.MasterVolume, 132f, GameOptions.SetMasterVolume);
-            DrawVolumeOption(panelRect, "\uBC30\uACBD \uC74C\uC545", GameOptions.BgmVolume, 188f, GameOptions.SetBgmVolume);
-            DrawVolumeOption(panelRect, "\uD6A8\uACFC\uC74C", GameOptions.SfxVolume, 244f, GameOptions.SetSfxVolume);
+            DrawVolumeOption(panelRect, "\uC804\uCCB4 \uC74C\uB7C9", ref pendingMasterVolume, 132f);
+            DrawVolumeOption(panelRect, "\uBC30\uACBD \uC74C\uC545", ref pendingBgmVolume, 188f);
+            DrawVolumeOption(panelRect, "\uD6A8\uACFC\uC74C", ref pendingSfxVolume, 244f);
             DrawFullscreenOption(panelRect, 308f);
             DrawResolutionOption(panelRect, 364f);
             GUI.Label(new Rect(panelRect.x + 88f, panelRect.y + 420f, panelRect.width - 176f, 28f), $"\uD604\uC7AC \uC801\uC6A9: {GameOptions.AppliedScreenInfo}", footerStyle);
 
-            Rect resetRect = new Rect(panelRect.center.x - 238f, panelRect.yMax - 72f, 214f, 46f);
-            Rect backRect = new Rect(panelRect.center.x + 24f, panelRect.yMax - 72f, 214f, 46f);
+            Rect resetRect = new Rect(panelRect.center.x - 80f, panelRect.yMax - 112f, 160f, 34f);
+            Rect confirmRect = new Rect(panelRect.center.x - 238f, panelRect.yMax - 66f, 214f, 46f);
+            Rect backRect = new Rect(panelRect.center.x + 24f, panelRect.yMax - 66f, 214f, 46f);
 
             if (GUI.Button(resetRect, "\uAE30\uBCF8\uAC12", secondaryButtonStyle))
             {
                 PlayMenuSfx();
-                GameOptions.ResetToDefaults();
+                LoadDefaultOptions();
+            }
+
+            if (GUI.Button(confirmRect, "\uD655\uC778", buttonStyle))
+            {
+                PlayMenuSfx();
+                GameOptions.ApplyOptions(pendingMasterVolume, pendingBgmVolume, pendingSfxVolume, pendingFullscreen, pendingResolutionIndex);
+                currentScreen = MenuScreen.Title;
             }
 
             if (GUI.Button(backRect, "\uB4A4\uB85C", buttonStyle))
@@ -290,7 +304,25 @@ namespace VampireLike.Menu
             GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 72f, cardRect.width - 36f, 140f), recordText, statStyle);
         }
 
-        private void DrawVolumeOption(Rect panelRect, string label, float value, float yOffset, System.Action<float> setter)
+        private void LoadPendingOptions()
+        {
+            pendingMasterVolume = GameOptions.MasterVolume;
+            pendingBgmVolume = GameOptions.BgmVolume;
+            pendingSfxVolume = GameOptions.SfxVolume;
+            pendingFullscreen = GameOptions.IsFullscreen;
+            pendingResolutionIndex = GameOptions.ResolutionIndex;
+        }
+
+        private void LoadDefaultOptions()
+        {
+            pendingMasterVolume = GameOptions.DefaultMasterVolume;
+            pendingBgmVolume = GameOptions.DefaultBgmVolume;
+            pendingSfxVolume = GameOptions.DefaultSfxVolume;
+            pendingFullscreen = GameOptions.DefaultFullscreen;
+            pendingResolutionIndex = GameOptions.DefaultResolutionIndex;
+        }
+
+        private void DrawVolumeOption(Rect panelRect, string label, ref float value, float yOffset)
         {
             Rect rowRect = new Rect(panelRect.x + 76f, panelRect.y + yOffset - 8f, panelRect.width - 152f, 44f);
             Rect labelRect = new Rect(rowRect.x + 22f, panelRect.y + yOffset, 160f, 30f);
@@ -301,9 +333,7 @@ namespace VampireLike.Menu
             GUI.Label(labelRect, label, optionLabelStyle);
             float nextValue = GUI.HorizontalSlider(sliderRect, value, 0f, 1f);
             GUI.Label(valueRect, $"{Mathf.RoundToInt(nextValue * 100f)}%", optionValueStyle);
-
-            if (!Mathf.Approximately(value, nextValue))
-                setter(nextValue);
+            value = nextValue;
         }
 
         private void DrawFullscreenOption(Rect panelRect, float yOffset)
@@ -315,10 +345,10 @@ namespace VampireLike.Menu
             GUI.Box(rowRect, GUIContent.none, cardStyle);
             GUI.Label(labelRect, "화면 모드", optionLabelStyle);
 
-            if (GUI.Button(buttonRect, GameOptions.IsFullscreen ? "전체 화면" : "창 모드", secondaryButtonStyle))
+            if (GUI.Button(buttonRect, pendingFullscreen ? "전체 화면" : "창 모드", secondaryButtonStyle))
             {
                 PlayMenuSfx();
-                GameOptions.SetFullscreen(!GameOptions.IsFullscreen);
+                pendingFullscreen = !pendingFullscreen;
             }
         }
 
@@ -329,7 +359,7 @@ namespace VampireLike.Menu
             Rect previousRect = new Rect(rowRect.x + 218f, panelRect.y + yOffset - 4f, 48f, 40f);
             Rect valueRect = new Rect(rowRect.x + 276f, panelRect.y + yOffset, 156f, 30f);
             Rect nextRect = new Rect(rowRect.x + 442f, panelRect.y + yOffset - 4f, 48f, 40f);
-            Vector2Int resolution = GameOptions.CurrentResolution;
+            Vector2Int resolution = GameOptions.GetResolution(pendingResolutionIndex);
 
             GUI.Box(rowRect, GUIContent.none, cardStyle);
             GUI.Label(labelRect, "해상도", optionLabelStyle);
@@ -337,7 +367,7 @@ namespace VampireLike.Menu
             if (GUI.Button(previousRect, "<", secondaryButtonStyle))
             {
                 PlayMenuSfx();
-                GameOptions.SetResolutionIndex((GameOptions.ResolutionIndex - 1 + GameOptions.ResolutionCount) % GameOptions.ResolutionCount);
+                pendingResolutionIndex = (pendingResolutionIndex - 1 + GameOptions.ResolutionCount) % GameOptions.ResolutionCount;
             }
 
             GUI.Label(valueRect, $"{resolution.x} x {resolution.y}", optionValueStyle);
@@ -345,7 +375,7 @@ namespace VampireLike.Menu
             if (GUI.Button(nextRect, ">", secondaryButtonStyle))
             {
                 PlayMenuSfx();
-                GameOptions.SetResolutionIndex((GameOptions.ResolutionIndex + 1) % GameOptions.ResolutionCount);
+                pendingResolutionIndex = (pendingResolutionIndex + 1) % GameOptions.ResolutionCount;
             }
         }
 

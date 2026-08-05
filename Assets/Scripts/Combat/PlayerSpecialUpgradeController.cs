@@ -274,7 +274,7 @@ namespace VampireLike.Combat
             return true;
         }
 
-        public void HandleProjectileHit(EnemyHealth enemy, int projectileDamage, Vector2 hitPosition)
+        public void HandleProjectileHit(EnemyHealth enemy, float projectileDamage, Vector2 hitPosition)
         {
             if (enemy == null || projectileDamage <= 0)
                 return;
@@ -289,7 +289,7 @@ namespace VampireLike.Combat
                 TriggerChainRicochet(enemy, projectileDamage, hitPosition);
         }
 
-        public void HandleProjectileKill(EnemyHealth killedEnemy, int projectileDamage, Vector2 killPosition)
+        public void HandleProjectileKill(EnemyHealth killedEnemy, float projectileDamage, Vector2 killPosition)
         {
             if (projectileDamage <= 0)
                 return;
@@ -314,7 +314,7 @@ namespace VampireLike.Combat
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Frost, 0.62f, 0.24f);
         }
 
-        private void CountShockwaveHit(int projectileDamage, Vector2 hitPosition)
+        private void CountShockwaveHit(float projectileDamage, Vector2 hitPosition)
         {
             projectileHitCount++;
 
@@ -322,7 +322,7 @@ namespace VampireLike.Combat
                 return;
 
             projectileHitCount = 0;
-            int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * shockwaveDamageMultiplier));
+            float damage = Mathf.Max(0.1f, projectileDamage * shockwaveDamageMultiplier);
             ApplyAreaDamage(hitPosition, shockwaveRadius, damage, null);
             GameSfx.Play(SfxType.SkillShockwave);
             CombatVFX.PlayBurst(hitPosition, CombatVFXKind.Shockwave, shockwaveRadius, 0.36f);
@@ -333,15 +333,15 @@ namespace VampireLike.Combat
             return Mathf.Max(3, shockwaveBaseHitInterval - Mathf.Max(0, shockwaveLevel - 1));
         }
 
-        private void TriggerExplosion(EnemyHealth killedEnemy, int projectileDamage, Vector2 killPosition)
+        private void TriggerExplosion(EnemyHealth killedEnemy, float projectileDamage, Vector2 killPosition)
         {
-            int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * explosionDamageRatioPerLevel * explosiveShotLevel));
+            float damage = Mathf.Max(0.1f, projectileDamage * explosionDamageRatioPerLevel * explosiveShotLevel);
             ApplyAreaDamage(killPosition, explosionRadius, damage, killedEnemy);
             GameSfx.Play(SfxType.SkillExplosion);
             CombatVFX.PlayBurst(killPosition, CombatVFXKind.Explosion, explosionRadius, 0.32f);
         }
 
-        private void ApplyAreaDamage(Vector2 center, float radius, int damage, EnemyHealth excludedEnemy)
+        private void ApplyAreaDamage(Vector2 center, float radius, float damage, EnemyHealth excludedEnemy)
         {
             int hitCount = Physics2D.OverlapCircleNonAlloc(center, radius, areaResults, enemyLayerMask);
 
@@ -379,11 +379,11 @@ namespace VampireLike.Combat
             }
         }
 
-        private void TriggerChainRicochet(EnemyHealth firstEnemy, int projectileDamage, Vector2 startPosition)
+        private void TriggerChainRicochet(EnemyHealth firstEnemy, float projectileDamage, Vector2 startPosition)
         {
             EnemyHealth currentEnemy = firstEnemy;
             Vector2 currentPosition = startPosition;
-            int damage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * chainRicochetDamageRatio));
+            float damage = Mathf.Max(0.1f, projectileDamage * chainRicochetDamageRatio);
             int maxChains = Mathf.Clamp(chainRicochetLevel, 1, 3);
 
             for (int i = 0; i < maxChains; i++)

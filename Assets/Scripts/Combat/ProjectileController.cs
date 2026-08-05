@@ -17,7 +17,7 @@ namespace VampireLike.Combat
 
         // 기본 피해량이다. 발사 시 공격력 배율을 곱해 실제 피해량을 계산한다.
         [SerializeField]
-        private int damage = 1;
+        private float damage = 1f;
 
         // 충돌하지 않아도 자동 제거되는 시간이다.
         [SerializeField]
@@ -28,7 +28,7 @@ namespace VampireLike.Combat
         private CircleCollider2D circleCollider;
         private Vector2 moveDirection = Vector2.right;
         private float lifeTimer;
-        private int effectiveDamage;
+        private float effectiveDamage;
         private int remainingPierceCount;
         private int remainingReflectCount;
         private PlayerSpecialUpgradeController specialUpgradeController;
@@ -104,7 +104,7 @@ namespace VampireLike.Combat
         private void OnValidate()
         {
             moveSpeed = Mathf.Max(0f, moveSpeed);
-            damage = Mathf.Max(1, damage);
+            damage = Mathf.Max(0.1f, damage);
             lifeTime = Mathf.Max(0.1f, lifeTime);
         }
 
@@ -129,7 +129,7 @@ namespace VampireLike.Combat
             specialUpgradeController = ownerSpecialUpgradeController;
             moveDirection = direction.normalized;
             transform.right = moveDirection;
-            effectiveDamage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, damageMultiplier)));
+            effectiveDamage = Mathf.Max(0.1f, damage * Mathf.Max(0.1f, damageMultiplier));
             remainingPierceCount = Mathf.Max(0, pierceCount);
             remainingReflectCount = specialUpgradeController == null ? 0 : specialUpgradeController.GetProjectileReflectCount();
             hitEnemies.Clear();

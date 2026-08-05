@@ -12,6 +12,11 @@ namespace VampireLike.Settings
         private const string SfxVolumeKey = "Options.SfxVolume";
         private const string FullscreenKey = "Options.Fullscreen";
         private const string ResolutionIndexKey = "Options.ResolutionIndex";
+        public const float DefaultMasterVolume = 0.8f;
+        public const float DefaultBgmVolume = 0.8f;
+        public const float DefaultSfxVolume = 0.8f;
+        public const bool DefaultFullscreen = true;
+        public const int DefaultResolutionIndex = 2;
 
         private static readonly Vector2Int[] SupportedResolutions =
         {
@@ -21,11 +26,11 @@ namespace VampireLike.Settings
             new Vector2Int(2560, 1440)
         };
 
-        public static float MasterVolume { get; private set; } = 0.8f;
-        public static float BgmVolume { get; private set; } = 0.8f;
-        public static float SfxVolume { get; private set; } = 0.8f;
-        public static bool IsFullscreen { get; private set; } = true;
-        public static int ResolutionIndex { get; private set; } = 2;
+        public static float MasterVolume { get; private set; } = DefaultMasterVolume;
+        public static float BgmVolume { get; private set; } = DefaultBgmVolume;
+        public static float SfxVolume { get; private set; } = DefaultSfxVolume;
+        public static bool IsFullscreen { get; private set; } = DefaultFullscreen;
+        public static int ResolutionIndex { get; private set; } = DefaultResolutionIndex;
         public static Vector2Int CurrentResolution => SupportedResolutions[ResolutionIndex];
         public static int ResolutionCount => SupportedResolutions.Length;
         public static string AppliedScreenInfo => $"{Screen.width} x {Screen.height} / {GetScreenModeText()}";
@@ -74,24 +79,29 @@ namespace VampireLike.Settings
             ApplyScreenOptions();
         }
 
-        public static void ResetToDefaults()
+        public static void ApplyOptions(float masterVolume, float bgmVolume, float sfxVolume, bool fullscreen, int resolutionIndex)
         {
-            MasterVolume = 0.8f;
-            BgmVolume = 0.8f;
-            SfxVolume = 0.8f;
-            IsFullscreen = true;
-            ResolutionIndex = 2;
+            MasterVolume = Mathf.Clamp01(masterVolume);
+            BgmVolume = Mathf.Clamp01(bgmVolume);
+            SfxVolume = Mathf.Clamp01(sfxVolume);
+            IsFullscreen = fullscreen;
+            ResolutionIndex = Mathf.Clamp(resolutionIndex, 0, SupportedResolutions.Length - 1);
             Save();
             ApplyScreenOptions();
         }
 
+        public static void ResetToDefaults()
+        {
+            ApplyOptions(DefaultMasterVolume, DefaultBgmVolume, DefaultSfxVolume, DefaultFullscreen, DefaultResolutionIndex);
+        }
+
         private static void Load()
         {
-            MasterVolume = PlayerPrefs.GetFloat(MasterVolumeKey, 0.8f);
-            BgmVolume = PlayerPrefs.GetFloat(BgmVolumeKey, 0.8f);
-            SfxVolume = PlayerPrefs.GetFloat(SfxVolumeKey, 0.8f);
-            IsFullscreen = PlayerPrefs.GetInt(FullscreenKey, 1) == 1;
-            ResolutionIndex = Mathf.Clamp(PlayerPrefs.GetInt(ResolutionIndexKey, 2), 0, SupportedResolutions.Length - 1);
+            MasterVolume = PlayerPrefs.GetFloat(MasterVolumeKey, DefaultMasterVolume);
+            BgmVolume = PlayerPrefs.GetFloat(BgmVolumeKey, DefaultBgmVolume);
+            SfxVolume = PlayerPrefs.GetFloat(SfxVolumeKey, DefaultSfxVolume);
+            IsFullscreen = PlayerPrefs.GetInt(FullscreenKey, DefaultFullscreen ? 1 : 0) == 1;
+            ResolutionIndex = Mathf.Clamp(PlayerPrefs.GetInt(ResolutionIndexKey, DefaultResolutionIndex), 0, SupportedResolutions.Length - 1);
         }
 
         private static void Save()

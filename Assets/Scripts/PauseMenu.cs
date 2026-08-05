@@ -38,10 +38,17 @@ public class PauseMenu : MonoBehaviour
     private Toggle fullscreenToggle;
     private Text resolutionText;
     private Text appliedScreenText;
+    private Text fullscreenModeText;
     private Button previousResolutionButton;
     private Button nextResolutionButton;
+    private Button optionsConfirmButton;
     private Button optionsBackButton;
     private bool isPaused;
+    private float pendingMasterVolume;
+    private float pendingBgmVolume;
+    private float pendingSfxVolume;
+    private bool pendingFullscreen;
+    private int pendingResolutionIndex;
 
     private void Awake()
     {
@@ -253,7 +260,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = new Vector2(560f, 500f);
+        rectTransform.sizeDelta = new Vector2(560f, 540f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 
@@ -278,13 +285,14 @@ public class PauseMenu : MonoBehaviour
         masterVolumeSlider = CreateSlider(panel.transform, new Vector2(96f, 108f));
         bgmVolumeSlider = CreateSlider(panel.transform, new Vector2(96f, 54f));
         sfxVolumeSlider = CreateSlider(panel.transform, new Vector2(96f, 0f));
-        fullscreenToggle = CreateToggle(panel.transform, new Vector2(72f, -66f));
+        fullscreenToggle = CreateToggle(panel.transform, new Vector2(72f, -66f), out fullscreenModeText);
         previousResolutionButton = CreateButton(panel.transform, "<", new Vector2(-20f, -122f), new Vector2(48f, 36f));
         resolutionText = CreateText(panel.transform, string.Empty, new Vector2(88f, -122f), 16, Color.white, new Vector2(168f, 34f));
         nextResolutionButton = CreateButton(panel.transform, ">", new Vector2(196f, -122f), new Vector2(48f, 36f));
         appliedScreenText = CreateText(panel.transform, string.Empty, new Vector2(0f, -164f), 14, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(430f, 28f));
-        CreateButton(panel.transform, "\uAE30\uBCF8\uAC12", new Vector2(-120f, -206f), new Vector2(190f, 44f)).onClick.AddListener(ResetOptions);
-        optionsBackButton = CreateButton(panel.transform, "\uB4A4\uB85C", new Vector2(120f, -206f), new Vector2(190f, 44f));
+        CreateButton(panel.transform, "\uAE30\uBCF8\uAC12", new Vector2(0f, -196f), new Vector2(160f, 34f)).onClick.AddListener(ResetOptions);
+        optionsConfirmButton = CreateButton(panel.transform, "\uD655\uC778", new Vector2(-120f, -236f), new Vector2(190f, 44f));
+        optionsBackButton = CreateButton(panel.transform, "\uB4A4\uB85C", new Vector2(120f, -236f), new Vector2(190f, 44f));
         RefreshOptionsControls();
         panel.SetActive(false);
     }
@@ -299,6 +307,7 @@ public class PauseMenu : MonoBehaviour
         if (optionsPanel != null)
             optionsPanel.gameObject.SetActive(true);
 
+        LoadPendingOptions();
         RefreshOptionsControls();
     }
 
@@ -314,22 +323,25 @@ public class PauseMenu : MonoBehaviour
     private void BindOptionsControls()
     {
         if (masterVolumeSlider != null)
-            masterVolumeSlider.onValueChanged.AddListener(GameOptions.SetMasterVolume);
+            masterVolumeSlider.onValueChanged.AddListener(SetPendingMasterVolume);
 
         if (bgmVolumeSlider != null)
-            bgmVolumeSlider.onValueChanged.AddListener(GameOptions.SetBgmVolume);
+            bgmVolumeSlider.onValueChanged.AddListener(SetPendingBgmVolume);
 
         if (sfxVolumeSlider != null)
-            sfxVolumeSlider.onValueChanged.AddListener(GameOptions.SetSfxVolume);
+            sfxVolumeSlider.onValueChanged.AddListener(SetPendingSfxVolume);
 
         if (fullscreenToggle != null)
-            fullscreenToggle.onValueChanged.AddListener(GameOptions.SetFullscreen);
+            fullscreenToggle.onValueChanged.AddListener(SetPendingFullscreen);
 
         if (previousResolutionButton != null)
             previousResolutionButton.onClick.AddListener(SelectPreviousResolution);
 
         if (nextResolutionButton != null)
             nextResolutionButton.onClick.AddListener(SelectNextResolution);
+
+        if (optionsConfirmButton != null)
+            optionsConfirmButton.onClick.AddListener(ConfirmOptions);
 
         if (optionsBackButton != null)
             optionsBackButton.onClick.AddListener(ShowPausePanel);
@@ -338,16 +350,16 @@ public class PauseMenu : MonoBehaviour
     private void UnbindOptionsControls()
     {
         if (masterVolumeSlider != null)
-            masterVolumeSlider.onValueChanged.RemoveListener(GameOptions.SetMasterVolume);
+            masterVolumeSlider.onValueChanged.RemoveListener(SetPendingMasterVolume);
 
         if (bgmVolumeSlider != null)
-            bgmVolumeSlider.onValueChanged.RemoveListener(GameOptions.SetBgmVolume);
+            bgmVolumeSlider.onValueChanged.RemoveListener(SetPendingBgmVolume);
 
         if (sfxVolumeSlider != null)
-            sfxVolumeSlider.onValueChanged.RemoveListener(GameOptions.SetSfxVolume);
+            sfxVolumeSlider.onValueChanged.RemoveListener(SetPendingSfxVolume);
 
         if (fullscreenToggle != null)
-            fullscreenToggle.onValueChanged.RemoveListener(GameOptions.SetFullscreen);
+            fullscreenToggle.onValueChanged.RemoveListener(SetPendingFullscreen);
 
         if (previousResolutionButton != null)
             previousResolutionButton.onClick.RemoveListener(SelectPreviousResolution);
@@ -355,48 +367,96 @@ public class PauseMenu : MonoBehaviour
         if (nextResolutionButton != null)
             nextResolutionButton.onClick.RemoveListener(SelectNextResolution);
 
+        if (optionsConfirmButton != null)
+            optionsConfirmButton.onClick.RemoveListener(ConfirmOptions);
+
         if (optionsBackButton != null)
             optionsBackButton.onClick.RemoveListener(ShowPausePanel);
+    }
+
+    private void LoadPendingOptions()
+    {
+        pendingMasterVolume = GameOptions.MasterVolume;
+        pendingBgmVolume = GameOptions.BgmVolume;
+        pendingSfxVolume = GameOptions.SfxVolume;
+        pendingFullscreen = GameOptions.IsFullscreen;
+        pendingResolutionIndex = GameOptions.ResolutionIndex;
+    }
+
+    private void SetPendingMasterVolume(float value)
+    {
+        pendingMasterVolume = Mathf.Clamp01(value);
+    }
+
+    private void SetPendingBgmVolume(float value)
+    {
+        pendingBgmVolume = Mathf.Clamp01(value);
+    }
+
+    private void SetPendingSfxVolume(float value)
+    {
+        pendingSfxVolume = Mathf.Clamp01(value);
+    }
+
+    private void SetPendingFullscreen(bool value)
+    {
+        pendingFullscreen = value;
+        RefreshOptionsControls();
     }
 
     private void SelectPreviousResolution()
     {
         GameSfx.Play(SfxType.UpgradeSelect);
-        GameOptions.SetResolutionIndex((GameOptions.ResolutionIndex - 1 + GameOptions.ResolutionCount) % GameOptions.ResolutionCount);
+        pendingResolutionIndex = (pendingResolutionIndex - 1 + GameOptions.ResolutionCount) % GameOptions.ResolutionCount;
         RefreshOptionsControls();
     }
 
     private void SelectNextResolution()
     {
         GameSfx.Play(SfxType.UpgradeSelect);
-        GameOptions.SetResolutionIndex((GameOptions.ResolutionIndex + 1) % GameOptions.ResolutionCount);
+        pendingResolutionIndex = (pendingResolutionIndex + 1) % GameOptions.ResolutionCount;
         RefreshOptionsControls();
     }
 
     private void ResetOptions()
     {
         GameSfx.Play(SfxType.UpgradeSelect);
-        GameOptions.ResetToDefaults();
+        pendingMasterVolume = GameOptions.DefaultMasterVolume;
+        pendingBgmVolume = GameOptions.DefaultBgmVolume;
+        pendingSfxVolume = GameOptions.DefaultSfxVolume;
+        pendingFullscreen = GameOptions.DefaultFullscreen;
+        pendingResolutionIndex = GameOptions.DefaultResolutionIndex;
         RefreshOptionsControls();
+    }
+
+    private void ConfirmOptions()
+    {
+        GameSfx.Play(SfxType.UpgradeSelect);
+        GameOptions.ApplyOptions(pendingMasterVolume, pendingBgmVolume, pendingSfxVolume, pendingFullscreen, pendingResolutionIndex);
+        RefreshOptionsControls();
+        ShowPausePanel();
     }
 
     private void RefreshOptionsControls()
     {
         if (masterVolumeSlider != null)
-            masterVolumeSlider.SetValueWithoutNotify(GameOptions.MasterVolume);
+            masterVolumeSlider.SetValueWithoutNotify(pendingMasterVolume);
 
         if (bgmVolumeSlider != null)
-            bgmVolumeSlider.SetValueWithoutNotify(GameOptions.BgmVolume);
+            bgmVolumeSlider.SetValueWithoutNotify(pendingBgmVolume);
 
         if (sfxVolumeSlider != null)
-            sfxVolumeSlider.SetValueWithoutNotify(GameOptions.SfxVolume);
+            sfxVolumeSlider.SetValueWithoutNotify(pendingSfxVolume);
 
         if (fullscreenToggle != null)
-            fullscreenToggle.SetIsOnWithoutNotify(GameOptions.IsFullscreen);
+            fullscreenToggle.SetIsOnWithoutNotify(pendingFullscreen);
+
+        if (fullscreenModeText != null)
+            fullscreenModeText.text = pendingFullscreen ? "\uC804\uCCB4 \uD654\uBA74" : "\uCC3D \uBAA8\uB4DC";
 
         if (resolutionText != null)
         {
-            Vector2Int resolution = GameOptions.CurrentResolution;
+            Vector2Int resolution = GameOptions.GetResolution(pendingResolutionIndex);
             resolutionText.text = $"{resolution.x} x {resolution.y}";
         }
 
@@ -517,7 +577,7 @@ public class PauseMenu : MonoBehaviour
         return slider;
     }
 
-    private static Toggle CreateToggle(Transform parent, Vector2 position)
+    private static Toggle CreateToggle(Transform parent, Vector2 position, out Text label)
     {
         GameObject toggleObject = new GameObject("Toggle");
         toggleObject.transform.SetParent(parent, false);
@@ -543,7 +603,7 @@ public class PauseMenu : MonoBehaviour
         checkRect.sizeDelta = new Vector2(24f, 24f);
         checkRect.anchoredPosition = new Vector2(18f, 0f);
 
-        Text label = CreateText(toggleObject.transform, "\uCF1C\uC9D0", new Vector2(42f, 0f), 16, Color.white, new Vector2(90f, 28f));
+        label = CreateText(toggleObject.transform, "\uC804\uCCB4 \uD654\uBA74", new Vector2(42f, 0f), 16, Color.white, new Vector2(110f, 28f));
         label.alignment = TextAnchor.MiddleLeft;
 
         Toggle toggle = toggleObject.AddComponent<Toggle>();

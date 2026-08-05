@@ -45,7 +45,7 @@ namespace VampireLike.Menu
                 "\uB2EC\uBE5B\uCC98\uB7FC \uBE60\uB974\uAC8C \uD30C\uACE0\uB4DC\uB294 \uC30D\uAC80 \uC554\uC0B4\uC790\uC785\uB2C8\uB2E4. \uAE30\uB3D9\uC131\uACFC \uC5F0\uC0AC\uB825\uC774 \uB192\uC9C0\uB9CC \uCCB4\uB825\uC740 \uB0AE\uC2B5\uB2C8\uB2E4.",
                 1.18f,
                 0.68f,
-                0.55f,
+                0.38f,
                 1,
                 0,
                 55,
