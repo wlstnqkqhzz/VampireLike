@@ -214,6 +214,8 @@ namespace VampireLike.Combat
             for (int i = 0; i < shotCount; i++)
             {
                 firePosition = GetFirePosition();
+                GameSfx.Play(attackSfxType);
+
                 Vector2[] directions = specialUpgradeController == null
                     ? new[] { direction }
                     : specialUpgradeController.GetProjectileDirections(direction);

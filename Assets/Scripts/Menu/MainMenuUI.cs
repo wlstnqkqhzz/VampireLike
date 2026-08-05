@@ -211,20 +211,20 @@ namespace VampireLike.Menu
 
         private void DrawOptionsScreen()
         {
-            Rect panelRect = CenterRect(TitlePanelWidth, TitlePanelHeight);
+            Rect panelRect = CenterRect(TitlePanelWidth, 560f);
             GUI.Box(panelRect, GUIContent.none, panelStyle);
-            GUI.Label(new Rect(panelRect.x, panelRect.y + 36f, panelRect.width, 52f), "\uC635\uC158", titleStyle);
-            GUI.Label(new Rect(panelRect.x, panelRect.y + 86f, panelRect.width, 30f), "\uAC8C\uC784 \uD654\uBA74\uACFC \uC74C\uB7C9\uC744 \uC870\uC815\uD569\uB2C8\uB2E4", subtitleStyle);
+            GUI.Label(new Rect(panelRect.x, panelRect.y + 34f, panelRect.width, 52f), "\uC635\uC158", titleStyle);
+            GUI.Label(new Rect(panelRect.x, panelRect.y + 82f, panelRect.width, 30f), "\uAC8C\uC784 \uD654\uBA74\uACFC \uC74C\uB7C9\uC744 \uC870\uC815\uD569\uB2C8\uB2E4", subtitleStyle);
 
-            DrawVolumeOption(panelRect, "\uC804\uCCB4 \uC74C\uB7C9", GameOptions.MasterVolume, 138f, GameOptions.SetMasterVolume);
-            DrawVolumeOption(panelRect, "\uBC30\uACBD \uC74C\uC545", GameOptions.BgmVolume, 200f, GameOptions.SetBgmVolume);
-            DrawVolumeOption(panelRect, "\uD6A8\uACFC\uC74C", GameOptions.SfxVolume, 262f, GameOptions.SetSfxVolume);
-            DrawFullscreenOption(panelRect, 324f);
-            DrawResolutionOption(panelRect, 386f);
-            GUI.Label(new Rect(panelRect.x + 96f, panelRect.y + 438f, panelRect.width - 192f, 28f), $"\uD604\uC7AC \uC801\uC6A9: {GameOptions.AppliedScreenInfo}", footerStyle);
+            DrawVolumeOption(panelRect, "\uC804\uCCB4 \uC74C\uB7C9", GameOptions.MasterVolume, 132f, GameOptions.SetMasterVolume);
+            DrawVolumeOption(panelRect, "\uBC30\uACBD \uC74C\uC545", GameOptions.BgmVolume, 188f, GameOptions.SetBgmVolume);
+            DrawVolumeOption(panelRect, "\uD6A8\uACFC\uC74C", GameOptions.SfxVolume, 244f, GameOptions.SetSfxVolume);
+            DrawFullscreenOption(panelRect, 308f);
+            DrawResolutionOption(panelRect, 364f);
+            GUI.Label(new Rect(panelRect.x + 88f, panelRect.y + 420f, panelRect.width - 176f, 28f), $"\uD604\uC7AC \uC801\uC6A9: {GameOptions.AppliedScreenInfo}", footerStyle);
 
-            Rect resetRect = new Rect(panelRect.center.x - 244f, panelRect.yMax - 76f, 220f, 46f);
-            Rect backRect = new Rect(panelRect.center.x + 24f, panelRect.yMax - 76f, 220f, 46f);
+            Rect resetRect = new Rect(panelRect.center.x - 238f, panelRect.yMax - 72f, 214f, 46f);
+            Rect backRect = new Rect(panelRect.center.x + 24f, panelRect.yMax - 72f, 214f, 46f);
 
             if (GUI.Button(resetRect, "\uAE30\uBCF8\uAC12", secondaryButtonStyle))
             {
@@ -292,10 +292,12 @@ namespace VampireLike.Menu
 
         private void DrawVolumeOption(Rect panelRect, string label, float value, float yOffset, System.Action<float> setter)
         {
-            Rect labelRect = new Rect(panelRect.x + 96f, panelRect.y + yOffset, 160f, 30f);
-            Rect sliderRect = new Rect(panelRect.x + 274f, panelRect.y + yOffset + 6f, 280f, 24f);
-            Rect valueRect = new Rect(panelRect.x + 570f, panelRect.y + yOffset, 70f, 30f);
+            Rect rowRect = new Rect(panelRect.x + 76f, panelRect.y + yOffset - 8f, panelRect.width - 152f, 44f);
+            Rect labelRect = new Rect(rowRect.x + 22f, panelRect.y + yOffset, 160f, 30f);
+            Rect sliderRect = new Rect(rowRect.x + 218f, panelRect.y + yOffset + 6f, 254f, 24f);
+            Rect valueRect = new Rect(rowRect.xMax - 78f, panelRect.y + yOffset, 58f, 30f);
 
+            GUI.Box(rowRect, GUIContent.none, cardStyle);
             GUI.Label(labelRect, label, optionLabelStyle);
             float nextValue = GUI.HorizontalSlider(sliderRect, value, 0f, 1f);
             GUI.Label(valueRect, $"{Mathf.RoundToInt(nextValue * 100f)}%", optionValueStyle);
@@ -306,9 +308,11 @@ namespace VampireLike.Menu
 
         private void DrawFullscreenOption(Rect panelRect, float yOffset)
         {
-            Rect labelRect = new Rect(panelRect.x + 96f, panelRect.y + yOffset, 160f, 30f);
-            Rect buttonRect = new Rect(panelRect.x + 274f, panelRect.y + yOffset - 4f, 220f, 40f);
+            Rect rowRect = new Rect(panelRect.x + 76f, panelRect.y + yOffset - 8f, panelRect.width - 152f, 44f);
+            Rect labelRect = new Rect(rowRect.x + 22f, panelRect.y + yOffset, 160f, 30f);
+            Rect buttonRect = new Rect(rowRect.x + 218f, panelRect.y + yOffset - 4f, 214f, 40f);
 
+            GUI.Box(rowRect, GUIContent.none, cardStyle);
             GUI.Label(labelRect, "화면 모드", optionLabelStyle);
 
             if (GUI.Button(buttonRect, GameOptions.IsFullscreen ? "전체 화면" : "창 모드", secondaryButtonStyle))
@@ -320,12 +324,14 @@ namespace VampireLike.Menu
 
         private void DrawResolutionOption(Rect panelRect, float yOffset)
         {
-            Rect labelRect = new Rect(panelRect.x + 96f, panelRect.y + yOffset, 160f, 30f);
-            Rect previousRect = new Rect(panelRect.x + 274f, panelRect.y + yOffset - 4f, 54f, 40f);
-            Rect valueRect = new Rect(panelRect.x + 336f, panelRect.y + yOffset, 160f, 30f);
-            Rect nextRect = new Rect(panelRect.x + 508f, panelRect.y + yOffset - 4f, 54f, 40f);
+            Rect rowRect = new Rect(panelRect.x + 76f, panelRect.y + yOffset - 8f, panelRect.width - 152f, 44f);
+            Rect labelRect = new Rect(rowRect.x + 22f, panelRect.y + yOffset, 160f, 30f);
+            Rect previousRect = new Rect(rowRect.x + 218f, panelRect.y + yOffset - 4f, 48f, 40f);
+            Rect valueRect = new Rect(rowRect.x + 276f, panelRect.y + yOffset, 156f, 30f);
+            Rect nextRect = new Rect(rowRect.x + 442f, panelRect.y + yOffset - 4f, 48f, 40f);
             Vector2Int resolution = GameOptions.CurrentResolution;
 
+            GUI.Box(rowRect, GUIContent.none, cardStyle);
             GUI.Label(labelRect, "해상도", optionLabelStyle);
 
             if (GUI.Button(previousRect, "<", secondaryButtonStyle))

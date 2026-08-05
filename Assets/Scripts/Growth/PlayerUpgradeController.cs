@@ -173,13 +173,10 @@ namespace VampireLike.Growth
         public void ApplyUpgrade(UpgradeDefinition definition)
         {
             // 선택된 강화 데이터를 실제 담당 컴포넌트로 전달한다.
-            if (definition == null || !CanApply(definition))
+            if (!TryReserveUpgradeLevel(definition))
                 return;
 
             CacheComponents();
-
-            if (!definition.Unlimited)
-                upgradeLevels[definition.UpgradeType] = Mathf.Min(GetLevel(definition.UpgradeType) + 1, GetMaxLevel(definition));
 
             switch (definition.UpgradeType)
             {
@@ -292,7 +289,25 @@ namespace VampireLike.Growth
             if (definition.Unlimited)
                 return true;
 
-            return GetLevel(definition.UpgradeType) < GetMaxLevel(definition);
+            int maxLevel = GetMaxLevel(definition);
+
+            if (maxLevel <= 0)
+                return false;
+
+            return GetLevel(definition.UpgradeType) < maxLevel;
+        }
+
+        private bool TryReserveUpgradeLevel(UpgradeDefinition definition)
+        {
+            if (!CanApply(definition))
+                return false;
+
+            if (definition.Unlimited)
+                return true;
+
+            int maxLevel = GetMaxLevel(definition);
+            upgradeLevels[definition.UpgradeType] = Mathf.Min(GetLevel(definition.UpgradeType) + 1, maxLevel);
+            return true;
         }
 
         private int GetLevel(UpgradeType upgradeType)
