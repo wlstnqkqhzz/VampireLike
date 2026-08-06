@@ -111,6 +111,7 @@ namespace VampireLike.Enemies
         private int currentMaxEnemyCount;
         private int currentWave;
         private bool isWaveProgressPaused;
+        private readonly HashSet<object> wavePauseSources = new HashSet<object>();
 
         public event Action<int> WaveChanged;
 
@@ -119,7 +120,7 @@ namespace VampireLike.Enemies
         public int CurrentMaxEnemyCount => currentMaxEnemyCount;
         public int AliveEnemyCount => spawnedEnemies.Count;
         public float WaveProgress => waveDuration <= 0f ? 0f : Mathf.Clamp01(waveTimer / waveDuration);
-        public bool IsWaveProgressPaused => isWaveProgressPaused;
+        public bool IsWaveProgressPaused => isWaveProgressPaused || wavePauseSources.Count > 0;
 
         private void Awake()
         {
@@ -176,7 +177,7 @@ namespace VampireLike.Enemies
 
         private void UpdateWaveTimer()
         {
-            if (isWaveProgressPaused)
+            if (IsWaveProgressPaused)
                 return;
 
             waveTimer += Time.deltaTime;
@@ -205,6 +206,24 @@ namespace VampireLike.Enemies
         public void SetWaveProgressPaused(bool paused)
         {
             isWaveProgressPaused = paused;
+        }
+
+        /// <summary>
+        /// 보스처럼 여러 시스템이 동시에 웨이브 정지를 요청할 수 있으므로,
+        /// 요청자별로 잠금을 관리해서 한쪽이 해제해도 다른 보스 잠금이 풀리지 않게 한다.
+        /// </summary>
+        public void SetWaveProgressPaused(object source, bool paused)
+        {
+            if (source == null)
+            {
+                SetWaveProgressPaused(paused);
+                return;
+            }
+
+            if (paused)
+                wavePauseSources.Add(source);
+            else
+                wavePauseSources.Remove(source);
         }
 
         private void SpawnEnemyBatch()

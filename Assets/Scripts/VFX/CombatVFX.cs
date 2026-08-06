@@ -153,6 +153,34 @@ namespace VampireLike.VFX
             effect.Play(duration, glow, core);
         }
 
+        public static void PlayChainLightningImpact(Vector2 position, float size = 0.22f, float duration = 0.12f, int sortingOrder = 21)
+        {
+            size *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            Color glowColor = WithAlpha(GetMainColor(CombatVFXKind.ChainLightning), 0.55f);
+            Color coreColor = GetSecondaryColor(CombatVFXKind.ChainLightning);
+            GameObject root = new GameObject("VFX Chain Lightning Spark");
+            root.transform.position = position;
+
+            LineRenderer[] lines = new LineRenderer[4];
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                float angle = i * 90f + Random.Range(-18f, 18f);
+                Vector2 direction = Quaternion.Euler(0f, 0f, angle) * Vector2.right;
+                LineRenderer line = CreateLightningRenderer(root, $"Spark {i + 1}", 0.025f * size, i % 2 == 0 ? coreColor : glowColor, sortingOrder + i);
+                line.positionCount = 2;
+                line.SetPosition(0, (Vector2)position - direction * size * 0.36f);
+                line.SetPosition(1, (Vector2)position + direction * size);
+                lines[i] = line;
+            }
+
+            CombatVFXLineEffect effect = root.AddComponent<CombatVFXLineEffect>();
+            effect.Play(duration, lines);
+        }
+
         public static GameObject CreateZoneVisual(Transform parent, CombatVFXKind kind, float radius, Color tint, int sortingOrder = 10)
         {
             radius *= SizeMultiplier;

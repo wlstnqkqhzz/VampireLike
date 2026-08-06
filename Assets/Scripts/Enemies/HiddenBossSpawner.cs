@@ -3,6 +3,7 @@ using UnityEngine;
 using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.Growth;
+using VampireLike.World;
 
 namespace VampireLike.Enemies
 {
@@ -230,7 +231,7 @@ namespace VampireLike.Enemies
                 return transform.position;
 
             Vector2 direction = Vector2.up;
-            return (Vector2)player.position + direction * spawnDistanceFromPlayer;
+            return MapBoundary.ClampToPlayableArea((Vector2)player.position + direction * spawnDistanceFromPlayer);
         }
 
         private void SetWaveProgressPaused(bool paused)
@@ -239,7 +240,7 @@ namespace VampireLike.Enemies
                 return;
 
             hasPausedWaveProgress = paused;
-            enemySpawner.SetWaveProgressPaused(paused);
+            enemySpawner.SetWaveProgressPaused(this, paused);
         }
     }
 }

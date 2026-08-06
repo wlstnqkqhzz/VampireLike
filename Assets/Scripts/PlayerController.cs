@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VampireLike.World;
 
 /// <summary>
 /// 방향키 입력을 받아 Rigidbody2D 기반으로 플레이어를 이동시키고,
@@ -122,6 +123,7 @@ public class PlayerController : MonoBehaviour
     {
         // Transform 직접 변경 대신 Rigidbody2D.MovePosition으로 이동해 충돌과 함께 동작하게 한다.
         Vector2 nextPosition = rb.position + moveInput * moveSpeed * currentMoveSpeedMultiplier * Time.fixedDeltaTime;
+        nextPosition = MapBoundary.ClampToPlayableArea(nextPosition);
         rb.MovePosition(nextPosition);
     }
 

@@ -25,6 +25,7 @@ namespace VampireLike.World
 
         private Bounds worldBounds;
         private bool hasBounds;
+        private bool usesExternalBounds;
         private static MapBoundary activeBoundary;
 
         public static bool TryGetWorldBounds(out Bounds bounds)
@@ -48,6 +49,22 @@ namespace VampireLike.World
             return new Vector2(
                 Mathf.Clamp(position.x, bounds.min.x + inset, bounds.max.x - inset),
                 Mathf.Clamp(position.y, bounds.min.y + inset, bounds.max.y - inset));
+        }
+
+        public static void OverrideActiveBounds(Bounds bounds)
+        {
+            MapBoundary boundary = activeBoundary;
+
+            if (boundary == null)
+                boundary = Object.FindFirstObjectByType<MapBoundary>();
+
+            if (boundary == null)
+            {
+                GameObject boundaryObject = new GameObject("Map Boundary");
+                boundary = boundaryObject.AddComponent<MapBoundary>();
+            }
+
+            boundary.ApplyWorldBounds(bounds);
         }
 
         private void Awake()
@@ -76,6 +93,8 @@ namespace VampireLike.World
 
         private void BuildBounds()
         {
+            usesExternalBounds = false;
+
             if (floorTilemap == null)
                 floorTilemap = GetComponentInChildren<Tilemap>();
 
@@ -119,7 +138,8 @@ namespace VampireLike.World
 
         private void RebuildBoundaryColliders()
         {
-            BuildBounds();
+            if (!usesExternalBounds)
+                BuildBounds();
 
             if (!hasBounds)
             {
@@ -127,6 +147,20 @@ namespace VampireLike.World
                 return;
             }
 
+            RebuildBoundaryCollidersFromCurrentBounds();
+        }
+
+        private void ApplyWorldBounds(Bounds bounds)
+        {
+            worldBounds = bounds;
+            hasBounds = true;
+            usesExternalBounds = true;
+            activeBoundary = this;
+            RebuildBoundaryCollidersFromCurrentBounds();
+        }
+
+        private void RebuildBoundaryCollidersFromCurrentBounds()
+        {
             Transform boundaryRoot = transform.Find(BoundaryRootName);
 
             if (boundaryRoot != null)

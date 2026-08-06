@@ -2,6 +2,7 @@ using UnityEngine;
 using VampireLike.Combat;
 using System;
 using VampireLike.Audio;
+using VampireLike.World;
 
 namespace VampireLike.Enemies
 {
@@ -228,7 +229,7 @@ namespace VampireLike.Enemies
                 return;
 
             hasPausedWaveProgress = paused;
-            enemySpawner.SetWaveProgressPaused(paused);
+            enemySpawner.SetWaveProgressPaused(this, paused);
         }
 
         private GameObject GetBossPrefabForStage(int bossStage)
@@ -295,7 +296,7 @@ namespace VampireLike.Enemies
             float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
             float distance = UnityEngine.Random.Range(minSpawnDistance, maxSpawnDistance);
             Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-            return (Vector2)player.position + direction * distance;
+            return MapBoundary.ClampToPlayableArea((Vector2)player.position + direction * distance);
         }
 
         private bool IsInsideCameraSafeArea(Vector2 position)
@@ -314,9 +315,11 @@ namespace VampireLike.Enemies
             if (!TryGetCameraSafeBounds(out Vector2 min, out Vector2 max))
                 return position;
 
-            return new Vector2(
+            Vector2 clampedPosition = new Vector2(
                 Mathf.Clamp(position.x, min.x, max.x),
                 Mathf.Clamp(position.y, min.y, max.y));
+
+            return MapBoundary.ClampToPlayableArea(clampedPosition);
         }
 
         private bool TryGetCameraSafeBounds(out Vector2 min, out Vector2 max)

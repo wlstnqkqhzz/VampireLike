@@ -18,6 +18,7 @@ namespace VampireLike.Menu
         private const float CharacterPanelWidth = 860f;
         private const float CharacterPanelHeight = 640f;
         private const string GameSceneName = "SampleScene";
+        private const string TitleBackgroundPath = "Menu/title_background";
 
         private GUIStyle titleStyle;
         private GUIStyle subtitleStyle;
@@ -38,6 +39,7 @@ namespace VampireLike.Menu
         private Texture2D selectedCardTexture;
         private Texture2D buttonTexture;
         private Texture2D secondaryButtonTexture;
+        private Texture2D titleBackgroundTexture;
 
         private MenuScreen currentScreen = MenuScreen.Title;
         private int selectedIndex;
@@ -126,11 +128,20 @@ namespace VampireLike.Menu
         {
             Color previousColor = GUI.color;
             GUI.color = Color.white;
-            GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), darkTexture);
+
+            Rect screenRect = new Rect(0f, 0f, Screen.width, Screen.height);
+
+            if (titleBackgroundTexture != null)
+                GUI.DrawTexture(screenRect, titleBackgroundTexture, ScaleMode.ScaleAndCrop);
+            else
+                GUI.DrawTexture(screenRect, darkTexture);
+
+            GUI.color = new Color(0f, 0f, 0f, 0.42f);
+            GUI.DrawTexture(screenRect, Texture2D.whiteTexture);
 
             // ??댄? ?붾㈃???덈Т ?됲룊?섏? ?딅룄濡?以묒븰???꾩＜ ?쏀븳 遺꾩쐞湲?鍮쏆쓣 源먮떎.
-            GUI.color = new Color(0.22f, 0.05f, 0.34f, 0.16f);
-            GUI.DrawTexture(new Rect(Screen.width * 0.5f - 260f, Screen.height * 0.5f - 240f, 520f, 480f), Texture2D.whiteTexture);
+            GUI.color = new Color(0.12f, 0.28f, 0.24f, 0.16f);
+            GUI.DrawTexture(new Rect(Screen.width * 0.5f - 360f, Screen.height * 0.5f - 280f, 720f, 560f), Texture2D.whiteTexture);
             GUI.color = previousColor;
         }
 
@@ -452,6 +463,7 @@ namespace VampireLike.Menu
             selectedCardTexture = MakeTexture(new Color(0.12f, 0.22f, 0.15f, 0.98f));
             buttonTexture = MakeTexture(new Color(0.78f, 0.88f, 0.7f, 1f));
             secondaryButtonTexture = MakeTexture(new Color(0.12f, 0.14f, 0.12f, 1f));
+            titleBackgroundTexture = Resources.Load<Texture2D>(TitleBackgroundPath);
 
             titleStyle = new GUIStyle(GUI.skin.label)
             {

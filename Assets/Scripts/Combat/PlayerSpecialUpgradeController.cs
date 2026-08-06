@@ -146,6 +146,9 @@ namespace VampireLike.Combat
         private float seleneShadowStepBonusInvinciblePerLevel = 0.18f;
 
         [SerializeField]
+        private string seleneShadowStepEnemyLayerName = "Enemy";
+
+        [SerializeField]
         private int seleneTwinMoonFlurryBaseInterval = 8;
 
         [SerializeField]
@@ -200,6 +203,11 @@ namespace VampireLike.Combat
         private PlayerEffectAnchors effectAnchors;
         private ShieldVFXController shieldVfx;
         private EclipseAuraVFX eclipseAuraVfx;
+        private int shadowStepPlayerLayer = -1;
+        private int shadowStepEnemyLayer = -1;
+        private bool shadowStepCollisionPhaseActive;
+        private bool shadowStepStoredCollisionIgnored;
+        private float shadowStepCollisionPhaseTimer;
 
         private void Awake()
         {
@@ -266,6 +274,12 @@ namespace VampireLike.Combat
             UpdateShieldAura();
             UpdateEclipseAura();
             UpdateCharacterExclusiveTimers();
+            UpdateShadowStepCollisionPhase();
+        }
+
+        private void OnDisable()
+        {
+            EndShadowStepCollisionPhase();
         }
 
         public void AddExplosiveShotLevel()
@@ -410,7 +424,7 @@ namespace VampireLike.Combat
             if (seleneMoonShadowCloneLevel > 0 && Random.value < seleneMoonShadowCloneChancePerLevel * seleneMoonShadowCloneLevel)
             {
                 directions.Add(Rotate(baseDirection, Random.Range(-5f, 5f)).normalized);
-                CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.ChainLightning, 0.36f, 0.14f);
+                CombatVFX.PlayChainLightningImpact(GetEffectCenterPosition(), 0.16f, 0.1f);
             }
 
             return directions.ToArray();
@@ -455,6 +469,7 @@ namespace VampireLike.Combat
                 return;
 
             CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.Ricochet, 0.58f, 0.2f);
+            StartShadowStepCollisionPhase(GetBonusInvincibleDuration());
         }
 
         public void HandleProjectileHit(EnemyHealth enemy, float projectileDamage, Vector2 hitPosition)
@@ -615,7 +630,7 @@ namespace VampireLike.Combat
             float damage = projectileDamage * seleneMoonlightMarkDamageRatioPerLevel * seleneMoonlightMarkLevel;
             enemy.TakeDamage(damage);
             GameSfx.Play(SfxType.SkillRicochet);
-            CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.ChainLightning, 0.58f, 0.18f);
+            CombatVFX.PlayChainLightningImpact(enemy.transform.position, 0.28f, 0.12f);
         }
 
         private void TrySeleneSilentBlade(EnemyHealth firstEnemy, float projectileDamage, Vector2 startPosition)
@@ -671,7 +686,7 @@ namespace VampireLike.Combat
 
                 GameSfx.Play(SfxType.SkillRicochet);
                 CombatVFX.PlayChainLightning(currentPosition, nextEnemy.transform.position, 0.24f, 0.075f);
-                CombatVFX.PlayBurst(nextEnemy.transform.position, CombatVFXKind.ChainLightning, 0.46f, 0.2f);
+                CombatVFX.PlayChainLightningImpact(nextEnemy.transform.position, 0.24f, 0.12f);
                 nextEnemy.TakeDamage(damage);
 
                 currentEnemy = nextEnemy;
@@ -850,6 +865,63 @@ namespace VampireLike.Combat
                 return;
 
             kaelBlackIronBarrierTimer -= Time.deltaTime;
+        }
+
+        private void StartShadowStepCollisionPhase(float duration)
+        {
+            if (duration <= 0f)
+                return;
+
+            int playerLayer = gameObject.layer;
+            int enemyLayer = LayerMask.NameToLayer(seleneShadowStepEnemyLayerName);
+
+            if (enemyLayer < 0)
+                return;
+
+            if (!shadowStepCollisionPhaseActive)
+            {
+                shadowStepPlayerLayer = playerLayer;
+                shadowStepEnemyLayer = enemyLayer;
+                shadowStepStoredCollisionIgnored = Physics2D.GetIgnoreLayerCollision(playerLayer, enemyLayer);
+                Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, true);
+                shadowStepCollisionPhaseActive = true;
+            }
+
+            shadowStepCollisionPhaseTimer = Mathf.Max(shadowStepCollisionPhaseTimer, duration);
+        }
+
+        private void UpdateShadowStepCollisionPhase()
+        {
+            if (!shadowStepCollisionPhaseActive)
+                return;
+
+            if (GameState.IsGameOver)
+            {
+                EndShadowStepCollisionPhase();
+                return;
+            }
+
+            if (Time.timeScale <= 0f)
+                return;
+
+            shadowStepCollisionPhaseTimer -= Time.deltaTime;
+
+            if (shadowStepCollisionPhaseTimer <= 0f)
+                EndShadowStepCollisionPhase();
+        }
+
+        private void EndShadowStepCollisionPhase()
+        {
+            if (!shadowStepCollisionPhaseActive)
+                return;
+
+            if (shadowStepPlayerLayer >= 0 && shadowStepEnemyLayer >= 0)
+                Physics2D.IgnoreLayerCollision(shadowStepPlayerLayer, shadowStepEnemyLayer, shadowStepStoredCollisionIgnored);
+
+            shadowStepCollisionPhaseActive = false;
+            shadowStepCollisionPhaseTimer = 0f;
+            shadowStepPlayerLayer = -1;
+            shadowStepEnemyLayer = -1;
         }
 
         private static bool IsIgnoredProjectileReflectEnemy(EnemyHealth enemy, IReadOnlyCollection<EnemyHealth> ignoredEnemies)

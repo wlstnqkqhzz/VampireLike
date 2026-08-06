@@ -340,6 +340,8 @@ namespace VampireLike.Combat
             if (!GameState.IsGameOver)
                 GameState.SetGameOver();
 
+            GameBgm.Play(BgmType.GameOver);
+
             deathRoutine = null;
         }
     }

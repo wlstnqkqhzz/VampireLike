@@ -8,7 +8,8 @@ namespace VampireLike.Audio
         MainMenu,
         Battle,
         Boss,
-        HiddenBoss
+        HiddenBoss,
+        GameOver
     }
 
     public class GameBgm : MonoBehaviour
@@ -17,6 +18,7 @@ namespace VampireLike.Audio
         private const string MainMenuClipName = "main_menu_bgm";
         private const string BattleClipName = "battle_bgm";
         private const string HiddenBossClipName = "hidden_boss_bgm";
+        private const string GameOverClipName = "game_over_bgm";
         private const string BossClipPrefix = "boss_stage_";
         private const string BossClipSuffix = "_bgm";
 
@@ -148,6 +150,8 @@ namespace VampireLike.Audio
                 case BgmType.HiddenBoss:
                     AudioClip hiddenBossClip = Resources.Load<AudioClip>(MusicRoot + HiddenBossClipName);
                     return hiddenBossClip != null ? hiddenBossClip : Resources.Load<AudioClip>(MusicRoot + BattleClipName);
+                case BgmType.GameOver:
+                    return Resources.Load<AudioClip>(MusicRoot + GameOverClipName);
                 default:
                     return null;
             }
