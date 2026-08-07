@@ -33,6 +33,7 @@ namespace VampireLike.Save
             DeleteRecord(OverallScope);
             DeleteRecord("character.kael");
             DeleteRecord("character.selene");
+            RunHistoryManager.ResetHistory();
             PlayerPrefs.Save();
         }
 

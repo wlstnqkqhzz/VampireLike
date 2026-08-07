@@ -276,6 +276,19 @@ namespace VampireLike.Combat
                     GameSessionStats.TotalExperienceGained);
 
                 highScoreResult = HighScoreManager.SubmitRun(GameSessionStats.CharacterId, runRecord);
+                RunHistoryManager.AddRun(new RunHistoryEntry(
+                    System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    GameSessionStats.CharacterId,
+                    GameSessionStats.CharacterDisplayName,
+                    GameSessionStats.CharacterRole,
+                    GameSessionStats.SurvivalTime,
+                    currentWave,
+                    currentLevel,
+                    GameSessionStats.KillCount,
+                    GameSessionStats.EnemyKillCount,
+                    GameSessionStats.BossKillCount,
+                    GameSessionStats.TotalExperienceGained,
+                    GameSessionStats.GetUpgradeSummary()));
                 hasSubmittedRecord = true;
             }
 
