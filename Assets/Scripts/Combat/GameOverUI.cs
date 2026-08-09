@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using VampireLike.Enemies;
 using VampireLike.Growth;
 using VampireLike.Save;
+using VampireLike.UI;
 
 namespace VampireLike.Combat
 {
@@ -344,41 +345,36 @@ namespace VampireLike.Combat
             return "이번 생존 기록  |  캐릭터 최고 기록 갱신";
         }
 
-        private static void StretchToParent(RectTransform rectTransform)
-        {
-            rectTransform.anchorMin = Vector2.zero;
-            rectTransform.anchorMax = Vector2.one;
-            rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.offsetMin = Vector2.zero;
-            rectTransform.offsetMax = Vector2.zero;
-            rectTransform.anchoredPosition = Vector2.zero;
-        }
+    private static void StretchToParent(RectTransform rectTransform)
+    {
+        MobileSafeArea.ApplyTo(rectTransform);
+    }
 
         private static void CenterPanel(RectTransform rectTransform)
         {
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(720f, 620f);
+            rectTransform.sizeDelta = new Vector2(760f, 650f);
             rectTransform.anchoredPosition = Vector2.zero;
         }
 
         private void PositionResultObjects()
         {
-            SetLabelPosition(titleText, new Vector2(0f, 250f), new Vector2(560f, 54f));
-            SetLabelPosition(subtitleText, new Vector2(0f, 210f), new Vector2(560f, 28f));
-            SetLabelPosition(characterText, new Vector2(0f, 166f), new Vector2(600f, 34f));
-            SetLabelPosition(mainStatsText, new Vector2(-210f, 78f), new Vector2(260f, 120f));
-            SetLabelPosition(combatStatsText, new Vector2(0f, 78f), new Vector2(260f, 120f));
-            SetLabelPosition(growthStatsText, new Vector2(210f, 78f), new Vector2(260f, 120f));
-            SetLabelPosition(upgradeHeaderText, new Vector2(0f, -18f), new Vector2(560f, 30f));
-            SetLabelPosition(upgradeText, new Vector2(0f, -108f), new Vector2(600f, 136f));
+            SetLabelPosition(titleText, new Vector2(0f, 260f), new Vector2(600f, 58f));
+            SetLabelPosition(subtitleText, new Vector2(0f, 218f), new Vector2(600f, 30f));
+            SetLabelPosition(characterText, new Vector2(0f, 172f), new Vector2(640f, 36f));
+            SetLabelPosition(mainStatsText, new Vector2(-220f, 82f), new Vector2(280f, 124f));
+            SetLabelPosition(combatStatsText, new Vector2(0f, 82f), new Vector2(280f, 124f));
+            SetLabelPosition(growthStatsText, new Vector2(220f, 82f), new Vector2(280f, 124f));
+            SetLabelPosition(upgradeHeaderText, new Vector2(0f, -22f), new Vector2(600f, 32f));
+            SetLabelPosition(upgradeText, new Vector2(0f, -118f), new Vector2(640f, 146f));
 
             if (restartButton != null)
-                SetRectPosition(restartButton.GetComponent<RectTransform>(), new Vector2(-144f, -252f), new Vector2(240f, 46f));
+                SetRectPosition(restartButton.GetComponent<RectTransform>(), new Vector2(-152f, -270f), new Vector2(260f, 54f));
 
             if (quitButton != null)
-                SetRectPosition(quitButton.GetComponent<RectTransform>(), new Vector2(144f, -252f), new Vector2(240f, 46f));
+                SetRectPosition(quitButton.GetComponent<RectTransform>(), new Vector2(152f, -270f), new Vector2(260f, 54f));
         }
 
         private static void SetLabelPosition(Text label, Vector2 position, Vector2 size)

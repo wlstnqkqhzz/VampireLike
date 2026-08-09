@@ -4,6 +4,7 @@ using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.Save;
 using VampireLike.Settings;
+using VampireLike.UI;
 
 namespace VampireLike.Menu
 {
@@ -437,11 +438,7 @@ namespace VampireLike.Menu
 
         private static Rect CenterRect(float width, float height)
         {
-            return new Rect(
-                (Screen.width - width) * 0.5f,
-                (Screen.height - height) * 0.5f,
-                width,
-                height);
+            return MobileSafeArea.CenterRect(width, height);
         }
 
         private static string FormatTime(float seconds)

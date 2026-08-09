@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using VampireLike.Audio;
+using VampireLike.UI;
 
 namespace VampireLike.Growth
 {
@@ -118,13 +119,13 @@ namespace VampireLike.Growth
             panelRect.anchorMin = new Vector2(0.5f, 0.5f);
             panelRect.anchorMax = new Vector2(0.5f, 0.5f);
             panelRect.pivot = new Vector2(0.5f, 0.5f);
-            panelRect.sizeDelta = new Vector2(620f, 360f);
+            panelRect.sizeDelta = new Vector2(680f, 430f);
             panelRect.anchoredPosition = Vector2.zero;
 
             Image panelImage = panel.AddComponent<Image>();
             panelImage.color = new Color(0.1f, 0.13f, 0.15f, 0.96f);
 
-            CreateLabel(panel.transform, "레벨 업", new Vector2(0f, 130f), 36, Color.white, new Vector2(520f, 52f));
+            CreateLabel(panel.transform, "레벨 업", new Vector2(0f, 158f), 38, Color.white, new Vector2(560f, 56f));
 
             choiceButtons = new Button[ChoiceCount];
             choiceButtonImages = new Image[ChoiceCount];
@@ -132,7 +133,7 @@ namespace VampireLike.Growth
 
             for (int i = 0; i < ChoiceCount; i++)
             {
-                Button button = CreateButton(panel.transform, new Vector2(0f, 62f - i * 82f), out Text buttonText, out Image buttonImage);
+                Button button = CreateButton(panel.transform, new Vector2(0f, 72f - i * 92f), out Text buttonText, out Image buttonImage);
                 choiceButtons[i] = button;
                 choiceButtonImages[i] = buttonImage;
                 choiceTexts[i] = buttonText;
@@ -197,12 +198,7 @@ namespace VampireLike.Growth
 
         private static void StretchToParent(RectTransform rectTransform)
         {
-            rectTransform.anchorMin = Vector2.zero;
-            rectTransform.anchorMax = Vector2.one;
-            rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.offsetMin = Vector2.zero;
-            rectTransform.offsetMax = Vector2.zero;
-            rectTransform.anchoredPosition = Vector2.zero;
+            MobileSafeArea.ApplyTo(rectTransform);
         }
 
         private static Text CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color, Vector2 size)
@@ -236,14 +232,14 @@ namespace VampireLike.Growth
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(520f, 64f);
+            rectTransform.sizeDelta = new Vector2(560f, 74f);
             rectTransform.anchoredPosition = position;
 
             image = buttonObject.AddComponent<Image>();
             image.color = new Color(0.72f, 0.9f, 0.95f, 1f);
 
             Button button = buttonObject.AddComponent<Button>();
-            buttonText = CreateLabel(buttonObject.transform, string.Empty, Vector2.zero, 21, new Color(0.06f, 0.1f, 0.12f, 1f), new Vector2(480f, 58f));
+            buttonText = CreateLabel(buttonObject.transform, string.Empty, Vector2.zero, 22, new Color(0.06f, 0.1f, 0.12f, 1f), new Vector2(520f, 66f));
             return button;
         }
     }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.UI;
 
 namespace VampireLike.Enemies
 {
@@ -84,10 +85,12 @@ namespace VampireLike.Enemies
 
         private void DrawBossHealthBar(EnemyHealth bossHealth, bool isHiddenBoss)
         {
-            float width = Mathf.Max(260f, Screen.width - sideMargin * 2f);
+            float top = MobileSafeArea.HudTop(topOffset);
+            float horizontalMargin = Mathf.Max(MobileSafeArea.HudLeft(sideMargin), MobileSafeArea.HudRight(sideMargin));
+            float width = Mathf.Max(260f, Screen.width - horizontalMargin * 2f);
             float x = (Screen.width - width) * 0.5f;
 
-            Rect borderRect = new Rect(x, topOffset, width, barHeight + 8f);
+            Rect borderRect = new Rect(x, top, width, barHeight + 8f);
             Rect backgroundRect = new Rect(borderRect.x + 4f, borderRect.y + 4f, borderRect.width - 8f, borderRect.height - 8f);
             Rect fillRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * bossHealth.HealthProgress, backgroundRect.height);
 

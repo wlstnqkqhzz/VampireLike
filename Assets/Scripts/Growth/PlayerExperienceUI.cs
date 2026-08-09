@@ -1,5 +1,6 @@
 using UnityEngine;
 using VampireLike.Enemies;
+using VampireLike.UI;
 
 namespace VampireLike.Growth
 {
@@ -80,9 +81,12 @@ namespace VampireLike.Growth
             const float levelWidth = 92f;
             const float gap = 8f;
 
-            float barWidth = Mathf.Max(240f, Screen.width - sideMargin * 2f - waveWidth - levelWidth - gap * 2f);
-            Rect waveRect = new Rect(sideMargin, topMargin - 1f, waveWidth, barHeight + 8f);
-            Rect borderRect = new Rect(waveRect.xMax + gap, topMargin, barWidth, barHeight + 6f);
+            float top = MobileSafeArea.HudTop(topMargin);
+            float left = MobileSafeArea.HudLeft(sideMargin);
+            float right = MobileSafeArea.HudRight(sideMargin);
+            float barWidth = Mathf.Max(240f, Screen.width - left - right - waveWidth - levelWidth - gap * 2f);
+            Rect waveRect = new Rect(left, top - 1f, waveWidth, barHeight + 8f);
+            Rect borderRect = new Rect(waveRect.xMax + gap, top, barWidth, barHeight + 6f);
             Rect backgroundRect = new Rect(borderRect.x + 3f, borderRect.y + 3f, borderRect.width - 6f, borderRect.height - 6f);
             Rect fillRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * playerExperience.ExperienceProgress, backgroundRect.height);
             Rect levelRect = new Rect(borderRect.xMax + gap, borderRect.y - 1f, levelWidth, borderRect.height + 2f);

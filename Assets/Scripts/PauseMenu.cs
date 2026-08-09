@@ -5,6 +5,7 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using VampireLike.Audio;
 using VampireLike.Settings;
+using VampireLike.UI;
 
 /// <summary>
 /// Escape ?ㅻ줈 ?쇱떆?뺤? 硫붾돱瑜??닿퀬 ?レ쑝硫? 怨꾩냽?섍린/寃뚯엫 醫낅즺 踰꾪듉??泥섎━?쒕떎.
@@ -166,10 +167,10 @@ public class PauseMenu : MonoBehaviour
         Image panelImage = panel.AddComponent<Image>();
         panelImage.color = new Color(0.12f, 0.14f, 0.12f, 0.92f);
 
-        CreateLabel(panel.transform, "\uC77C\uC2DC\uC815\uC9C0", new Vector2(0f, 84f), 30, Color.white);
-        resumeButton = CreateButton(panel.transform, "\uACC4\uC18D\uD558\uAE30", new Vector2(0f, 38f));
-        optionsButton = CreateButton(panel.transform, "\uC635\uC158", new Vector2(0f, -24f));
-        quitButton = CreateButton(panel.transform, "\uAC8C\uC784 \uC885\uB8CC", new Vector2(0f, -86f));
+        CreateLabel(panel.transform, "\uC77C\uC2DC\uC815\uC9C0", new Vector2(0f, 108f), 32, Color.white);
+        resumeButton = CreateButton(panel.transform, "\uACC4\uC18D\uD558\uAE30", new Vector2(0f, 54f), new Vector2(260f, 54f));
+        optionsButton = CreateButton(panel.transform, "\uC635\uC158", new Vector2(0f, -18f), new Vector2(260f, 54f));
+        quitButton = CreateButton(panel.transform, "\uAC8C\uC784 \uC885\uB8CC", new Vector2(0f, -90f), new Vector2(260f, 54f));
 
         CreateOptionsPanel(root.transform);
     }
@@ -238,12 +239,7 @@ public class PauseMenu : MonoBehaviour
 
     private static void StretchToParent(RectTransform rectTransform)
     {
-        rectTransform.anchorMin = Vector2.zero;
-        rectTransform.anchorMax = Vector2.one;
-        rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.offsetMin = Vector2.zero;
-        rectTransform.offsetMax = Vector2.zero;
-        rectTransform.anchoredPosition = Vector2.zero;
+        MobileSafeArea.ApplyTo(rectTransform);
     }
 
     private static void CenterPausePanel(RectTransform rectTransform)
@@ -251,7 +247,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = new Vector2(360f, 270f);
+        rectTransform.sizeDelta = new Vector2(420f, 320f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 
@@ -260,7 +256,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = new Vector2(560f, 540f);
+        rectTransform.sizeDelta = new Vector2(640f, 620f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 
@@ -274,25 +270,25 @@ public class PauseMenu : MonoBehaviour
         Image panelImage = panel.AddComponent<Image>();
         panelImage.color = new Color(0.08f, 0.1f, 0.09f, 0.95f);
 
-        CreateLabel(panel.transform, "\uC635\uC158", new Vector2(0f, 202f), 30, Color.white);
-        CreateLabel(panel.transform, "\uAC8C\uC784 \uD654\uBA74\uACFC \uC74C\uB7C9\uC744 \uC870\uC815\uD569\uB2C8\uB2E4", new Vector2(0f, 166f), 15, new Color(0.82f, 0.9f, 0.78f, 1f));
-        CreateLabel(panel.transform, "\uC804\uCCB4 \uC74C\uB7C9", new Vector2(-178f, 108f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "\uBC30\uACBD \uC74C\uC545", new Vector2(-178f, 54f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "\uD6A8\uACFC\uC74C", new Vector2(-178f, 0f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "\uD654\uBA74 \uBAA8\uB4DC", new Vector2(-178f, -66f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "\uD574\uC0C1\uB3C4", new Vector2(-178f, -122f), 17, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uC635\uC158", new Vector2(0f, 244f), 32, Color.white);
+        CreateLabel(panel.transform, "\uAC8C\uC784 \uD654\uBA74\uACFC \uC74C\uB7C9\uC744 \uC870\uC815\uD569\uB2C8\uB2E4", new Vector2(0f, 204f), 16, new Color(0.82f, 0.9f, 0.78f, 1f));
+        CreateLabel(panel.transform, "\uC804\uCCB4 \uC74C\uB7C9", new Vector2(-210f, 132f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uBC30\uACBD \uC74C\uC545", new Vector2(-210f, 72f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uD6A8\uACFC\uC74C", new Vector2(-210f, 12f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uD654\uBA74 \uBAA8\uB4DC", new Vector2(-210f, -60f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
+        CreateLabel(panel.transform, "\uD574\uC0C1\uB3C4", new Vector2(-210f, -122f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
 
-        masterVolumeSlider = CreateSlider(panel.transform, new Vector2(96f, 108f));
-        bgmVolumeSlider = CreateSlider(panel.transform, new Vector2(96f, 54f));
-        sfxVolumeSlider = CreateSlider(panel.transform, new Vector2(96f, 0f));
-        fullscreenToggle = CreateToggle(panel.transform, new Vector2(72f, -66f), out fullscreenModeText);
-        previousResolutionButton = CreateButton(panel.transform, "<", new Vector2(-20f, -122f), new Vector2(48f, 36f));
-        resolutionText = CreateText(panel.transform, string.Empty, new Vector2(88f, -122f), 16, Color.white, new Vector2(168f, 34f));
-        nextResolutionButton = CreateButton(panel.transform, ">", new Vector2(196f, -122f), new Vector2(48f, 36f));
-        appliedScreenText = CreateText(panel.transform, string.Empty, new Vector2(0f, -164f), 14, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(430f, 28f));
-        CreateButton(panel.transform, "\uAE30\uBCF8\uAC12", new Vector2(0f, -196f), new Vector2(160f, 34f)).onClick.AddListener(ResetOptions);
-        optionsConfirmButton = CreateButton(panel.transform, "\uD655\uC778", new Vector2(-120f, -236f), new Vector2(190f, 44f));
-        optionsBackButton = CreateButton(panel.transform, "\uB4A4\uB85C", new Vector2(120f, -236f), new Vector2(190f, 44f));
+        masterVolumeSlider = CreateSlider(panel.transform, new Vector2(112f, 132f));
+        bgmVolumeSlider = CreateSlider(panel.transform, new Vector2(112f, 72f));
+        sfxVolumeSlider = CreateSlider(panel.transform, new Vector2(112f, 12f));
+        fullscreenToggle = CreateToggle(panel.transform, new Vector2(84f, -60f), out fullscreenModeText);
+        previousResolutionButton = CreateButton(panel.transform, "<", new Vector2(-40f, -122f), new Vector2(56f, 44f));
+        resolutionText = CreateText(panel.transform, string.Empty, new Vector2(92f, -122f), 17, Color.white, new Vector2(190f, 38f));
+        nextResolutionButton = CreateButton(panel.transform, ">", new Vector2(226f, -122f), new Vector2(56f, 44f));
+        appliedScreenText = CreateText(panel.transform, string.Empty, new Vector2(0f, -174f), 14, new Color(0.82f, 0.9f, 0.78f, 1f), new Vector2(500f, 30f));
+        CreateButton(panel.transform, "\uAE30\uBCF8\uAC12", new Vector2(0f, -214f), new Vector2(180f, 40f)).onClick.AddListener(ResetOptions);
+        optionsConfirmButton = CreateButton(panel.transform, "\uD655\uC778", new Vector2(-140f, -268f), new Vector2(220f, 52f));
+        optionsBackButton = CreateButton(panel.transform, "\uB4A4\uB85C", new Vector2(140f, -268f), new Vector2(220f, 52f));
         RefreshOptionsControls();
         panel.SetActive(false);
     }
@@ -506,7 +502,13 @@ public class PauseMenu : MonoBehaviour
         image.color = new Color(0.84f, 0.92f, 0.72f, 1f);
 
         Button button = buttonObject.AddComponent<Button>();
-        CreateLabel(buttonObject.transform, text, Vector2.zero, 18, new Color(0.08f, 0.12f, 0.08f, 1f));
+        CreateText(
+            buttonObject.transform,
+            text,
+            Vector2.zero,
+            18,
+            new Color(0.08f, 0.12f, 0.08f, 1f),
+            new Vector2(Mathf.Max(1f, size.x - 12f), Mathf.Max(1f, size.y - 8f)));
 
         return button;
     }
@@ -520,7 +522,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = new Vector2(220f, 20f);
+        rectTransform.sizeDelta = new Vector2(260f, 28f);
         rectTransform.anchoredPosition = position;
 
         Slider slider = sliderObject.AddComponent<Slider>();
@@ -568,7 +570,7 @@ public class PauseMenu : MonoBehaviour
         Image handle = handleObject.AddComponent<Image>();
         handle.color = new Color(0.86f, 0.96f, 0.78f, 1f);
         RectTransform handleRect = handleObject.GetComponent<RectTransform>();
-        handleRect.sizeDelta = new Vector2(18f, 26f);
+        handleRect.sizeDelta = new Vector2(28f, 38f);
 
         slider.fillRect = fillRect;
         slider.handleRect = handleRect;
@@ -586,7 +588,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = new Vector2(160f, 32f);
+        rectTransform.sizeDelta = new Vector2(220f, 42f);
         rectTransform.anchoredPosition = position;
 
         Image background = toggleObject.AddComponent<Image>();
@@ -600,10 +602,10 @@ public class PauseMenu : MonoBehaviour
         checkRect.anchorMin = new Vector2(0f, 0.5f);
         checkRect.anchorMax = new Vector2(0f, 0.5f);
         checkRect.pivot = new Vector2(0.5f, 0.5f);
-        checkRect.sizeDelta = new Vector2(24f, 24f);
-        checkRect.anchoredPosition = new Vector2(18f, 0f);
+        checkRect.sizeDelta = new Vector2(30f, 30f);
+        checkRect.anchoredPosition = new Vector2(22f, 0f);
 
-        label = CreateText(toggleObject.transform, "\uC804\uCCB4 \uD654\uBA74", new Vector2(42f, 0f), 16, Color.white, new Vector2(110f, 28f));
+        label = CreateText(toggleObject.transform, "\uC804\uCCB4 \uD654\uBA74", new Vector2(56f, 0f), 18, Color.white, new Vector2(150f, 34f));
         label.alignment = TextAnchor.MiddleLeft;
 
         Toggle toggle = toggleObject.AddComponent<Toggle>();
