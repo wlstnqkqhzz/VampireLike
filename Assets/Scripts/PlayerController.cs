@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VampireLike.Mobile;
 using VampireLike.World;
 
 /// <summary>
@@ -78,6 +79,7 @@ public class PlayerController : MonoBehaviour
 
         ConfigurePlayerCollider();
         ConfigureSpriteRenderer();
+        MobileTouchJoystick.EnsureExists();
     }
 
     private void Start()
@@ -95,6 +97,14 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         moveInput = Vector2.zero;
+
+        if (MobileTouchJoystick.HasActiveInput)
+        {
+            moveInput = MobileTouchJoystick.MoveInput;
+            UpdateFacingDirection();
+            UpdateAnimation();
+            return;
+        }
 
         Keyboard keyboard = Keyboard.current;
 
