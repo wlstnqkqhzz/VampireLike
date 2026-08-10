@@ -24,7 +24,7 @@ namespace VampireLike.VFX
 
     public static class CombatVFX
     {
-        private static readonly int DefaultSortingOrder = 15;
+        private static readonly int DefaultSortingOrder = 1800;
         private static CombatVFXSettings settings;
         private static Material sharedTrailMaterial;
         private static CombatVFXSettings Settings
@@ -40,7 +40,7 @@ namespace VampireLike.VFX
             }
         }
 
-        public static void PlayBurst(Vector2 position, CombatVFXKind kind, float size, float duration = 0.28f, int sortingOrder = 15)
+        public static void PlayBurst(Vector2 position, CombatVFXKind kind, float size, float duration = 0.28f, int sortingOrder = 1800)
         {
             size *= SizeMultiplier;
             duration *= DurationMultiplier;
@@ -62,7 +62,7 @@ namespace VampireLike.VFX
             effect.Play(duration, 1f, 1.22f, 120f, true);
         }
 
-        public static GameObject PlayWarning(Vector2 position, CombatVFXKind kind, float size, float duration = 0.9f, int sortingOrder = 12)
+        public static GameObject PlayWarning(Vector2 position, CombatVFXKind kind, float size, float duration = 0.9f, int sortingOrder = 650)
         {
             size *= SizeMultiplier;
             duration *= DurationMultiplier;
@@ -84,7 +84,7 @@ namespace VampireLike.VFX
             return root;
         }
 
-        public static GameObject PlayCone(Vector2 position, Vector2 direction, CombatVFXKind kind, float range, bool impact, float duration, int sortingOrder = 14)
+        public static GameObject PlayCone(Vector2 position, Vector2 direction, CombatVFXKind kind, float range, bool impact, float duration, int sortingOrder = 1600)
         {
             range *= SizeMultiplier;
             duration *= DurationMultiplier;
@@ -106,7 +106,7 @@ namespace VampireLike.VFX
             return root;
         }
 
-        public static void PlayLine(Vector2 from, Vector2 to, CombatVFXKind kind, float duration = 0.16f, float width = 0.08f, int sortingOrder = 16)
+        public static void PlayLine(Vector2 from, Vector2 to, CombatVFXKind kind, float duration = 0.16f, float width = 0.08f, int sortingOrder = 1850)
         {
             duration *= DurationMultiplier;
             width *= SizeMultiplier;
@@ -129,7 +129,7 @@ namespace VampireLike.VFX
             effect.Play(duration, 1f, 1f, 0f, true);
         }
 
-        public static void PlayChainLightning(Vector2 from, Vector2 to, float duration = 0.22f, float width = 0.07f, int sortingOrder = 19)
+        public static void PlayChainLightning(Vector2 from, Vector2 to, float duration = 0.22f, float width = 0.07f, int sortingOrder = 1900)
         {
             duration *= DurationMultiplier;
             width *= SizeMultiplier;
@@ -153,7 +153,7 @@ namespace VampireLike.VFX
             effect.Play(duration, glow, core);
         }
 
-        public static void PlayChainLightningImpact(Vector2 position, float size = 0.22f, float duration = 0.12f, int sortingOrder = 21)
+        public static void PlayChainLightningImpact(Vector2 position, float size = 0.22f, float duration = 0.12f, int sortingOrder = 1900)
         {
             size *= SizeMultiplier;
             duration *= DurationMultiplier;
@@ -181,7 +181,7 @@ namespace VampireLike.VFX
             effect.Play(duration, lines);
         }
 
-        public static GameObject CreateZoneVisual(Transform parent, CombatVFXKind kind, float radius, Color tint, int sortingOrder = 10)
+        public static GameObject CreateZoneVisual(Transform parent, CombatVFXKind kind, float radius, Color tint, int sortingOrder = 620)
         {
             radius *= SizeMultiplier;
             sortingOrder += SortingOffset;

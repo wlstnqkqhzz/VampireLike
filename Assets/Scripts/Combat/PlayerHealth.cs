@@ -68,6 +68,9 @@ namespace VampireLike.Combat
 
             if (GetComponent<GameOverUI>() == null)
                 gameObject.AddComponent<GameOverUI>();
+
+            if (GetComponent<PlayerHealthUI>() == null)
+                gameObject.AddComponent<PlayerHealthUI>();
         }
 
         private void Start()

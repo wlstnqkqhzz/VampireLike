@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace VampireLike.UI
 {
@@ -8,6 +9,12 @@ namespace VampireLike.UI
     public static class MobileSafeArea
     {
         private const float MinimumScreenSize = 1f;
+        private static readonly Vector2 LandscapeReferenceResolution = new Vector2(1920f, 1080f);
+        private static readonly Vector2 PortraitReferenceResolution = new Vector2(1080f, 1920f);
+
+        public static bool IsPortrait => Screen.height > Screen.width;
+
+        public static Vector2 CurrentReferenceResolution => IsPortrait ? PortraitReferenceResolution : LandscapeReferenceResolution;
 
         public static Rect GuiSafeArea
         {
@@ -76,6 +83,16 @@ namespace VampireLike.UI
             float widthScale = safeArea.width / Mathf.Max(MinimumScreenSize, designWidth);
             float heightScale = safeArea.height / Mathf.Max(MinimumScreenSize, designHeight);
             return Mathf.Clamp(Mathf.Min(widthScale, heightScale), 0.72f, 1.25f);
+        }
+
+        public static void ConfigureCanvasScaler(CanvasScaler scaler)
+        {
+            if (scaler == null)
+                return;
+
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = CurrentReferenceResolution;
+            scaler.matchWidthOrHeight = 0.5f;
         }
     }
 }

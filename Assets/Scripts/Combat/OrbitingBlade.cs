@@ -30,7 +30,7 @@ namespace VampireLike.Combat
             spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.sprite = CreateBladeSprite();
             spriteRenderer.color = Color.white;
-            spriteRenderer.sortingOrder = 16;
+            spriteRenderer.sortingOrder = 1750;
             transform.localScale = Vector3.one * 0.58f;
 
             glowRenderer = CreateGlowRenderer();

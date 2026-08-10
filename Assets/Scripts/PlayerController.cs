@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VampireLike.Mobile;
+using VampireLike.VFX;
 using VampireLike.World;
 
 /// <summary>
@@ -14,6 +15,8 @@ public class PlayerController : MonoBehaviour
 {
     // 기본 플레이어 스프라이트/충돌 설정값이다.
     private const int PlayerSortingOrder = 10;
+    private const int PlayerDepthBaseOrder = 1000;
+    private const float PlayerDepthOrderPerUnit = 6f;
     private const float PlayerVisualScale = 3f;
     private const int SpriteSize = 16;
     private const int DirectionFrameCount = 4;
@@ -191,6 +194,7 @@ public class PlayerController : MonoBehaviour
             visualRenderer.sortingOrder = PlayerSortingOrder;
 
         visualRenderer.transform.localPosition = Vector3.zero;
+        ConfigureDepthSorting();
 
         if (playerSpriteAnimator != null)
         {
@@ -317,6 +321,19 @@ public class PlayerController : MonoBehaviour
             rootSpriteRenderer.enabled = false;
 
         return spriteRenderer;
+    }
+
+    private void ConfigureDepthSorting()
+    {
+        if (visualRenderer == null)
+            return;
+
+        SpriteDepthSorter sorter = visualRenderer.GetComponent<SpriteDepthSorter>();
+
+        if (sorter == null)
+            sorter = visualRenderer.gameObject.AddComponent<SpriteDepthSorter>();
+
+        sorter.Configure(visualRenderer, transform, PlayerDepthBaseOrder, PlayerDepthOrderPerUnit);
     }
 
 #if UNITY_EDITOR

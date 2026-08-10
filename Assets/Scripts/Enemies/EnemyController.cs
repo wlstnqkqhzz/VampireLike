@@ -1,5 +1,6 @@
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -30,6 +31,8 @@ namespace VampireLike.Enemies
 
         [SerializeField]
         private LayerMask enemyLayerMask = 1 << 7;
+        private const int EnemyDepthBaseOrder = 1000;
+        private const float EnemyDepthOrderPerUnit = 6f;
 
         private Rigidbody2D rb;
         private Collider2D enemyCollider;
@@ -55,6 +58,8 @@ namespace VampireLike.Enemies
 
             if (target == null)
                 target = GameObject.Find("Player")?.transform;
+
+            ConfigureDepthSorting();
         }
 
         private void FixedUpdate()
@@ -165,6 +170,21 @@ namespace VampireLike.Enemies
 
             SpriteRenderer targetRenderer = GetComponentInChildren<SpriteRenderer>();
             return targetRenderer == null ? null : targetRenderer.gameObject.AddComponent<EnemySpriteAnimator>();
+        }
+
+        private void ConfigureDepthSorting()
+        {
+            SpriteRenderer targetRenderer = GetComponentInChildren<SpriteRenderer>();
+
+            if (targetRenderer == null)
+                return;
+
+            SpriteDepthSorter sorter = targetRenderer.GetComponent<SpriteDepthSorter>();
+
+            if (sorter == null)
+                sorter = targetRenderer.gameObject.AddComponent<SpriteDepthSorter>();
+
+            sorter.Configure(targetRenderer, transform, EnemyDepthBaseOrder, EnemyDepthOrderPerUnit);
         }
     }
 }

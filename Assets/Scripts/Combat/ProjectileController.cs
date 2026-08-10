@@ -35,6 +35,7 @@ namespace VampireLike.Combat
         private CombatVFXKind vfxKind = CombatVFXKind.ArcaneImpact;
         private bool isDestroying;
         private readonly HashSet<EnemyHealth> hitEnemies = new HashSet<EnemyHealth>();
+        private const int ProjectileSortingOrder = 1800;
 
         private void Awake()
         {
@@ -47,6 +48,10 @@ namespace VampireLike.Combat
             Collider2D projectileCollider = GetComponent<Collider2D>();
             projectileCollider.isTrigger = true;
             spriteRenderer = GetComponent<SpriteRenderer>();
+
+            if (spriteRenderer != null)
+                spriteRenderer.sortingOrder = ProjectileSortingOrder;
+
             circleCollider = projectileCollider as CircleCollider2D;
             effectiveDamage = damage;
         }

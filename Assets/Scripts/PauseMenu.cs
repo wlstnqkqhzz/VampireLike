@@ -207,9 +207,8 @@ public class PauseMenu : MonoBehaviour
         canvas.sortingOrder = 1000;
 
         CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
+        MobileSafeArea.ConfigureCanvasScaler(scaler);
+        canvasObject.AddComponent<ResponsiveCanvasScaler>();
 
         canvasObject.AddComponent<GraphicRaycaster>();
         return canvas;
@@ -239,7 +238,7 @@ public class PauseMenu : MonoBehaviour
             mobilePauseButtonRect.anchorMin = new Vector2(1f, 1f);
             mobilePauseButtonRect.anchorMax = new Vector2(1f, 1f);
             mobilePauseButtonRect.pivot = new Vector2(1f, 1f);
-            mobilePauseButtonRect.sizeDelta = new Vector2(72f, 72f);
+            mobilePauseButtonRect.sizeDelta = GetMobilePauseButtonSize();
 
             Image buttonImage = buttonObject.AddComponent<Image>();
             buttonImage.color = new Color(0.02f, 0.03f, 0.025f, 0.78f);
@@ -247,7 +246,7 @@ public class PauseMenu : MonoBehaviour
             mobilePauseButton = buttonObject.AddComponent<Button>();
             mobilePauseButton.targetGraphic = buttonImage;
 
-            Text label = CreateText(buttonObject.transform, "II", Vector2.zero, 30, Color.white, new Vector2(72f, 72f));
+            Text label = CreateText(buttonObject.transform, "II", Vector2.zero, 30, Color.white, GetMobilePauseButtonSize());
             label.fontStyle = FontStyle.Bold;
         }
 
@@ -272,10 +271,9 @@ public class PauseMenu : MonoBehaviour
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 960;
 
-        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
+            CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+            MobileSafeArea.ConfigureCanvasScaler(scaler);
+            canvasObject.AddComponent<ResponsiveCanvasScaler>();
 
         canvasObject.AddComponent<GraphicRaycaster>();
         return canvas;
@@ -294,7 +292,28 @@ public class PauseMenu : MonoBehaviour
         mobilePauseButton.gameObject.SetActive(canShow);
 
         if (mobilePauseButtonRect != null)
-            mobilePauseButtonRect.anchoredPosition = new Vector2(-MobileSafeArea.HudRight(22f), -MobileSafeArea.HudTop(22f));
+        {
+            Vector2 buttonSize = GetMobilePauseButtonSize();
+            mobilePauseButtonRect.sizeDelta = buttonSize;
+            mobilePauseButtonRect.anchoredPosition = new Vector2(-MobileSafeArea.HudRight(24f), -MobileSafeArea.HudTop(24f));
+
+            Text label = mobilePauseButtonRect.GetComponentInChildren<Text>();
+
+            if (label != null)
+            {
+                RectTransform labelRect = label.GetComponent<RectTransform>();
+
+                if (labelRect != null)
+                    labelRect.sizeDelta = buttonSize;
+
+                label.fontSize = MobileSafeArea.IsPortrait ? 36 : 30;
+            }
+        }
+    }
+
+    private static Vector2 GetMobilePauseButtonSize()
+    {
+        return MobileSafeArea.IsPortrait ? new Vector2(92f, 92f) : new Vector2(72f, 72f);
     }
 
     private static void EnsureEventSystem()

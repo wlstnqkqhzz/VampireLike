@@ -74,6 +74,7 @@ namespace VampireLike.Menu
                 return;
 
             EnsureStyles();
+            ApplyResponsiveStyleSizes();
             DrawBackdrop();
 
             if (currentScreen == MenuScreen.Title)
@@ -481,12 +482,20 @@ namespace VampireLike.Menu
 
         private static Rect CenterRect(float width, float height)
         {
-            return MobileSafeArea.CenterRect(width, height);
+            float scale = GetMenuScale();
+            return MobileSafeArea.CenterRect(width * scale, height * scale);
         }
 
         private static bool IsPortraitLayout()
         {
-            return Screen.height > Screen.width;
+            return MobileSafeArea.IsPortrait;
+        }
+
+        private static float GetMenuScale()
+        {
+            return MobileSafeArea.IsPortrait
+                ? MobileSafeArea.UiScale(1080f, 1920f)
+                : MobileSafeArea.UiScale(1920f, 1080f);
         }
 
         private static string FormatTime(float seconds)
@@ -592,6 +601,22 @@ namespace VampireLike.Menu
             secondaryButtonStyle = new GUIStyle(buttonStyle);
             secondaryButtonStyle.normal.background = secondaryButtonTexture;
             secondaryButtonStyle.normal.textColor = new Color(0.9f, 0.95f, 0.86f, 1f);
+        }
+
+        private void ApplyResponsiveStyleSizes()
+        {
+            float scale = GetMenuScale();
+
+            titleStyle.fontSize = Mathf.RoundToInt(42 * scale);
+            subtitleStyle.fontSize = Mathf.RoundToInt(17 * scale);
+            labelStyle.fontSize = Mathf.RoundToInt(26 * scale);
+            descriptionStyle.fontSize = Mathf.RoundToInt(15 * scale);
+            statStyle.fontSize = Mathf.RoundToInt(14 * scale);
+            footerStyle.fontSize = Mathf.RoundToInt(14 * scale);
+            optionLabelStyle.fontSize = Mathf.RoundToInt(18 * scale);
+            optionValueStyle.fontSize = Mathf.RoundToInt(18 * scale);
+            buttonStyle.fontSize = Mathf.RoundToInt(20 * scale);
+            secondaryButtonStyle.fontSize = buttonStyle.fontSize;
         }
 
         private static Texture2D MakeTexture(Color color)

@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 using VampireLike.Combat;
+using VampireLike.UI;
 
 namespace VampireLike.Mobile
 {
@@ -211,9 +212,8 @@ namespace VampireLike.Mobile
             canvas.sortingOrder = 950;
 
             CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            MobileSafeArea.ConfigureCanvasScaler(scaler);
+            canvasObject.AddComponent<ResponsiveCanvasScaler>();
 
             canvasRect = canvasObject.GetComponent<RectTransform>();
 

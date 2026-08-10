@@ -174,9 +174,8 @@ namespace VampireLike.Combat
             canvas.sortingOrder = 1500;
 
             CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            MobileSafeArea.ConfigureCanvasScaler(scaler);
+            canvasObject.AddComponent<ResponsiveCanvasScaler>();
 
             canvasObject.AddComponent<GraphicRaycaster>();
             return canvas;

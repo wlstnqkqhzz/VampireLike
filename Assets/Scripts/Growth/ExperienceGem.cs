@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using VampireLike.Audio;
+using VampireLike.VFX;
 
 namespace VampireLike.Growth
 {
@@ -37,6 +38,8 @@ namespace VampireLike.Growth
         private PlayerExperience targetExperience;
         private Action<int> bossCollectCallback;
         private GemCollectorType collectorType = GemCollectorType.None;
+        private const int GemDepthBaseOrder = 760;
+        private const float GemDepthOrderPerUnit = 6f;
 
         public int ExperienceAmount => experienceAmount;
         public bool IsClaimed => isCollected;
@@ -46,6 +49,22 @@ namespace VampireLike.Growth
         {
             Collider2D gemCollider = GetComponent<Collider2D>();
             gemCollider.isTrigger = true;
+            ConfigureDepthSorting();
+        }
+
+        private void ConfigureDepthSorting()
+        {
+            SpriteRenderer spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+            if (spriteRenderer == null)
+                return;
+
+            SpriteDepthSorter sorter = spriteRenderer.GetComponent<SpriteDepthSorter>();
+
+            if (sorter == null)
+                sorter = spriteRenderer.gameObject.AddComponent<SpriteDepthSorter>();
+
+            sorter.Configure(spriteRenderer, transform, GemDepthBaseOrder, GemDepthOrderPerUnit);
         }
 
         private void OnValidate()
