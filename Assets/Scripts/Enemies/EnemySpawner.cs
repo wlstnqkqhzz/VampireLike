@@ -87,6 +87,20 @@ namespace VampireLike.Enemies
         [SerializeField]
         private int maxEnemyCount = 44;
 
+        [Header("Early Wave Ease")]
+        // 초반에는 플레이어 화력이 낮으므로 적 밀도를 천천히 올린다.
+        [SerializeField]
+        private int earlyEaseEndWave = 5;
+
+        [SerializeField]
+        private float earlySpawnIntervalMultiplier = 1.65f;
+
+        [SerializeField]
+        private float earlyMaxEnemyMultiplier = 0.55f;
+
+        [SerializeField]
+        private int earlyMinimumMaxEnemyCount = 18;
+
         // 웨이브 상승 1회마다 늘어나는 최대 적 수다.
         [SerializeField]
         private int maxEnemyCountIncrease = 9;
@@ -128,8 +142,7 @@ namespace VampireLike.Enemies
                 player = GameObject.Find("Player")?.transform;
 
             currentWave = startingWave;
-            currentSpawnInterval = spawnInterval;
-            currentMaxEnemyCount = maxEnemyCount;
+            RecalculateWaveTuning();
         }
 
         private void Update()
@@ -162,6 +175,10 @@ namespace VampireLike.Enemies
             minSpawnDistance = Mathf.Max(0f, minSpawnDistance);
             maxSpawnDistance = Mathf.Max(minSpawnDistance, maxSpawnDistance);
             maxEnemyCount = Mathf.Max(0, maxEnemyCount);
+            earlyEaseEndWave = Mathf.Max(1, earlyEaseEndWave);
+            earlySpawnIntervalMultiplier = Mathf.Max(1f, earlySpawnIntervalMultiplier);
+            earlyMaxEnemyMultiplier = Mathf.Clamp01(earlyMaxEnemyMultiplier);
+            earlyMinimumMaxEnemyCount = Mathf.Max(0, earlyMinimumMaxEnemyCount);
             maxEnemyCountIncrease = Mathf.Max(0, maxEnemyCountIncrease);
             maxEnemyCountLimit = Mathf.Max(maxEnemyCount, maxEnemyCountLimit);
             enemiesPerSpawn = Mathf.Max(1, enemiesPerSpawn);
@@ -192,12 +209,40 @@ namespace VampireLike.Enemies
         private void AdvanceWave()
         {
             currentWave++;
-            currentSpawnInterval = Mathf.Max(minimumSpawnInterval, currentSpawnInterval * spawnIntervalMultiplier);
-            currentMaxEnemyCount = Mathf.Min(maxEnemyCountLimit, currentMaxEnemyCount + maxEnemyCountIncrease);
+            RecalculateWaveTuning();
             WaveChanged?.Invoke(currentWave);
 
             if (logWaveChanges)
                 Debug.Log($"Wave {currentWave} started. Spawn Interval: {currentSpawnInterval:0.00}, Max Enemies: {currentMaxEnemyCount}");
+        }
+
+        private void RecalculateWaveTuning()
+        {
+            int waveOffset = Mathf.Max(0, currentWave - startingWave);
+            currentSpawnInterval = Mathf.Max(minimumSpawnInterval, spawnInterval * Mathf.Pow(spawnIntervalMultiplier, waveOffset));
+            currentSpawnInterval *= GetEarlySpawnIntervalMultiplier(currentWave);
+
+            int baseMaxEnemyCount = maxEnemyCount + maxEnemyCountIncrease * waveOffset;
+            int easedMaxEnemyCount = Mathf.RoundToInt(baseMaxEnemyCount * GetEarlyMaxEnemyMultiplier(currentWave));
+            currentMaxEnemyCount = Mathf.Min(maxEnemyCountLimit, Mathf.Max(earlyMinimumMaxEnemyCount, easedMaxEnemyCount));
+        }
+
+        private float GetEarlySpawnIntervalMultiplier(int wave)
+        {
+            if (wave >= earlyEaseEndWave)
+                return 1f;
+
+            float progress = Mathf.InverseLerp(1f, earlyEaseEndWave, wave);
+            return Mathf.Lerp(earlySpawnIntervalMultiplier, 1f, progress);
+        }
+
+        private float GetEarlyMaxEnemyMultiplier(int wave)
+        {
+            if (wave >= earlyEaseEndWave)
+                return 1f;
+
+            float progress = Mathf.InverseLerp(1f, earlyEaseEndWave, wave);
+            return Mathf.Lerp(earlyMaxEnemyMultiplier, 1f, progress);
         }
 
         /// <summary>

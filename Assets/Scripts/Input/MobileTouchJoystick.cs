@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VampireLike.Combat;
 using VampireLike.UI;
@@ -23,7 +24,10 @@ namespace VampireLike.Mobile
         private float maxRadius = 96f;
 
         [SerializeField]
-        private float deadZone = 0.12f;
+        private float deadZone = 0.16f;
+
+        [SerializeField]
+        private float safeAreaMargin = 24f;
 
         [SerializeField]
         private Vector2 backgroundSize = new Vector2(168f, 168f);
@@ -122,6 +126,10 @@ namespace VampireLike.Mobile
             if (isPressed && activeTouchId < 0)
             {
                 int touchId = touch.touchId.ReadValue();
+
+                if (IsPointerOverUi(touchId))
+                    return;
+
                 BeginInput(screenPosition);
                 activeTouchId = touchId;
                 return;
@@ -151,6 +159,9 @@ namespace VampireLike.Mobile
 
             if (mouse.leftButton.wasPressedThisFrame)
             {
+                if (IsPointerOverUi())
+                    return;
+
                 isTrackingMouse = true;
                 BeginInput(screenPosition);
                 return;
@@ -173,10 +184,10 @@ namespace VampireLike.Mobile
 
         private void BeginInput(Vector2 screenPosition)
         {
-            startScreenPosition = screenPosition;
+            startScreenPosition = ClampScreenPositionToSafeArea(screenPosition);
             hasActiveInput = true;
-            SetVisualPosition(rootRect, screenPosition);
-            SetVisualPosition(knobRect, screenPosition);
+            SetVisualPosition(rootRect, startScreenPosition);
+            SetVisualPosition(knobRect, startScreenPosition);
             ShowVisuals();
             UpdateInput(screenPosition);
         }
@@ -191,6 +202,29 @@ namespace VampireLike.Mobile
 
             currentInput = normalized;
             SetVisualPosition(knobRect, startScreenPosition + delta);
+        }
+
+        private Vector2 ClampScreenPositionToSafeArea(Vector2 screenPosition)
+        {
+            Rect safeArea = Screen.safeArea;
+            float margin = Mathf.Max(maxRadius, Mathf.Max(backgroundSize.x, backgroundSize.y) * 0.5f) + safeAreaMargin;
+
+            if (safeArea.width <= margin * 2f || safeArea.height <= margin * 2f)
+                return screenPosition;
+
+            return new Vector2(
+                Mathf.Clamp(screenPosition.x, safeArea.xMin + margin, safeArea.xMax - margin),
+                Mathf.Clamp(screenPosition.y, safeArea.yMin + margin, safeArea.yMax - margin));
+        }
+
+        private static bool IsPointerOverUi(int pointerId = -1)
+        {
+            if (EventSystem.current == null)
+                return false;
+
+            return pointerId >= 0
+                ? EventSystem.current.IsPointerOverGameObject(pointerId)
+                : EventSystem.current.IsPointerOverGameObject();
         }
 
         private void ReleaseInput()
