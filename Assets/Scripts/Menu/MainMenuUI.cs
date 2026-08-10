@@ -140,24 +140,30 @@ namespace VampireLike.Menu
             GUI.color = new Color(0f, 0f, 0f, 0.42f);
             GUI.DrawTexture(screenRect, Texture2D.whiteTexture);
 
-            // ??댄? ?붾㈃???덈Т ?됲룊?섏? ?딅룄濡?以묒븰???꾩＜ ?쏀븳 遺꾩쐞湲?鍮쏆쓣 源먮떎.
-            GUI.color = new Color(0.12f, 0.28f, 0.24f, 0.16f);
-            GUI.DrawTexture(new Rect(Screen.width * 0.5f - 360f, Screen.height * 0.5f - 280f, 720f, 560f), Texture2D.whiteTexture);
             GUI.color = previousColor;
         }
 
         private void DrawTitleScreen()
         {
-            Rect panelRect = CenterRect(TitlePanelWidth, TitlePanelHeight);
+            bool isPortrait = IsPortraitLayout();
+            Rect panelRect = isPortrait ? CenterRect(680f, 900f) : CenterRect(TitlePanelWidth, TitlePanelHeight);
             GUI.Box(panelRect, GUIContent.none, panelStyle);
 
-            GUI.Label(new Rect(panelRect.x, panelRect.y + 50f, panelRect.width, 58f), "VampireLike", titleStyle);
-            GUI.Label(new Rect(panelRect.x, panelRect.y + 110f, panelRect.width, 30f), "\uC5B4\uB460 \uC18D\uC5D0\uC11C \uB05D\uC5C6\uC774 \uBAB0\uB824\uB4DC\uB294 \uC801\uC744 \uBC84\uD2F0\uC138\uC694", subtitleStyle);
+            float titleY = isPortrait ? 92f : 50f;
+            float subtitleY = isPortrait ? 166f : 110f;
+            float buttonWidth = Mathf.Min(isPortrait ? 420f : 320f, panelRect.width - 140f);
+            float buttonHeight = isPortrait ? 66f : 52f;
+            float buttonX = panelRect.center.x - buttonWidth * 0.5f;
+            float firstButtonY = panelRect.y + (isPortrait ? 300f : 190f);
+            float buttonGap = isPortrait ? 86f : 62f;
 
-            Rect startButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 190f, 320f, 52f);
-            Rect recordButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 258f, 320f, 48f);
-            Rect optionButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 320f, 320f, 48f);
-            Rect quitButtonRect = new Rect(panelRect.center.x - 160f, panelRect.y + 382f, 320f, 48f);
+            GUI.Label(new Rect(panelRect.x + 36f, panelRect.y + titleY, panelRect.width - 72f, 70f), "VampireLike", titleStyle);
+            GUI.Label(new Rect(panelRect.x + 54f, panelRect.y + subtitleY, panelRect.width - 108f, 58f), "\uC5B4\uB460 \uC18D\uC5D0\uC11C \uB05D\uC5C6\uC774 \uBAB0\uB824\uB4DC\uB294 \uC801\uC744 \uBC84\uD2F0\uC138\uC694", subtitleStyle);
+
+            Rect startButtonRect = new Rect(buttonX, firstButtonY, buttonWidth, buttonHeight);
+            Rect recordButtonRect = new Rect(buttonX, firstButtonY + buttonGap, buttonWidth, buttonHeight);
+            Rect optionButtonRect = new Rect(buttonX, firstButtonY + buttonGap * 2f, buttonWidth, buttonHeight);
+            Rect quitButtonRect = new Rect(buttonX, firstButtonY + buttonGap * 3f, buttonWidth, buttonHeight);
 
             if (GUI.Button(startButtonRect, "\uAC8C\uC784 \uC2DC\uC791", buttonStyle))
             {
@@ -188,7 +194,7 @@ namespace VampireLike.Menu
             }
 
             string notice = Time.unscaledTime <= noticeUntilTime ? noticeMessage : "\uCE90\uB9AD\uD130\uB97C \uC120\uD0DD\uD558\uACE0 \uC0DD\uC874\uC744 \uC2DC\uC791\uD558\uC138\uC694";
-            GUI.Label(new Rect(panelRect.x + 48f, panelRect.yMax - 74f, panelRect.width - 96f, 28f), notice, footerStyle);
+            GUI.Label(new Rect(panelRect.x + 48f, panelRect.yMax - (isPortrait ? 110f : 74f), panelRect.width - 96f, 48f), notice, footerStyle);
         }
 
         private void DrawCharacterSelectScreen()
@@ -439,6 +445,11 @@ namespace VampireLike.Menu
         private static Rect CenterRect(float width, float height)
         {
             return MobileSafeArea.CenterRect(width, height);
+        }
+
+        private static bool IsPortraitLayout()
+        {
+            return Screen.height > Screen.width;
         }
 
         private static string FormatTime(float seconds)

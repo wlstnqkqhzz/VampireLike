@@ -77,16 +77,19 @@ namespace VampireLike.Growth
 
         private void DrawHud()
         {
-            const float waveWidth = 112f;
-            const float levelWidth = 92f;
-            const float gap = 8f;
+            bool isPortrait = Screen.height > Screen.width;
+            float waveWidth = isPortrait ? 100f : 112f;
+            float levelWidth = isPortrait ? 88f : 92f;
+            float gap = isPortrait ? 6f : 8f;
+            float portraitSideMargin = isPortrait ? 36f : sideMargin;
+            float currentBarHeight = isPortrait ? 16f : barHeight;
 
             float top = MobileSafeArea.HudTop(topMargin);
-            float left = MobileSafeArea.HudLeft(sideMargin);
-            float right = MobileSafeArea.HudRight(sideMargin);
-            float barWidth = Mathf.Max(240f, Screen.width - left - right - waveWidth - levelWidth - gap * 2f);
-            Rect waveRect = new Rect(left, top - 1f, waveWidth, barHeight + 8f);
-            Rect borderRect = new Rect(waveRect.xMax + gap, top, barWidth, barHeight + 6f);
+            float left = MobileSafeArea.HudLeft(portraitSideMargin);
+            float right = MobileSafeArea.HudRight(portraitSideMargin);
+            float barWidth = Mathf.Max(isPortrait ? 160f : 240f, Screen.width - left - right - waveWidth - levelWidth - gap * 2f);
+            Rect waveRect = new Rect(left, top - 1f, waveWidth, currentBarHeight + 8f);
+            Rect borderRect = new Rect(waveRect.xMax + gap, top, barWidth, currentBarHeight + 6f);
             Rect backgroundRect = new Rect(borderRect.x + 3f, borderRect.y + 3f, borderRect.width - 6f, borderRect.height - 6f);
             Rect fillRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * playerExperience.ExperienceProgress, backgroundRect.height);
             Rect levelRect = new Rect(borderRect.xMax + gap, borderRect.y - 1f, levelWidth, borderRect.height + 2f);

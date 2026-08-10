@@ -13,6 +13,8 @@ using VampireLike.UI;
 public class PauseMenu : MonoBehaviour
 {
     private const string PauseCanvasName = "Pause Menu Canvas";
+    private const string MobilePauseCanvasName = "Mobile Pause Button Canvas";
+    private const string MobilePauseButtonName = "Mobile Pause Button";
     private const string PauseRootName = "Pause Menu";
     private const string PausePanelName = "Pause Panel";
     private const string OptionsPanelName = "Options Panel";
@@ -44,6 +46,8 @@ public class PauseMenu : MonoBehaviour
     private Button nextResolutionButton;
     private Button optionsConfirmButton;
     private Button optionsBackButton;
+    private Button mobilePauseButton;
+    private RectTransform mobilePauseButtonRect;
     private bool isPaused;
     private float pendingMasterVolume;
     private float pendingBgmVolume;
@@ -55,6 +59,7 @@ public class PauseMenu : MonoBehaviour
     {
         EnsurePauseMenu();
         EnsureEventSystem();
+        EnsureMobilePauseButton();
 
         if (resumeButton != null)
             resumeButton.onClick.AddListener(ResumeGame);
@@ -68,6 +73,7 @@ public class PauseMenu : MonoBehaviour
         BindOptionsControls();
 
         SetPaused(false);
+        UpdateMobilePauseButton();
     }
 
     private void Update()
@@ -75,11 +81,16 @@ public class PauseMenu : MonoBehaviour
         Keyboard keyboard = Keyboard.current;
 
         if (VampireLike.Combat.GameState.IsGameOver || VampireLike.Combat.GameState.IsMainMenuOpen)
+        {
+            UpdateMobilePauseButton();
             return;
+        }
 
         // New Input System 湲곗??쇰줈 Escape ?낅젰??吏곸젒 ?뺤씤?쒕떎.
         if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
             TogglePause();
+
+        UpdateMobilePauseButton();
     }
 
     private void OnDestroy()
@@ -92,6 +103,9 @@ public class PauseMenu : MonoBehaviour
 
         if (quitButton != null)
             quitButton.onClick.RemoveListener(QuitGame);
+
+        if (mobilePauseButton != null)
+            mobilePauseButton.onClick.RemoveListener(TogglePause);
 
         UnbindOptionsControls();
 
@@ -135,6 +149,8 @@ public class PauseMenu : MonoBehaviour
 
         if (isPaused)
             ShowPausePanel();
+
+        UpdateMobilePauseButton();
     }
 
     private void EnsurePauseMenu()
@@ -196,6 +212,88 @@ public class PauseMenu : MonoBehaviour
         return canvas;
     }
 
+    private void EnsureMobilePauseButton()
+    {
+        GameObject canvasObject = GameObject.Find(MobilePauseCanvasName);
+        Canvas canvas = canvasObject != null ? canvasObject.GetComponent<Canvas>() : CreateMobilePauseCanvas();
+
+        if (canvas == null)
+            return;
+
+        Transform existingButton = canvas.transform.Find(MobilePauseButtonName);
+
+        if (existingButton != null)
+        {
+            mobilePauseButton = existingButton.GetComponent<Button>();
+            mobilePauseButtonRect = existingButton.GetComponent<RectTransform>();
+        }
+        else
+        {
+            GameObject buttonObject = new GameObject(MobilePauseButtonName);
+            buttonObject.transform.SetParent(canvas.transform, false);
+
+            mobilePauseButtonRect = buttonObject.AddComponent<RectTransform>();
+            mobilePauseButtonRect.anchorMin = new Vector2(1f, 1f);
+            mobilePauseButtonRect.anchorMax = new Vector2(1f, 1f);
+            mobilePauseButtonRect.pivot = new Vector2(1f, 1f);
+            mobilePauseButtonRect.sizeDelta = new Vector2(72f, 72f);
+
+            Image buttonImage = buttonObject.AddComponent<Image>();
+            buttonImage.color = new Color(0.02f, 0.03f, 0.025f, 0.78f);
+
+            mobilePauseButton = buttonObject.AddComponent<Button>();
+            mobilePauseButton.targetGraphic = buttonImage;
+
+            Text label = CreateText(buttonObject.transform, "II", Vector2.zero, 30, Color.white, new Vector2(72f, 72f));
+            label.fontStyle = FontStyle.Bold;
+        }
+
+        if (mobilePauseButton != null)
+        {
+            mobilePauseButton.onClick.RemoveListener(TogglePause);
+            mobilePauseButton.onClick.AddListener(TogglePause);
+        }
+
+        UpdateMobilePauseButton();
+    }
+
+    private static Canvas CreateMobilePauseCanvas()
+    {
+        GameObject canvasObject = new GameObject(MobilePauseCanvasName);
+        int uiLayer = LayerMask.NameToLayer("UI");
+
+        if (uiLayer >= 0)
+            canvasObject.layer = uiLayer;
+
+        Canvas canvas = canvasObject.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 960;
+
+        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+
+        canvasObject.AddComponent<GraphicRaycaster>();
+        return canvas;
+    }
+
+    private void UpdateMobilePauseButton()
+    {
+        if (mobilePauseButton == null)
+            return;
+
+        bool canShow = !isPaused
+            && !VampireLike.Combat.GameState.IsGameOver
+            && !VampireLike.Combat.GameState.IsMainMenuOpen
+            && (Application.isMobilePlatform || Touchscreen.current != null);
+
+        mobilePauseButton.gameObject.SetActive(canShow);
+
+        if (mobilePauseButtonRect != null)
+            mobilePauseButtonRect.anchoredPosition = new Vector2(-MobileSafeArea.HudRight(22f), -MobileSafeArea.HudTop(22f));
+    }
+
     private static void EnsureEventSystem()
     {
         // 踰꾪듉 ?대┃??諛쏆쓣 EventSystem???놁쑝硫?New Input System??紐⑤뱢怨??④퍡 留뚮뱺??
@@ -244,19 +342,21 @@ public class PauseMenu : MonoBehaviour
 
     private static void CenterPausePanel(RectTransform rectTransform)
     {
+        bool isPortrait = Screen.height > Screen.width;
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = new Vector2(420f, 320f);
+        rectTransform.sizeDelta = isPortrait ? new Vector2(560f, 720f) : new Vector2(420f, 320f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 
     private static void CenterOptionsPanel(RectTransform rectTransform)
     {
+        bool isPortrait = Screen.height > Screen.width;
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = new Vector2(640f, 620f);
+        rectTransform.sizeDelta = isPortrait ? new Vector2(680f, 860f) : new Vector2(640f, 620f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 

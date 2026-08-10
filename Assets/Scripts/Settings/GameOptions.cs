@@ -116,6 +116,9 @@ namespace VampireLike.Settings
 
         private static void ApplyScreenOptions()
         {
+            if (Application.isMobilePlatform)
+                return;
+
             Vector2Int resolution = CurrentResolution;
             Screen.SetResolution(resolution.x, resolution.y, IsFullscreen ? FullScreenMode.ExclusiveFullScreen : FullScreenMode.Windowed);
         }

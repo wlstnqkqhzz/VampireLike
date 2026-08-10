@@ -1,0 +1,8 @@
+E:/Pro2026/Project/VampireLike/.utmp/RelWithDebInfo/w26371xx/arm64-v8a/CMakeFiles/edit_cache.dir
+E:/Pro2026/Project/VampireLike/.utmp/RelWithDebInfo/w26371xx/arm64-v8a/CMakeFiles/rebuild_cache.dir
+E:/Pro2026/Project/VampireLike/.utmp/RelWithDebInfo/w26371xx/arm64-v8a/GameActivity/CMakeFiles/game.dir
+E:/Pro2026/Project/VampireLike/.utmp/RelWithDebInfo/w26371xx/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+E:/Pro2026/Project/VampireLike/.utmp/RelWithDebInfo/w26371xx/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir
+E:/Pro2026/Project/VampireLike/.utmp/RelWithDebInfo/w26371xx/arm64-v8a/FramePacing/CMakeFiles/swappywrapper.dir
+E:/Pro2026/Project/VampireLike/.utmp/RelWithDebInfo/w26371xx/arm64-v8a/FramePacing/CMakeFiles/edit_cache.dir
+E:/Pro2026/Project/VampireLike/.utmp/RelWithDebInfo/w26371xx/arm64-v8a/FramePacing/CMakeFiles/rebuild_cache.dir

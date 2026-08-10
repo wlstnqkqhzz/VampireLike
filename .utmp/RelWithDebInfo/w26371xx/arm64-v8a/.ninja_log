@@ -1,0 +1,12 @@
+# ninja log v5
+47	544	8080384360639159	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	92f44319ba773088
+546	769	8080384362938779	E:/Pro2026/Project/VampireLike/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/w26371xx/obj/arm64-v8a/libswappywrapper.so	550448d1ace54414
+16	1507	8080384370455310	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	ead76502dd73659d
+25	1514	8080384370455310	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	308b90aa6287bf6e
+0	1515	8080384370465365	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	9765062535675760
+42	1517	8080384370591269	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	4e1b517e24e928b3
+11	1522	8080384370646555	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	5d92ab7a41005c1
+36	1652	8080384371957245	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	2d0e04f6c4abc58d
+31	1692	8080384372343616	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	ba7f63b6337cdaf5
+6	1767	8080384373075707	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	c5fc355820a32044
+1768	1865	8080384374078150	E:/Pro2026/Project/VampireLike/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/w26371xx/obj/arm64-v8a/libgame.so	74679f2c0b78e35a

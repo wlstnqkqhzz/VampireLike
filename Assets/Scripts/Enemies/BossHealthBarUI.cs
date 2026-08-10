@@ -85,9 +85,11 @@ namespace VampireLike.Enemies
 
         private void DrawBossHealthBar(EnemyHealth bossHealth, bool isHiddenBoss)
         {
+            bool isPortrait = Screen.height > Screen.width;
             float top = MobileSafeArea.HudTop(topOffset);
-            float horizontalMargin = Mathf.Max(MobileSafeArea.HudLeft(sideMargin), MobileSafeArea.HudRight(sideMargin));
-            float width = Mathf.Max(260f, Screen.width - horizontalMargin * 2f);
+            float effectiveSideMargin = isPortrait ? 56f : sideMargin;
+            float horizontalMargin = Mathf.Max(MobileSafeArea.HudLeft(effectiveSideMargin), MobileSafeArea.HudRight(effectiveSideMargin));
+            float width = Mathf.Max(isPortrait ? 220f : 260f, Screen.width - horizontalMargin * 2f);
             float x = (Screen.width - width) * 0.5f;
 
             Rect borderRect = new Rect(x, top, width, barHeight + 8f);

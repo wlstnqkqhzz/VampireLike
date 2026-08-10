@@ -17,6 +17,9 @@ namespace VampireLike.CameraSystem
         private float referenceAspect = 16f / 9f;
 
         [SerializeField]
+        private float portraitReferenceAspect = 9f / 16f;
+
+        [SerializeField]
         private float referenceOrthographicSize = 5f;
 
         [SerializeField]
@@ -24,6 +27,9 @@ namespace VampireLike.CameraSystem
 
         [SerializeField]
         private float maximumOrthographicSize = 5.2f;
+
+        [SerializeField]
+        private float maximumPortraitOrthographicSize = 7.4f;
 
         [SerializeField]
         private float mapEdgePadding = 0.1f;
@@ -78,9 +84,11 @@ namespace VampireLike.CameraSystem
         private void OnValidate()
         {
             referenceAspect = Mathf.Max(0.1f, referenceAspect);
+            portraitReferenceAspect = Mathf.Max(0.1f, portraitReferenceAspect);
             referenceOrthographicSize = Mathf.Max(0.1f, referenceOrthographicSize);
             minimumOrthographicSize = Mathf.Max(0.1f, minimumOrthographicSize);
             maximumOrthographicSize = Mathf.Max(minimumOrthographicSize, maximumOrthographicSize);
+            maximumPortraitOrthographicSize = Mathf.Max(maximumOrthographicSize, maximumPortraitOrthographicSize);
             mapEdgePadding = Mathf.Max(0f, mapEdgePadding);
         }
 
@@ -103,24 +111,28 @@ namespace VampireLike.CameraSystem
             lastScreenHeight = height;
             lastAspect = aspect;
 
+            bool isPortrait = aspect < 1f;
+            float maxSize = isPortrait ? maximumPortraitOrthographicSize : maximumOrthographicSize;
             float desiredSize = referenceOrthographicSize;
 
-            if (aspect > referenceAspect)
+            if (isPortrait)
+                desiredSize = referenceOrthographicSize * portraitReferenceAspect / aspect;
+            else if (aspect > referenceAspect)
                 desiredSize = referenceOrthographicSize * referenceAspect / aspect;
 
-            desiredSize = Mathf.Clamp(desiredSize, minimumOrthographicSize, maximumOrthographicSize);
-            desiredSize = ClampToMapBounds(desiredSize, aspect);
+            desiredSize = Mathf.Clamp(desiredSize, minimumOrthographicSize, maxSize);
+            desiredSize = ClampToMapBounds(desiredSize, aspect, maxSize);
             targetCamera.orthographicSize = desiredSize;
         }
 
-        private float ClampToMapBounds(float desiredSize, float aspect)
+        private float ClampToMapBounds(float desiredSize, float aspect, float maxSize)
         {
             if (!MapBoundary.TryGetWorldBounds(out Bounds mapBounds))
                 return desiredSize;
 
             float maxHeightSize = Mathf.Max(minimumOrthographicSize, mapBounds.size.y * 0.5f - mapEdgePadding);
             float maxWidthSize = Mathf.Max(minimumOrthographicSize, (mapBounds.size.x * 0.5f - mapEdgePadding) / Mathf.Max(0.1f, aspect));
-            float maxAllowedSize = Mathf.Min(maximumOrthographicSize, maxHeightSize, maxWidthSize);
+            float maxAllowedSize = Mathf.Min(maxSize, maxHeightSize, maxWidthSize);
 
             return Mathf.Min(desiredSize, Mathf.Max(minimumOrthographicSize, maxAllowedSize));
         }
