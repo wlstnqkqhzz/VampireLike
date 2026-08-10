@@ -29,8 +29,10 @@ namespace VampireLike.Growth
         private static readonly Color NormalTextColor = new Color(0.06f, 0.1f, 0.12f, 1f);
         private static readonly Color SpecialButtonColor = new Color(0.34f, 0.18f, 0.58f, 1f);
         private static readonly Color SpecialTextColor = new Color(1f, 0.88f, 0.42f, 1f);
-        private static readonly Color CharacterButtonColor = new Color(0.18f, 0.14f, 0.08f, 1f);
-        private static readonly Color CharacterTextColor = new Color(1f, 0.78f, 0.28f, 1f);
+        private static readonly Color KaelButtonColor = new Color(0.16f, 0.1f, 0.24f, 1f);
+        private static readonly Color KaelTextColor = new Color(1f, 0.78f, 0.35f, 1f);
+        private static readonly Color SeleneButtonColor = new Color(0.08f, 0.2f, 0.32f, 1f);
+        private static readonly Color SeleneTextColor = new Color(0.74f, 0.95f, 1f, 1f);
 
         private void Awake()
         {
@@ -148,7 +150,7 @@ namespace VampireLike.Growth
             if (choiceButtonImages != null && index < choiceButtonImages.Length && choiceButtonImages[index] != null)
             {
                 if (isCharacterUpgrade)
-                    choiceButtonImages[index].color = CharacterButtonColor;
+                    choiceButtonImages[index].color = GetCharacterButtonColor(definition);
                 else
                     choiceButtonImages[index].color = isSpecialUpgrade ? SpecialButtonColor : NormalButtonColor;
             }
@@ -157,11 +159,27 @@ namespace VampireLike.Growth
                 return;
 
             if (isCharacterUpgrade)
-                choiceTexts[index].color = CharacterTextColor;
+                choiceTexts[index].color = GetCharacterTextColor(definition);
             else
                 choiceTexts[index].color = isSpecialUpgrade ? SpecialTextColor : NormalTextColor;
 
             choiceTexts[index].fontStyle = isCharacterUpgrade || isSpecialUpgrade ? FontStyle.Bold : FontStyle.Normal;
+        }
+
+        private static Color GetCharacterButtonColor(UpgradeDefinition definition)
+        {
+            if (definition != null && string.Equals(definition.RequiredCharacterId, "selene", System.StringComparison.OrdinalIgnoreCase))
+                return SeleneButtonColor;
+
+            return KaelButtonColor;
+        }
+
+        private static Color GetCharacterTextColor(UpgradeDefinition definition)
+        {
+            if (definition != null && string.Equals(definition.RequiredCharacterId, "selene", System.StringComparison.OrdinalIgnoreCase))
+                return SeleneTextColor;
+
+            return KaelTextColor;
         }
 
         private static Canvas CreateCanvas()

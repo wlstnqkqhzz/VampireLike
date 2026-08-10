@@ -93,7 +93,22 @@ namespace VampireLike.Growth
             || upgradeType == UpgradeType.ChainRicochet
             || upgradeType == UpgradeType.EclipseAura
             || upgradeType == UpgradeType.ProjectileReflect;
-        public string GradeLabel => IsCharacterExclusiveUpgrade ? "전용 강화" : IsSpecialUpgrade ? "특수 강화" : "일반 강화";
+        public string GradeLabel
+        {
+            get
+            {
+                if (!IsCharacterExclusiveUpgrade)
+                    return IsSpecialUpgrade ? "특수 강화" : "일반 강화";
+
+                if (string.Equals(requiredCharacterId, "kael", System.StringComparison.OrdinalIgnoreCase))
+                    return "카엘 전용";
+
+                if (string.Equals(requiredCharacterId, "selene", System.StringComparison.OrdinalIgnoreCase))
+                    return "셀레네 전용";
+
+                return "전용 강화";
+            }
+        }
 
         public bool CanAppearForCharacter(string characterId)
         {

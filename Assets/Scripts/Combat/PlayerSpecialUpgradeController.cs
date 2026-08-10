@@ -106,68 +106,68 @@ namespace VampireLike.Combat
 
         [Header("Character Exclusive - Kael")]
         [SerializeField]
-        private float kaelBlackSwordWaveRadius = 0.85f;
+        private float kaelBlackSwordWaveRadius = 1f;
 
         [SerializeField]
-        private float kaelBlackSwordWaveDamageRatio = 0.18f;
+        private float kaelBlackSwordWaveDamageRatio = 0.24f;
 
         [SerializeField]
-        private float kaelGuardianResolveHealthThreshold = 0.5f;
+        private float kaelGuardianResolveHealthThreshold = 0.55f;
 
         [SerializeField]
-        private float kaelGuardianResolveBlockChancePerLevel = 0.12f;
+        private float kaelGuardianResolveBlockChancePerLevel = 0.14f;
 
         [SerializeField]
-        private int kaelManaSlashBaseHitInterval = 6;
+        private int kaelManaSlashBaseHitInterval = 5;
 
         [SerializeField]
-        private float kaelManaSlashDamageRatio = 1.15f;
+        private float kaelManaSlashDamageRatio = 1.35f;
 
         [SerializeField]
-        private float kaelManaSlashRadius = 1.45f;
+        private float kaelManaSlashRadius = 1.65f;
 
         [SerializeField]
-        private float kaelBlackIronBarrierCooldown = 18f;
+        private float kaelBlackIronBarrierCooldown = 16f;
 
         [SerializeField]
-        private float kaelBlackIronBarrierCooldownReductionPerLevel = 3f;
+        private float kaelBlackIronBarrierCooldownReductionPerLevel = 3.5f;
 
         [SerializeField]
-        private float kaelExecutionHealthThreshold = 0.35f;
+        private float kaelExecutionHealthThreshold = 0.38f;
 
         [SerializeField]
-        private float kaelExecutionDamageRatioPerLevel = 0.25f;
+        private float kaelExecutionDamageRatioPerLevel = 0.32f;
 
         [Header("Character Exclusive - Selene")]
         [SerializeField]
-        private float seleneMoonShadowCloneChancePerLevel = 0.18f;
+        private float seleneMoonShadowCloneChancePerLevel = 0.16f;
 
         [SerializeField]
-        private float seleneShadowStepBonusInvinciblePerLevel = 0.18f;
+        private float seleneShadowStepBonusInvinciblePerLevel = 0.24f;
 
         [SerializeField]
         private string seleneShadowStepEnemyLayerName = "Enemy";
 
         [SerializeField]
-        private int seleneTwinMoonFlurryBaseInterval = 8;
+        private int seleneTwinMoonFlurryBaseInterval = 7;
 
         [SerializeField]
-        private float seleneTwinMoonFlurryAngle = 12f;
+        private float seleneTwinMoonFlurryAngle = 10f;
 
         [SerializeField]
         private int seleneMoonlightMarkRequiredStacks = 3;
 
         [SerializeField]
-        private float seleneMoonlightMarkDamageRatioPerLevel = 0.42f;
+        private float seleneMoonlightMarkDamageRatioPerLevel = 0.38f;
 
         [SerializeField]
-        private float seleneSilentBladeChancePerLevel = 0.16f;
+        private float seleneSilentBladeChancePerLevel = 0.14f;
 
         [SerializeField]
-        private float seleneSilentBladeRadius = 2.3f;
+        private float seleneSilentBladeRadius = 2.8f;
 
         [SerializeField]
-        private float seleneSilentBladeDamageRatio = 0.55f;
+        private float seleneSilentBladeDamageRatio = 0.48f;
 
         private readonly Collider2D[] areaResults = new Collider2D[64];
         private readonly List<OrbitingBlade> orbitingBlades = new List<OrbitingBlade>();
@@ -856,7 +856,7 @@ namespace VampireLike.Combat
 
         private float GetKaelBlackIronBarrierCooldown()
         {
-            return Mathf.Max(6f, kaelBlackIronBarrierCooldown - kaelBlackIronBarrierCooldownReductionPerLevel * Mathf.Max(0, kaelBlackIronBarrierLevel - 1));
+            return Mathf.Max(5f, kaelBlackIronBarrierCooldown - kaelBlackIronBarrierCooldownReductionPerLevel * Mathf.Max(0, kaelBlackIronBarrierLevel - 1));
         }
 
         private void UpdateCharacterExclusiveTimers()
