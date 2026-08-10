@@ -25,6 +25,10 @@ namespace VampireLike.Growth
         [SerializeField]
         private bool forceAtLeastOneNormalChoice = true;
 
+        [Header("First Experience")]
+        [SerializeField]
+        private int simpleChoiceUntilLevel = 3;
+
         [Header("Character Exclusive Choices")]
         [SerializeField]
         [Range(0f, 1f)]
@@ -40,6 +44,14 @@ namespace VampireLike.Growth
         private PlayerExperience playerExperience;
         private PlayerSpecialUpgradeController specialUpgradeController;
         private global::PlayerController playerController;
+        private static readonly HashSet<UpgradeType> SimpleEarlyUpgradeTypes = new HashSet<UpgradeType>
+        {
+            UpgradeType.ProjectileDamage,
+            UpgradeType.AttackInterval,
+            UpgradeType.MoveSpeed,
+            UpgradeType.MaxHealth,
+            UpgradeType.PickupRadius
+        };
 
         public readonly struct UpgradeChoice
         {
@@ -76,6 +88,7 @@ namespace VampireLike.Growth
         {
             specialUpgradeChance = Mathf.Clamp01(specialUpgradeChance);
             maxSpecialChoices = Mathf.Max(0, maxSpecialChoices);
+            simpleChoiceUntilLevel = Mathf.Max(0, simpleChoiceUntilLevel);
             characterExclusiveUpgradeChance = Mathf.Clamp01(characterExclusiveUpgradeChance);
             maxCharacterExclusiveChoices = Mathf.Max(0, maxCharacterExclusiveChoices);
 
@@ -92,10 +105,10 @@ namespace VampireLike.Growth
             }
         }
 
-        public List<UpgradeChoice> GetRandomChoices(int count)
+        public List<UpgradeChoice> GetRandomChoices(int count, int playerLevel = 0)
         {
             // 최대 레벨에 도달하지 않은 강화 중에서 중복 없이 랜덤 선택한다.
-            List<UpgradeDefinition> availableDefinitions = GetAvailableDefinitions();
+            List<UpgradeDefinition> availableDefinitions = GetAvailableDefinitions(playerLevel);
             List<UpgradeChoice> choices = new List<UpgradeChoice>();
             List<UpgradeDefinition> normalDefinitions = new List<UpgradeDefinition>();
             List<UpgradeDefinition> specialDefinitions = new List<UpgradeDefinition>();
@@ -358,7 +371,7 @@ namespace VampireLike.Growth
             Debug.Log($"Upgrade Selected: {definition.DisplayName}");
         }
 
-        private List<UpgradeDefinition> GetAvailableDefinitions()
+        private List<UpgradeDefinition> GetAvailableDefinitions(int playerLevel)
         {
             // 제한 레벨이 남아 있거나 무제한 강화인 것만 후보로 사용한다.
             List<UpgradeDefinition> availableDefinitions = new List<UpgradeDefinition>();
@@ -381,7 +394,34 @@ namespace VampireLike.Growth
                 availableDefinitions.Add(definition);
             }
 
+            if (ShouldUseSimpleEarlyChoices(playerLevel))
+            {
+                List<UpgradeDefinition> simpleDefinitions = new List<UpgradeDefinition>();
+
+                foreach (UpgradeDefinition definition in availableDefinitions)
+                {
+                    if (definition == null)
+                        continue;
+
+                    if (definition.IsSpecialUpgrade || definition.IsCharacterExclusiveUpgrade)
+                        continue;
+
+                    if (SimpleEarlyUpgradeTypes.Contains(definition.UpgradeType))
+                        simpleDefinitions.Add(definition);
+                }
+
+                if (simpleDefinitions.Count >= 3)
+                    return simpleDefinitions;
+            }
+
             return availableDefinitions;
+        }
+
+        private bool ShouldUseSimpleEarlyChoices(int playerLevel)
+        {
+            return simpleChoiceUntilLevel > 0
+                && playerLevel > 0
+                && playerLevel <= simpleChoiceUntilLevel;
         }
 
         private bool CanApply(UpgradeDefinition definition)

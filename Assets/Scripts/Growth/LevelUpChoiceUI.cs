@@ -49,7 +49,7 @@ namespace VampireLike.Growth
             EnsureUI();
 
             // 媛뺥솕 而⑦듃濡ㅻ윭?먯꽌 ?꾩옱 ?좏깮 媛?ν븳 媛뺥솕 3媛쒕? ?쒕뜡?쇰줈 諛쏆븘?⑤떎.
-            currentChoices = upgradeController.GetRandomChoices(ChoiceCount);
+            currentChoices = upgradeController.GetRandomChoices(ChoiceCount, level);
 
             if (currentChoices.Count == 0)
                 return;
