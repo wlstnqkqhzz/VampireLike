@@ -52,6 +52,7 @@ namespace VampireLike.Menu
         private float pendingSfxVolume;
         private bool pendingFullscreen;
         private int pendingResolutionIndex;
+        private MobileOrientationMode pendingMobileOrientation;
 
         public static bool IsOpen { get; private set; }
 
@@ -243,8 +244,16 @@ namespace VampireLike.Menu
             DrawVolumeOption(panelRect, "\uC804\uCCB4 \uC74C\uB7C9", ref pendingMasterVolume, 132f);
             DrawVolumeOption(panelRect, "\uBC30\uACBD \uC74C\uC545", ref pendingBgmVolume, 188f);
             DrawVolumeOption(panelRect, "\uD6A8\uACFC\uC74C", ref pendingSfxVolume, 244f);
-            DrawFullscreenOption(panelRect, 308f);
-            DrawResolutionOption(panelRect, 364f);
+            if (GameOptions.IsMobileDisplayMode)
+            {
+                DrawMobileOrientationOption(panelRect, 326f);
+            }
+            else
+            {
+                DrawFullscreenOption(panelRect, 308f);
+                DrawResolutionOption(panelRect, 364f);
+            }
+
             GUI.Label(new Rect(panelRect.x + 88f, panelRect.y + 420f, panelRect.width - 176f, 28f), $"\uD604\uC7AC \uC801\uC6A9: {GameOptions.AppliedScreenInfo}", footerStyle);
 
             Rect resetRect = new Rect(panelRect.center.x - 80f, panelRect.yMax - 112f, 160f, 34f);
@@ -260,7 +269,7 @@ namespace VampireLike.Menu
             if (GUI.Button(confirmRect, "\uD655\uC778", buttonStyle))
             {
                 PlayMenuSfx();
-                GameOptions.ApplyOptions(pendingMasterVolume, pendingBgmVolume, pendingSfxVolume, pendingFullscreen, pendingResolutionIndex);
+                GameOptions.ApplyOptions(pendingMasterVolume, pendingBgmVolume, pendingSfxVolume, pendingFullscreen, pendingResolutionIndex, pendingMobileOrientation);
                 currentScreen = MenuScreen.Title;
             }
 
@@ -329,6 +338,7 @@ namespace VampireLike.Menu
             pendingSfxVolume = GameOptions.SfxVolume;
             pendingFullscreen = GameOptions.IsFullscreen;
             pendingResolutionIndex = GameOptions.ResolutionIndex;
+            pendingMobileOrientation = GameOptions.MobileOrientation;
         }
 
         private void LoadDefaultOptions()
@@ -338,6 +348,7 @@ namespace VampireLike.Menu
             pendingSfxVolume = GameOptions.DefaultSfxVolume;
             pendingFullscreen = GameOptions.DefaultFullscreen;
             pendingResolutionIndex = GameOptions.DefaultResolutionIndex;
+            pendingMobileOrientation = GameOptions.DefaultMobileOrientation;
         }
 
         private void DrawVolumeOption(Rect panelRect, string label, ref float value, float yOffset)
@@ -394,6 +405,32 @@ namespace VampireLike.Menu
             {
                 PlayMenuSfx();
                 pendingResolutionIndex = (pendingResolutionIndex + 1) % GameOptions.ResolutionCount;
+            }
+        }
+
+        private void DrawMobileOrientationOption(Rect panelRect, float yOffset)
+        {
+            Rect rowRect = new Rect(panelRect.x + 76f, panelRect.y + yOffset - 8f, panelRect.width - 152f, 44f);
+            Rect labelRect = new Rect(rowRect.x + 22f, panelRect.y + yOffset, 160f, 30f);
+            Rect previousRect = new Rect(rowRect.x + 218f, panelRect.y + yOffset - 4f, 48f, 40f);
+            Rect valueRect = new Rect(rowRect.x + 276f, panelRect.y + yOffset, 156f, 30f);
+            Rect nextRect = new Rect(rowRect.x + 442f, panelRect.y + yOffset - 4f, 48f, 40f);
+
+            GUI.Box(rowRect, GUIContent.none, cardStyle);
+            GUI.Label(labelRect, "화면 방향", optionLabelStyle);
+
+            if (GUI.Button(previousRect, "<", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
+                pendingMobileOrientation = GameOptions.GetMobileOrientationByOffset(pendingMobileOrientation, -1);
+            }
+
+            GUI.Label(valueRect, GameOptions.GetMobileOrientationText(pendingMobileOrientation), optionValueStyle);
+
+            if (GUI.Button(nextRect, ">", secondaryButtonStyle))
+            {
+                PlayMenuSfx();
+                pendingMobileOrientation = GameOptions.GetMobileOrientationByOffset(pendingMobileOrientation, 1);
             }
         }
 

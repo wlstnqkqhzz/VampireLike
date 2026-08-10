@@ -38,7 +38,9 @@ public class PauseMenu : MonoBehaviour
     private Slider masterVolumeSlider;
     private Slider bgmVolumeSlider;
     private Slider sfxVolumeSlider;
+    private Text fullscreenLabel;
     private Toggle fullscreenToggle;
+    private Text resolutionLabel;
     private Text resolutionText;
     private Text appliedScreenText;
     private Text fullscreenModeText;
@@ -54,6 +56,7 @@ public class PauseMenu : MonoBehaviour
     private float pendingSfxVolume;
     private bool pendingFullscreen;
     private int pendingResolutionIndex;
+    private MobileOrientationMode pendingMobileOrientation;
 
     private void Awake()
     {
@@ -375,8 +378,8 @@ public class PauseMenu : MonoBehaviour
         CreateLabel(panel.transform, "\uC804\uCCB4 \uC74C\uB7C9", new Vector2(-210f, 132f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
         CreateLabel(panel.transform, "\uBC30\uACBD \uC74C\uC545", new Vector2(-210f, 72f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
         CreateLabel(panel.transform, "\uD6A8\uACFC\uC74C", new Vector2(-210f, 12f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "\uD654\uBA74 \uBAA8\uB4DC", new Vector2(-210f, -60f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
-        CreateLabel(panel.transform, "\uD574\uC0C1\uB3C4", new Vector2(-210f, -122f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
+        fullscreenLabel = CreateLabel(panel.transform, "\uD654\uBA74 \uBAA8\uB4DC", new Vector2(-210f, -60f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
+        resolutionLabel = CreateLabel(panel.transform, "\uD574\uC0C1\uB3C4", new Vector2(-210f, -122f), 18, new Color(0.9f, 0.95f, 0.86f, 1f));
 
         masterVolumeSlider = CreateSlider(panel.transform, new Vector2(112f, 132f));
         bgmVolumeSlider = CreateSlider(panel.transform, new Vector2(112f, 72f));
@@ -477,6 +480,7 @@ public class PauseMenu : MonoBehaviour
         pendingSfxVolume = GameOptions.SfxVolume;
         pendingFullscreen = GameOptions.IsFullscreen;
         pendingResolutionIndex = GameOptions.ResolutionIndex;
+        pendingMobileOrientation = GameOptions.MobileOrientation;
     }
 
     private void SetPendingMasterVolume(float value)
@@ -503,14 +507,24 @@ public class PauseMenu : MonoBehaviour
     private void SelectPreviousResolution()
     {
         GameSfx.Play(SfxType.UpgradeSelect);
-        pendingResolutionIndex = (pendingResolutionIndex - 1 + GameOptions.ResolutionCount) % GameOptions.ResolutionCount;
+
+        if (GameOptions.IsMobileDisplayMode)
+            pendingMobileOrientation = GameOptions.GetMobileOrientationByOffset(pendingMobileOrientation, -1);
+        else
+            pendingResolutionIndex = (pendingResolutionIndex - 1 + GameOptions.ResolutionCount) % GameOptions.ResolutionCount;
+
         RefreshOptionsControls();
     }
 
     private void SelectNextResolution()
     {
         GameSfx.Play(SfxType.UpgradeSelect);
-        pendingResolutionIndex = (pendingResolutionIndex + 1) % GameOptions.ResolutionCount;
+
+        if (GameOptions.IsMobileDisplayMode)
+            pendingMobileOrientation = GameOptions.GetMobileOrientationByOffset(pendingMobileOrientation, 1);
+        else
+            pendingResolutionIndex = (pendingResolutionIndex + 1) % GameOptions.ResolutionCount;
+
         RefreshOptionsControls();
     }
 
@@ -522,13 +536,14 @@ public class PauseMenu : MonoBehaviour
         pendingSfxVolume = GameOptions.DefaultSfxVolume;
         pendingFullscreen = GameOptions.DefaultFullscreen;
         pendingResolutionIndex = GameOptions.DefaultResolutionIndex;
+        pendingMobileOrientation = GameOptions.DefaultMobileOrientation;
         RefreshOptionsControls();
     }
 
     private void ConfirmOptions()
     {
         GameSfx.Play(SfxType.UpgradeSelect);
-        GameOptions.ApplyOptions(pendingMasterVolume, pendingBgmVolume, pendingSfxVolume, pendingFullscreen, pendingResolutionIndex);
+        GameOptions.ApplyOptions(pendingMasterVolume, pendingBgmVolume, pendingSfxVolume, pendingFullscreen, pendingResolutionIndex, pendingMobileOrientation);
         RefreshOptionsControls();
         ShowPausePanel();
     }
@@ -544,23 +559,41 @@ public class PauseMenu : MonoBehaviour
         if (sfxVolumeSlider != null)
             sfxVolumeSlider.SetValueWithoutNotify(pendingSfxVolume);
 
+        bool isMobileOptions = GameOptions.IsMobileDisplayMode;
+
+        if (fullscreenLabel != null)
+            fullscreenLabel.gameObject.SetActive(!isMobileOptions);
+
         if (fullscreenToggle != null)
+        {
+            fullscreenToggle.gameObject.SetActive(!isMobileOptions);
             fullscreenToggle.SetIsOnWithoutNotify(pendingFullscreen);
+        }
 
         if (fullscreenModeText != null)
             fullscreenModeText.text = pendingFullscreen ? "\uC804\uCCB4 \uD654\uBA74" : "\uCC3D \uBAA8\uB4DC";
 
+        if (resolutionLabel != null)
+            resolutionLabel.text = isMobileOptions ? "\uD654\uBA74 \uBC29\uD5A5" : "\uD574\uC0C1\uB3C4";
+
         if (resolutionText != null)
         {
-            Vector2Int resolution = GameOptions.GetResolution(pendingResolutionIndex);
-            resolutionText.text = $"{resolution.x} x {resolution.y}";
+            if (isMobileOptions)
+            {
+                resolutionText.text = GameOptions.GetMobileOrientationText(pendingMobileOrientation);
+            }
+            else
+            {
+                Vector2Int resolution = GameOptions.GetResolution(pendingResolutionIndex);
+                resolutionText.text = $"{resolution.x} x {resolution.y}";
+            }
         }
 
         if (appliedScreenText != null)
             appliedScreenText.text = $"\uD604\uC7AC \uC801\uC6A9: {GameOptions.AppliedScreenInfo}";
     }
 
-    private static void CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color)
+    private static Text CreateLabel(Transform parent, string text, Vector2 position, int fontSize, Color color)
     {
         GameObject labelObject = new GameObject(text);
         labelObject.transform.SetParent(parent, false);
@@ -579,6 +612,7 @@ public class PauseMenu : MonoBehaviour
         label.alignment = TextAnchor.MiddleCenter;
         label.color = color;
         label.raycastTarget = false;
+        return label;
     }
 
     private static Button CreateButton(Transform parent, string text, Vector2 position)
