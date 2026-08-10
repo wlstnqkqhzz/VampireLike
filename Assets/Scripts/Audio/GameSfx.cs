@@ -108,11 +108,11 @@ namespace VampireLike.Audio
         {
             { SfxType.PlayerShoot, 0.45f },
             { SfxType.EnemyHit, 0.34f },
-            { SfxType.EnemyDeath, 0.42f },
+            { SfxType.EnemyDeath, 0.62f },
             { SfxType.PlayerHit, 0.55f },
             { SfxType.ExperiencePickup, 0.32f },
             { SfxType.LevelUp, 0.62f },
-            { SfxType.UpgradeSelect, 0.5f },
+            { SfxType.UpgradeSelect, 0.62f },
             { SfxType.BossAppear, 0.72f },
             { SfxType.GameOver, 0.72f },
             { SfxType.Heal, 0.48f },

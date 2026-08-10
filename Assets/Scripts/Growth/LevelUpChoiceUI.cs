@@ -93,8 +93,8 @@ namespace VampireLike.Growth
             if (!isShowing || choiceIndex < 0 || choiceIndex >= currentChoices.Count)
                 return;
 
-            upgradeController.ApplyUpgrade(currentChoices[choiceIndex].Definition);
             GameSfx.Play(SfxType.UpgradeSelect);
+            upgradeController.ApplyUpgrade(currentChoices[choiceIndex].Definition);
             Hide();
             Time.timeScale = 1f;
         }
