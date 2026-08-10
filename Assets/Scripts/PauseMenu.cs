@@ -287,7 +287,7 @@ public class PauseMenu : MonoBehaviour
         bool canShow = !isPaused
             && !VampireLike.Combat.GameState.IsGameOver
             && !VampireLike.Combat.GameState.IsMainMenuOpen
-            && (Application.isMobilePlatform || Touchscreen.current != null);
+            && (GameOptions.IsMobileDisplayMode || Application.isMobilePlatform || Touchscreen.current != null);
 
         mobilePauseButton.gameObject.SetActive(canShow);
 
@@ -295,7 +295,8 @@ public class PauseMenu : MonoBehaviour
         {
             Vector2 buttonSize = GetMobilePauseButtonSize();
             mobilePauseButtonRect.sizeDelta = buttonSize;
-            mobilePauseButtonRect.anchoredPosition = new Vector2(-MobileSafeArea.HudRight(24f), -MobileSafeArea.HudTop(24f));
+            float margin = MobileSafeArea.IsPortrait ? 18f : 24f;
+            mobilePauseButtonRect.anchoredPosition = new Vector2(-MobileSafeArea.HudRight(margin), -MobileSafeArea.HudTop(margin));
 
             Text label = mobilePauseButtonRect.GetComponentInChildren<Text>();
 
@@ -306,14 +307,14 @@ public class PauseMenu : MonoBehaviour
                 if (labelRect != null)
                     labelRect.sizeDelta = buttonSize;
 
-                label.fontSize = MobileSafeArea.IsPortrait ? 36 : 30;
+                label.fontSize = MobileSafeArea.IsPortrait ? 30 : 30;
             }
         }
     }
 
     private static Vector2 GetMobilePauseButtonSize()
     {
-        return MobileSafeArea.IsPortrait ? new Vector2(92f, 92f) : new Vector2(72f, 72f);
+        return MobileSafeArea.IsPortrait ? new Vector2(78f, 78f) : new Vector2(72f, 72f);
     }
 
     private static void EnsureEventSystem()

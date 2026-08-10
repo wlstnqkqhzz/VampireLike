@@ -24,16 +24,28 @@ namespace VampireLike.Mobile
         private float maxRadius = 96f;
 
         [SerializeField]
+        private float portraitMaxRadius = 78f;
+
+        [SerializeField]
         private float deadZone = 0.16f;
 
         [SerializeField]
         private float safeAreaMargin = 24f;
 
         [SerializeField]
+        private float portraitTopReservedArea = 132f;
+
+        [SerializeField]
         private Vector2 backgroundSize = new Vector2(168f, 168f);
 
         [SerializeField]
+        private Vector2 portraitBackgroundSize = new Vector2(146f, 146f);
+
+        [SerializeField]
         private Vector2 knobSize = new Vector2(72f, 72f);
+
+        [SerializeField]
+        private Vector2 portraitKnobSize = new Vector2(62f, 62f);
 
         [SerializeField]
         private Color backgroundColor = new Color(0.08f, 0.12f, 0.16f, 0.38f);
@@ -184,6 +196,7 @@ namespace VampireLike.Mobile
 
         private void BeginInput(Vector2 screenPosition)
         {
+            UpdateVisualSizes();
             startScreenPosition = ClampScreenPositionToSafeArea(screenPosition);
             hasActiveInput = true;
             SetVisualPosition(rootRect, startScreenPosition);
@@ -194,8 +207,9 @@ namespace VampireLike.Mobile
 
         private void UpdateInput(Vector2 screenPosition)
         {
-            Vector2 delta = Vector2.ClampMagnitude(screenPosition - startScreenPosition, maxRadius);
-            Vector2 normalized = delta / maxRadius;
+            float currentMaxRadius = GetCurrentMaxRadius();
+            Vector2 delta = Vector2.ClampMagnitude(screenPosition - startScreenPosition, currentMaxRadius);
+            Vector2 normalized = delta / currentMaxRadius;
 
             if (normalized.magnitude < deadZone)
                 normalized = Vector2.zero;
@@ -207,14 +221,16 @@ namespace VampireLike.Mobile
         private Vector2 ClampScreenPositionToSafeArea(Vector2 screenPosition)
         {
             Rect safeArea = Screen.safeArea;
-            float margin = Mathf.Max(maxRadius, Mathf.Max(backgroundSize.x, backgroundSize.y) * 0.5f) + safeAreaMargin;
+            Vector2 currentBackgroundSize = GetCurrentBackgroundSize();
+            float margin = Mathf.Max(GetCurrentMaxRadius(), Mathf.Max(currentBackgroundSize.x, currentBackgroundSize.y) * 0.5f) + safeAreaMargin;
+            float topReservedArea = MobileSafeArea.IsPortrait ? portraitTopReservedArea : 0f;
 
-            if (safeArea.width <= margin * 2f || safeArea.height <= margin * 2f)
+            if (safeArea.width <= margin * 2f || safeArea.height <= margin * 2f + topReservedArea)
                 return screenPosition;
 
             return new Vector2(
                 Mathf.Clamp(screenPosition.x, safeArea.xMin + margin, safeArea.xMax - margin),
-                Mathf.Clamp(screenPosition.y, safeArea.yMin + margin, safeArea.yMax - margin));
+                Mathf.Clamp(screenPosition.y, safeArea.yMin + margin, safeArea.yMax - margin - topReservedArea));
         }
 
         private static bool IsPointerOverUi(int pointerId = -1)
@@ -254,6 +270,37 @@ namespace VampireLike.Mobile
             rootRect = CreateImage("Joystick Root", canvasObject.transform, CreateCircleSprite(0.5f), backgroundColor, backgroundSize);
             rimRect = CreateImage("Joystick Rim", rootRect, CreateRingSprite(), rimColor, backgroundSize);
             knobRect = CreateImage("Joystick Knob", canvasObject.transform, CreateCircleSprite(0.5f), knobColor, knobSize);
+            UpdateVisualSizes();
+        }
+
+        private float GetCurrentMaxRadius()
+        {
+            return MobileSafeArea.IsPortrait ? portraitMaxRadius : maxRadius;
+        }
+
+        private Vector2 GetCurrentBackgroundSize()
+        {
+            return MobileSafeArea.IsPortrait ? portraitBackgroundSize : backgroundSize;
+        }
+
+        private Vector2 GetCurrentKnobSize()
+        {
+            return MobileSafeArea.IsPortrait ? portraitKnobSize : knobSize;
+        }
+
+        private void UpdateVisualSizes()
+        {
+            Vector2 currentBackgroundSize = GetCurrentBackgroundSize();
+            Vector2 currentKnobSize = GetCurrentKnobSize();
+
+            if (rootRect != null)
+                rootRect.sizeDelta = currentBackgroundSize;
+
+            if (rimRect != null)
+                rimRect.sizeDelta = currentBackgroundSize;
+
+            if (knobRect != null)
+                knobRect.sizeDelta = currentKnobSize;
         }
 
         private RectTransform CreateImage(string objectName, Transform parent, Sprite sprite, Color color, Vector2 size)

@@ -1,5 +1,6 @@
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.Settings;
 using VampireLike.VFX;
 
 namespace VampireLike.Enemies
@@ -28,6 +29,9 @@ namespace VampireLike.Enemies
 
         [SerializeField]
         private float separationWeight = 0.28f;
+
+        [SerializeField]
+        private float mobilePortraitSpeedMultiplier = 0.92f;
 
         [SerializeField]
         private LayerMask enemyLayerMask = 1 << 7;
@@ -90,7 +94,7 @@ namespace VampireLike.Enemies
             spriteAnimator?.FaceDirection(moveDirection);
             spriteAnimator?.PlayWalk();
 
-            Vector2 nextPosition = currentPosition + moveDirection * moveSpeed * Time.fixedDeltaTime;
+            Vector2 nextPosition = currentPosition + moveDirection * GetEffectiveMoveSpeed() * Time.fixedDeltaTime;
             rb.MovePosition(nextPosition);
         }
 
@@ -100,6 +104,7 @@ namespace VampireLike.Enemies
             stoppingDistance = Mathf.Max(0f, stoppingDistance);
             separationRadius = Mathf.Max(0f, separationRadius);
             separationWeight = Mathf.Max(0f, separationWeight);
+            mobilePortraitSpeedMultiplier = Mathf.Clamp(mobilePortraitSpeedMultiplier, 0.6f, 1f);
         }
 
         public void SetMoveSpeed(float value)
@@ -143,6 +148,14 @@ namespace VampireLike.Enemies
             }
 
             return separation.sqrMagnitude > 1f ? separation.normalized : separation;
+        }
+
+        private float GetEffectiveMoveSpeed()
+        {
+            if (GameOptions.IsMobileDisplayMode && Screen.height > Screen.width)
+                return moveSpeed * mobilePortraitSpeedMultiplier;
+
+            return moveSpeed;
         }
 
         private static void IgnoreEnemyToEnemyCollision()

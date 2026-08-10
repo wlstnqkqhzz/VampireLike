@@ -78,13 +78,14 @@ namespace VampireLike.Growth
         private void DrawHud()
         {
             bool isPortrait = Screen.height > Screen.width;
-            float waveWidth = isPortrait ? 100f : 112f;
-            float levelWidth = isPortrait ? 88f : 92f;
-            float gap = isPortrait ? 6f : 8f;
-            float portraitSideMargin = isPortrait ? 36f : sideMargin;
-            float currentBarHeight = isPortrait ? 16f : barHeight;
+            float waveWidth = isPortrait ? 86f : 112f;
+            float levelWidth = isPortrait ? 72f : 92f;
+            float gap = isPortrait ? 5f : 8f;
+            float portraitSideMargin = isPortrait ? 24f : sideMargin;
+            float currentBarHeight = isPortrait ? 18f : barHeight;
+            hudTextStyle.fontSize = isPortrait ? 13 : 16;
 
-            float top = MobileSafeArea.HudTop(topMargin);
+            float top = MobileSafeArea.HudTop(isPortrait ? 18f : topMargin);
             float left = MobileSafeArea.HudLeft(portraitSideMargin);
             float right = MobileSafeArea.HudRight(portraitSideMargin);
             float barWidth = Mathf.Max(isPortrait ? 160f : 240f, Screen.width - left - right - waveWidth - levelWidth - gap * 2f);
@@ -109,7 +110,7 @@ namespace VampireLike.Growth
 
             GUI.color = Color.white;
             GUI.Label(waveRect, enemySpawner == null ? "WAVE -" : $"WAVE {enemySpawner.CurrentWave}", hudTextStyle);
-            GUI.Label(levelRect, $"레벨 {playerExperience.CurrentLevel}", hudTextStyle);
+            GUI.Label(levelRect, $"LV {playerExperience.CurrentLevel}", hudTextStyle);
 
             GUI.color = previousColor;
         }

@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using VampireLike.Audio;
+using VampireLike.Settings;
 
 namespace VampireLike.Enemies
 {
@@ -29,14 +30,24 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float maximumTriggerDistance = 3.8f;
 
+        [SerializeField]
+        private float mobilePortraitPrepareMultiplier = 1.18f;
+
+        [SerializeField]
+        private float mobilePortraitDashSpeedMultiplier = 0.9f;
+
+        [SerializeField]
+        private float mobilePortraitMaximumTriggerDistance = 3.2f;
+
         protected override bool CanExecutePattern()
         {
             if (Player == null || BossRigidbody == null)
                 return false;
 
             float sqrDistance = ((Vector2)Player.position - BossRigidbody.position).sqrMagnitude;
+            float currentMaximumTriggerDistance = GetEffectiveMaximumTriggerDistance();
             return sqrDistance >= minimumTriggerDistance * minimumTriggerDistance
-                && sqrDistance <= maximumTriggerDistance * maximumTriggerDistance;
+                && sqrDistance <= currentMaximumTriggerDistance * currentMaximumTriggerDistance;
         }
 
         protected override IEnumerator ExecutePattern()
@@ -53,7 +64,7 @@ namespace VampireLike.Enemies
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(0);
 
-            yield return new WaitForSeconds(prepareTime);
+            yield return new WaitForSeconds(GetEffectivePrepareTime());
 
             Boss.SetState(BossState.Attacking, false);
             Boss.FaceDirection(dashDirection);
@@ -63,7 +74,7 @@ namespace VampireLike.Enemies
 
             while (elapsedTime < dashDuration && !Boss.IsDead)
             {
-                Vector2 nextPosition = BossRigidbody.position + dashDirection * dashSpeed * Time.fixedDeltaTime;
+                Vector2 nextPosition = BossRigidbody.position + dashDirection * GetEffectiveDashSpeed() * Time.fixedDeltaTime;
                 BossRigidbody.MovePosition(nextPosition);
                 elapsedTime += Time.fixedDeltaTime;
                 yield return new WaitForFixedUpdate();
@@ -83,6 +94,29 @@ namespace VampireLike.Enemies
             endLag = Mathf.Max(0f, endLag);
             minimumTriggerDistance = Mathf.Max(0f, minimumTriggerDistance);
             maximumTriggerDistance = Mathf.Max(minimumTriggerDistance, maximumTriggerDistance);
+            mobilePortraitPrepareMultiplier = Mathf.Max(1f, mobilePortraitPrepareMultiplier);
+            mobilePortraitDashSpeedMultiplier = Mathf.Clamp(mobilePortraitDashSpeedMultiplier, 0.6f, 1f);
+            mobilePortraitMaximumTriggerDistance = Mathf.Max(minimumTriggerDistance, mobilePortraitMaximumTriggerDistance);
+        }
+
+        private float GetEffectivePrepareTime()
+        {
+            return ShouldUseMobilePortraitTuning() ? prepareTime * mobilePortraitPrepareMultiplier : prepareTime;
+        }
+
+        private float GetEffectiveDashSpeed()
+        {
+            return ShouldUseMobilePortraitTuning() ? dashSpeed * mobilePortraitDashSpeedMultiplier : dashSpeed;
+        }
+
+        private float GetEffectiveMaximumTriggerDistance()
+        {
+            return ShouldUseMobilePortraitTuning() ? Mathf.Min(maximumTriggerDistance, mobilePortraitMaximumTriggerDistance) : maximumTriggerDistance;
+        }
+
+        private static bool ShouldUseMobilePortraitTuning()
+        {
+            return GameOptions.IsMobileDisplayMode && Screen.height > Screen.width;
         }
     }
 }

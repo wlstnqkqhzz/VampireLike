@@ -32,6 +32,7 @@ namespace VampireLike.UI
         public static float TopInset => Mathf.Max(0f, Screen.height - Screen.safeArea.yMax);
         public static float LeftInset => Mathf.Max(0f, Screen.safeArea.xMin);
         public static float RightInset => Mathf.Max(0f, Screen.width - Screen.safeArea.xMax);
+        public static float BottomInset => Mathf.Max(0f, Screen.safeArea.yMin);
 
         public static float HudTop(float baseMargin)
         {
@@ -46,6 +47,11 @@ namespace VampireLike.UI
         public static float HudRight(float baseMargin)
         {
             return RightInset + Mathf.Max(0f, baseMargin);
+        }
+
+        public static float HudBottom(float baseMargin)
+        {
+            return BottomInset + Mathf.Max(0f, baseMargin);
         }
 
         public static void ApplyTo(RectTransform rectTransform)
@@ -92,7 +98,7 @@ namespace VampireLike.UI
 
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = CurrentReferenceResolution;
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.matchWidthOrHeight = IsPortrait ? 0f : 0.5f;
         }
     }
 }

@@ -72,11 +72,11 @@ namespace VampireLike.Combat
         private void DrawHealthBar()
         {
             bool isPortrait = Screen.height > Screen.width;
-            float currentWidth = isPortrait ? 150f : width;
-            float currentHeight = isPortrait ? 14f : height;
-            float left = MobileSafeArea.HudLeft(isPortrait ? 36f : sideMargin);
-            float top = MobileSafeArea.HudTop(isPortrait ? 34f : topMargin);
-            labelStyle.fontSize = isPortrait ? 12 : 14;
+            float currentWidth = isPortrait ? 210f : width;
+            float currentHeight = isPortrait ? 18f : height;
+            float left = MobileSafeArea.HudLeft(isPortrait ? 24f : sideMargin);
+            float top = MobileSafeArea.HudTop(isPortrait ? 58f : topMargin);
+            labelStyle.fontSize = isPortrait ? 13 : 14;
 
             Rect borderRect = new Rect(left, top, currentWidth, currentHeight + 6f);
             Rect backgroundRect = new Rect(borderRect.x + 3f, borderRect.y + 3f, borderRect.width - 6f, borderRect.height - 6f);

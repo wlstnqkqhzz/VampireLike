@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using VampireLike.Combat;
+using VampireLike.Settings;
 using VampireLike.World;
 
 namespace VampireLike.Enemies
@@ -118,6 +119,19 @@ namespace VampireLike.Enemies
         [SerializeField]
         private int maxEnemiesPerSpawn = 3;
 
+        [Header("Mobile Portrait Tuning")]
+        [SerializeField]
+        private float mobilePortraitSpawnIntervalMultiplier = 1.12f;
+
+        [SerializeField]
+        private float mobilePortraitMaxEnemyMultiplier = 0.9f;
+
+        [SerializeField]
+        private float mobilePortraitSpawnBuffer = 1.1f;
+
+        [SerializeField]
+        private float mobilePortraitSpawnBand = 2.4f;
+
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
         private float spawnTimer;
         private float waveTimer;
@@ -184,6 +198,10 @@ namespace VampireLike.Enemies
             enemiesPerSpawn = Mathf.Max(1, enemiesPerSpawn);
             extraEnemyEveryWaves = Mathf.Max(0, extraEnemyEveryWaves);
             maxEnemiesPerSpawn = Mathf.Max(enemiesPerSpawn, maxEnemiesPerSpawn);
+            mobilePortraitSpawnIntervalMultiplier = Mathf.Max(1f, mobilePortraitSpawnIntervalMultiplier);
+            mobilePortraitMaxEnemyMultiplier = Mathf.Clamp(mobilePortraitMaxEnemyMultiplier, 0.5f, 1f);
+            mobilePortraitSpawnBuffer = Mathf.Max(0f, mobilePortraitSpawnBuffer);
+            mobilePortraitSpawnBand = Mathf.Max(0.5f, mobilePortraitSpawnBand);
 
             if (enemySpawnEntries == null)
                 return;
@@ -222,9 +240,15 @@ namespace VampireLike.Enemies
             currentSpawnInterval = Mathf.Max(minimumSpawnInterval, spawnInterval * Mathf.Pow(spawnIntervalMultiplier, waveOffset));
             currentSpawnInterval *= GetEarlySpawnIntervalMultiplier(currentWave);
 
+            if (ShouldUseMobilePortraitTuning())
+                currentSpawnInterval *= mobilePortraitSpawnIntervalMultiplier;
+
             int baseMaxEnemyCount = maxEnemyCount + maxEnemyCountIncrease * waveOffset;
             int easedMaxEnemyCount = Mathf.RoundToInt(baseMaxEnemyCount * GetEarlyMaxEnemyMultiplier(currentWave));
             currentMaxEnemyCount = Mathf.Min(maxEnemyCountLimit, Mathf.Max(earlyMinimumMaxEnemyCount, easedMaxEnemyCount));
+
+            if (ShouldUseMobilePortraitTuning())
+                currentMaxEnemyCount = Mathf.Max(earlyMinimumMaxEnemyCount, Mathf.RoundToInt(currentMaxEnemyCount * mobilePortraitMaxEnemyMultiplier));
         }
 
         private float GetEarlySpawnIntervalMultiplier(int wave)
@@ -349,19 +373,42 @@ namespace VampireLike.Enemies
         {
             // 원형 방향을 무작위로 뽑고, 최소/최대 거리 사이에 적을 생성한다.
             Vector2 playerPosition = player.position;
+            GetEffectiveSpawnDistanceRange(out float effectiveMinDistance, out float effectiveMaxDistance);
 
             for (int i = 0; i < 16; i++)
             {
                 float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
-                float distance = UnityEngine.Random.Range(minSpawnDistance, maxSpawnDistance);
+                float distance = UnityEngine.Random.Range(effectiveMinDistance, effectiveMaxDistance);
                 Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
                 Vector2 candidatePosition = MapBoundary.ClampToPlayableArea(playerPosition + direction * distance);
 
-                if ((candidatePosition - playerPosition).sqrMagnitude >= minSpawnDistance * minSpawnDistance * 0.64f)
+                if ((candidatePosition - playerPosition).sqrMagnitude >= effectiveMinDistance * effectiveMinDistance * 0.64f)
                     return candidatePosition;
             }
 
-            return MapBoundary.ClampToPlayableArea(playerPosition + Vector2.right * minSpawnDistance);
+            return MapBoundary.ClampToPlayableArea(playerPosition + Vector2.right * effectiveMinDistance);
+        }
+
+        private void GetEffectiveSpawnDistanceRange(out float effectiveMinDistance, out float effectiveMaxDistance)
+        {
+            effectiveMinDistance = minSpawnDistance;
+            effectiveMaxDistance = maxSpawnDistance;
+
+            if (!ShouldUseMobilePortraitTuning() || Camera.main == null)
+                return;
+
+            Camera mainCamera = Camera.main;
+            float halfHeight = mainCamera.orthographicSize;
+            float halfWidth = halfHeight * mainCamera.aspect;
+            float visibleRadius = Mathf.Max(halfWidth, halfHeight);
+
+            effectiveMinDistance = Mathf.Max(minSpawnDistance, visibleRadius + mobilePortraitSpawnBuffer);
+            effectiveMaxDistance = Mathf.Max(effectiveMinDistance + 0.5f, effectiveMinDistance + mobilePortraitSpawnBand);
+        }
+
+        private static bool ShouldUseMobilePortraitTuning()
+        {
+            return GameOptions.IsMobileDisplayMode && Screen.height > Screen.width;
         }
 
         private void RemoveMissingEnemies()
