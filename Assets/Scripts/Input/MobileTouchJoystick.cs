@@ -18,7 +18,7 @@ namespace VampireLike.Mobile
         private const int CircleTextureSize = 128;
 
         [SerializeField]
-        private bool enableInEditor = true;
+        private bool enableInEditor = false;
 
         [SerializeField]
         private float maxRadius = 96f;

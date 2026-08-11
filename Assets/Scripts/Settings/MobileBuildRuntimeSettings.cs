@@ -9,12 +9,20 @@ namespace VampireLike.Settings
     {
         private const int MobileTargetFrameRate = 60;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         private static void Apply()
         {
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = MobileTargetFrameRate;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
+#if UNITY_ANDROID || UNITY_IOS
+            Screen.orientation = ScreenOrientation.Portrait;
+            Screen.autorotateToPortrait = true;
+            Screen.autorotateToPortraitUpsideDown = false;
+            Screen.autorotateToLandscapeLeft = false;
+            Screen.autorotateToLandscapeRight = false;
+#endif
         }
     }
 }

@@ -194,8 +194,8 @@ namespace VampireLike.Settings
         {
             Screen.autorotateToPortrait = true;
             Screen.autorotateToPortraitUpsideDown = false;
-            Screen.autorotateToLandscapeLeft = true;
-            Screen.autorotateToLandscapeRight = true;
+            Screen.autorotateToLandscapeLeft = MobileOrientation != MobileOrientationMode.Portrait;
+            Screen.autorotateToLandscapeRight = MobileOrientation != MobileOrientationMode.Portrait;
 
             Screen.orientation = MobileOrientation switch
             {
