@@ -169,6 +169,9 @@ namespace VampireLike.Growth
                 if (definition == null)
                     break;
 
+                if (!CanApply(definition))
+                    continue;
+
                 if (definition.IsCharacterExclusiveUpgrade)
                     characterChoiceCount++;
                 else if (definition.IsSpecialUpgrade)

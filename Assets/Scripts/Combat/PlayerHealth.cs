@@ -21,6 +21,9 @@ namespace VampireLike.Combat
         [SerializeField]
         private float invincibleDuration = 1f;
 
+        [SerializeField]
+        private float shieldBlockInvincibleDuration = 0.35f;
+
         // 피격 시 빨간색으로 깜빡이는 전체 시간이다.
         [SerializeField]
         private float hitFlashDuration = 0.6f;
@@ -114,6 +117,7 @@ namespace VampireLike.Combat
             maxHealth = Mathf.Max(1, maxHealth);
             contactDamage = Mathf.Max(1, contactDamage);
             invincibleDuration = Mathf.Max(0f, invincibleDuration);
+            shieldBlockInvincibleDuration = Mathf.Max(0f, shieldBlockInvincibleDuration);
             hitFlashDuration = Mathf.Max(0f, hitFlashDuration);
             hitFlashInterval = Mathf.Max(0.01f, hitFlashInterval);
             contactCheckRadius = Mathf.Max(0.01f, contactCheckRadius);
@@ -135,7 +139,10 @@ namespace VampireLike.Combat
             PlayerSpecialUpgradeController specialUpgradeController = GetComponent<PlayerSpecialUpgradeController>();
 
             if (specialUpgradeController != null && specialUpgradeController.TryBlockDamage(hitDirection))
+            {
+                invincibleTimer = Mathf.Max(invincibleTimer, shieldBlockInvincibleDuration);
                 return;
+            }
 
             currentHealth -= damage;
             invincibleTimer = invincibleDuration;

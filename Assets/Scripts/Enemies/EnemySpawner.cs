@@ -132,6 +132,13 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float mobilePortraitSpawnBand = 2.4f;
 
+        [Header("Spawn Visibility")]
+        [SerializeField]
+        private float cameraSpawnMargin = 0.8f;
+
+        [SerializeField]
+        private float cameraSpawnBand = 1.8f;
+
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
         private float spawnTimer;
         private float waveTimer;
@@ -202,6 +209,8 @@ namespace VampireLike.Enemies
             mobilePortraitMaxEnemyMultiplier = Mathf.Clamp(mobilePortraitMaxEnemyMultiplier, 0.5f, 1f);
             mobilePortraitSpawnBuffer = Mathf.Max(0f, mobilePortraitSpawnBuffer);
             mobilePortraitSpawnBand = Mathf.Max(0.5f, mobilePortraitSpawnBand);
+            cameraSpawnMargin = Mathf.Max(0f, cameraSpawnMargin);
+            cameraSpawnBand = Mathf.Max(0.25f, cameraSpawnBand);
 
             if (enemySpawnEntries == null)
                 return;
@@ -372,6 +381,9 @@ namespace VampireLike.Enemies
         private Vector2 GetRandomSpawnPosition()
         {
             // 원형 방향을 무작위로 뽑고, 최소/최대 거리 사이에 적을 생성한다.
+            if (TryGetCameraOutsideSpawnPosition(out Vector2 offscreenPosition))
+                return offscreenPosition;
+
             Vector2 playerPosition = player.position;
             GetEffectiveSpawnDistanceRange(out float effectiveMinDistance, out float effectiveMaxDistance);
 
@@ -387,6 +399,84 @@ namespace VampireLike.Enemies
             }
 
             return MapBoundary.ClampToPlayableArea(playerPosition + Vector2.right * effectiveMinDistance);
+        }
+
+        private bool TryGetCameraOutsideSpawnPosition(out Vector2 spawnPosition)
+        {
+            spawnPosition = default;
+
+            Camera mainCamera = Camera.main;
+
+            if (mainCamera == null || player == null)
+                return false;
+
+            Rect cameraRect = GetCameraWorldRect(mainCamera);
+            Rect playableRect = GetPlayableSpawnRect();
+            GetEffectiveSpawnDistanceRange(out float effectiveMinDistance, out float effectiveMaxDistance);
+
+            for (int i = 0; i < 24; i++)
+            {
+                Vector2 candidate = GetRandomPositionOutsideCamera(cameraRect);
+                candidate.x = Mathf.Clamp(candidate.x, playableRect.xMin, playableRect.xMax);
+                candidate.y = Mathf.Clamp(candidate.y, playableRect.yMin, playableRect.yMax);
+
+                if (cameraRect.Contains(candidate))
+                    continue;
+
+                float sqrDistance = ((Vector2)player.position - candidate).sqrMagnitude;
+
+                if (sqrDistance < effectiveMinDistance * effectiveMinDistance * 0.64f)
+                    continue;
+
+                if (sqrDistance > effectiveMaxDistance * effectiveMaxDistance * 2.25f)
+                    continue;
+
+                spawnPosition = candidate;
+                return true;
+            }
+
+            return false;
+        }
+
+        private Vector2 GetRandomPositionOutsideCamera(Rect cameraRect)
+        {
+            float offset = cameraSpawnMargin + UnityEngine.Random.Range(0f, cameraSpawnBand);
+            int side = UnityEngine.Random.Range(0, 4);
+
+            switch (side)
+            {
+                case 0:
+                    return new Vector2(UnityEngine.Random.Range(cameraRect.xMin, cameraRect.xMax), cameraRect.yMax + offset);
+                case 1:
+                    return new Vector2(cameraRect.xMax + offset, UnityEngine.Random.Range(cameraRect.yMin, cameraRect.yMax));
+                case 2:
+                    return new Vector2(UnityEngine.Random.Range(cameraRect.xMin, cameraRect.xMax), cameraRect.yMin - offset);
+                default:
+                    return new Vector2(cameraRect.xMin - offset, UnityEngine.Random.Range(cameraRect.yMin, cameraRect.yMax));
+            }
+        }
+
+        private static Rect GetCameraWorldRect(Camera mainCamera)
+        {
+            float halfHeight = mainCamera.orthographicSize;
+            float halfWidth = halfHeight * mainCamera.aspect;
+            Vector3 cameraPosition = mainCamera.transform.position;
+
+            return new Rect(cameraPosition.x - halfWidth, cameraPosition.y - halfHeight, halfWidth * 2f, halfHeight * 2f);
+        }
+
+        private Rect GetPlayableSpawnRect()
+        {
+            if (MapBoundary.TryGetWorldBounds(out Bounds bounds))
+            {
+                float inset = Mathf.Min(Mathf.Max(0.1f, cameraSpawnMargin * 0.5f), Mathf.Min(bounds.size.x, bounds.size.y) * 0.45f);
+                return Rect.MinMaxRect(bounds.min.x + inset, bounds.min.y + inset, bounds.max.x - inset, bounds.max.y - inset);
+            }
+
+            GetEffectiveSpawnDistanceRange(out float effectiveMinDistance, out float effectiveMaxDistance);
+            Vector2 center = player.position;
+            float radius = Mathf.Max(effectiveMaxDistance, effectiveMinDistance + cameraSpawnBand);
+            return Rect.MinMaxRect(center.x - radius, center.y - radius, center.x + radius, center.y + radius);
         }
 
         private void GetEffectiveSpawnDistanceRange(out float effectiveMinDistance, out float effectiveMaxDistance)
