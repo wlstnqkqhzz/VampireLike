@@ -65,6 +65,9 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float maxBossMoveSpeed = 1.8f;
 
+        [SerializeField]
+        private float bossArenaBoundsScale = 0.72f;
+
         private GameObject activeBoss;
         private EnemyHealth activeBossHealth;
         private int activeBossStage;
@@ -118,6 +121,7 @@ namespace VampireLike.Enemies
                 activeBossHealth = null;
                 activeBossStage = 0;
                 SetWaveProgressPaused(false);
+                MapBoundary.ClearTemporaryBounds(this);
             }
             else
             {
@@ -143,6 +147,7 @@ namespace VampireLike.Enemies
             contactDamageMultiplierPerAppearance = Mathf.Max(1f, contactDamageMultiplierPerAppearance);
             moveSpeedMultiplierPerAppearance = Mathf.Max(1f, moveSpeedMultiplierPerAppearance);
             maxBossMoveSpeed = Mathf.Max(0.1f, maxBossMoveSpeed);
+            bossArenaBoundsScale = Mathf.Clamp(bossArenaBoundsScale, 0.35f, 1f);
 
             if (bossSpawnEntries == null)
                 return;
@@ -202,6 +207,7 @@ namespace VampireLike.Enemies
                 bossController.InitializeBoss(bossStage, player);
 
             ApplyBossScaling(activeBoss, wave);
+            ActivateBossArena();
             SetWaveProgressPaused(true);
             Debug.Log($"Boss appeared - Wave {wave}");
             GameSfx.Play(SfxType.BossAppear);
@@ -215,6 +221,7 @@ namespace VampireLike.Enemies
             BossDefeated?.Invoke(defeatedStage, defeatedBoss);
             GameBgm.Play(BgmType.Battle);
             UnsubscribeActiveBossDeath();
+            MapBoundary.ClearTemporaryBounds(this);
         }
 
         private void UnsubscribeActiveBossDeath()
@@ -230,6 +237,25 @@ namespace VampireLike.Enemies
 
             hasPausedWaveProgress = paused;
             enemySpawner.SetWaveProgressPaused(this, paused);
+        }
+
+        private void ActivateBossArena()
+        {
+            if (player == null || !MapBoundary.TryGetBaseWorldBounds(out Bounds baseBounds))
+                return;
+
+            Vector3 arenaSize = baseBounds.size * bossArenaBoundsScale;
+            arenaSize.z = baseBounds.size.z;
+
+            Vector3 center = player.position;
+            float halfWidth = arenaSize.x * 0.5f;
+            float halfHeight = arenaSize.y * 0.5f;
+
+            center.x = Mathf.Clamp(center.x, baseBounds.min.x + halfWidth, baseBounds.max.x - halfWidth);
+            center.y = Mathf.Clamp(center.y, baseBounds.min.y + halfHeight, baseBounds.max.y - halfHeight);
+            center.z = baseBounds.center.z;
+
+            MapBoundary.OverrideTemporaryBounds(this, new Bounds(center, arenaSize));
         }
 
         private GameObject GetBossPrefabForStage(int bossStage)

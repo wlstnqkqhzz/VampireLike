@@ -15,7 +15,7 @@ namespace VampireLike.Map
         private const string BackgroundResourcePath = "Tiles/DarkForestBackground";
         private const string TilemapObjectName = "Tilemap";
         private const int BackgroundSortingOrder = -100;
-        private const float TargetWorldWidth = 112f;
+        private const float TargetWorldWidth = 56f;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialize()

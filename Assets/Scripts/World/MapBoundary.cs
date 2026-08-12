@@ -24,8 +24,11 @@ namespace VampireLike.World
         private bool rebuildOnStart = true;
 
         private Bounds worldBounds;
+        private Bounds baseWorldBounds;
         private bool hasBounds;
+        private bool hasBaseBounds;
         private bool usesExternalBounds;
+        private object temporaryBoundsSource;
         private static MapBoundary activeBoundary;
 
         public static bool TryGetWorldBounds(out Bounds bounds)
@@ -38,6 +41,17 @@ namespace VampireLike.World
 
             bounds = default;
             return false;
+        }
+
+        public static bool TryGetBaseWorldBounds(out Bounds bounds)
+        {
+            if (activeBoundary != null && activeBoundary.hasBaseBounds)
+            {
+                bounds = activeBoundary.baseWorldBounds;
+                return true;
+            }
+
+            return TryGetWorldBounds(out bounds);
         }
 
         public static Vector2 ClampToPlayableArea(Vector2 position)
@@ -65,6 +79,38 @@ namespace VampireLike.World
             }
 
             boundary.ApplyWorldBounds(bounds);
+        }
+
+        public static void OverrideTemporaryBounds(object source, Bounds bounds)
+        {
+            if (source == null)
+                return;
+
+            if (activeBoundary == null)
+                activeBoundary = Object.FindFirstObjectByType<MapBoundary>();
+
+            if (activeBoundary == null)
+                return;
+
+            activeBoundary.temporaryBoundsSource = source;
+            activeBoundary.worldBounds = bounds;
+            activeBoundary.hasBounds = true;
+            activeBoundary.RebuildBoundaryCollidersFromCurrentBounds();
+        }
+
+        public static void ClearTemporaryBounds(object source)
+        {
+            if (activeBoundary == null || activeBoundary.temporaryBoundsSource != source)
+                return;
+
+            activeBoundary.temporaryBoundsSource = null;
+
+            if (!activeBoundary.hasBaseBounds)
+                return;
+
+            activeBoundary.worldBounds = activeBoundary.baseWorldBounds;
+            activeBoundary.hasBounds = true;
+            activeBoundary.RebuildBoundaryCollidersFromCurrentBounds();
         }
 
         private void Awake()
@@ -99,6 +145,12 @@ namespace VampireLike.World
                 floorTilemap = GetComponentInChildren<Tilemap>();
 
             hasBounds = TryCalculateTileBounds(out worldBounds);
+
+            if (hasBounds)
+            {
+                baseWorldBounds = worldBounds;
+                hasBaseBounds = true;
+            }
         }
 
         private bool TryCalculateTileBounds(out Bounds bounds)
@@ -153,8 +205,11 @@ namespace VampireLike.World
         private void ApplyWorldBounds(Bounds bounds)
         {
             worldBounds = bounds;
+            baseWorldBounds = bounds;
             hasBounds = true;
+            hasBaseBounds = true;
             usesExternalBounds = true;
+            temporaryBoundsSource = null;
             activeBoundary = this;
             RebuildBoundaryCollidersFromCurrentBounds();
         }

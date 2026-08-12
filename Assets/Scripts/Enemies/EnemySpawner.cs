@@ -139,6 +139,19 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float cameraSpawnBand = 1.8f;
 
+        [Header("Boss Fight Tuning")]
+        [SerializeField]
+        private float bossFightSpawnIntervalMultiplier = 1.8f;
+
+        [SerializeField]
+        private float bossFightMaxEnemyMultiplier = 0.45f;
+
+        [SerializeField]
+        private int bossFightMinimumMaxEnemyCount = 18;
+
+        [SerializeField]
+        private int bossFightMaxEnemyCap = 70;
+
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
         private float spawnTimer;
         private float waveTimer;
@@ -151,8 +164,8 @@ namespace VampireLike.Enemies
         public event Action<int> WaveChanged;
 
         public int CurrentWave => currentWave;
-        public float CurrentSpawnInterval => currentSpawnInterval;
-        public int CurrentMaxEnemyCount => currentMaxEnemyCount;
+        public float CurrentSpawnInterval => GetEffectiveCurrentSpawnInterval();
+        public int CurrentMaxEnemyCount => GetEffectiveCurrentMaxEnemyCount();
         public int AliveEnemyCount => spawnedEnemies.Count;
         public float WaveProgress => waveDuration <= 0f ? 0f : Mathf.Clamp01(waveTimer / waveDuration);
         public bool IsWaveProgressPaused => isWaveProgressPaused || wavePauseSources.Count > 0;
@@ -174,12 +187,12 @@ namespace VampireLike.Enemies
             UpdateWaveTimer();
             RemoveMissingEnemies();
 
-            if (spawnedEnemies.Count >= currentMaxEnemyCount)
+            if (spawnedEnemies.Count >= CurrentMaxEnemyCount)
                 return;
 
             spawnTimer += Time.deltaTime;
 
-            if (spawnTimer < currentSpawnInterval)
+            if (spawnTimer < CurrentSpawnInterval)
                 return;
 
             spawnTimer = 0f;
@@ -211,6 +224,10 @@ namespace VampireLike.Enemies
             mobilePortraitSpawnBand = Mathf.Max(0.5f, mobilePortraitSpawnBand);
             cameraSpawnMargin = Mathf.Max(0f, cameraSpawnMargin);
             cameraSpawnBand = Mathf.Max(0.25f, cameraSpawnBand);
+            bossFightSpawnIntervalMultiplier = Mathf.Max(1f, bossFightSpawnIntervalMultiplier);
+            bossFightMaxEnemyMultiplier = Mathf.Clamp(bossFightMaxEnemyMultiplier, 0.1f, 1f);
+            bossFightMinimumMaxEnemyCount = Mathf.Max(0, bossFightMinimumMaxEnemyCount);
+            bossFightMaxEnemyCap = Mathf.Max(bossFightMinimumMaxEnemyCount, bossFightMaxEnemyCap);
 
             if (enemySpawnEntries == null)
                 return;
@@ -310,7 +327,7 @@ namespace VampireLike.Enemies
 
             for (int i = 0; i < spawnCount; i++)
             {
-                if (spawnedEnemies.Count >= currentMaxEnemyCount)
+                if (spawnedEnemies.Count >= CurrentMaxEnemyCount)
                     return;
 
                 SpawnEnemy();
@@ -321,6 +338,24 @@ namespace VampireLike.Enemies
         {
             int extraCount = extraEnemyEveryWaves <= 0 ? 0 : (currentWave - 1) / extraEnemyEveryWaves;
             return Mathf.Clamp(enemiesPerSpawn + extraCount, 1, maxEnemiesPerSpawn);
+        }
+
+        private float GetEffectiveCurrentSpawnInterval()
+        {
+            if (!IsWaveProgressPaused)
+                return currentSpawnInterval;
+
+            return currentSpawnInterval * bossFightSpawnIntervalMultiplier;
+        }
+
+        private int GetEffectiveCurrentMaxEnemyCount()
+        {
+            if (!IsWaveProgressPaused)
+                return currentMaxEnemyCount;
+
+            int bossFightMax = Mathf.RoundToInt(currentMaxEnemyCount * bossFightMaxEnemyMultiplier);
+            bossFightMax = Mathf.Min(bossFightMax, bossFightMaxEnemyCap);
+            return Mathf.Max(bossFightMinimumMaxEnemyCount, bossFightMax);
         }
 
         private void SpawnEnemy()
