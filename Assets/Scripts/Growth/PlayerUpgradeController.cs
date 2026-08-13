@@ -278,7 +278,12 @@ namespace VampireLike.Growth
                     break;
                 case UpgradeType.MaxHealth:
                     if (playerHealth != null)
-                        playerHealth.IncreaseMaxHealth(definition.FlatAmount);
+                    {
+                        if (definition.Multiplier > 1f)
+                            playerHealth.MultiplyMaxHealth(definition.Multiplier);
+                        else
+                            playerHealth.IncreaseMaxHealth(definition.FlatAmount);
+                    }
                     break;
                 case UpgradeType.Heal:
                     if (playerHealth != null)

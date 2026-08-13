@@ -72,14 +72,14 @@ namespace VampireLike.Combat
         private void DrawHealthBar()
         {
             bool isPortrait = Screen.height > Screen.width;
-            float currentWidth = isPortrait ? 210f : width;
-            float currentHeight = isPortrait ? 18f : height;
+            float currentWidth = isPortrait ? 230f : width;
+            float currentHeight = isPortrait ? 20f : height;
             float left = MobileSafeArea.HudLeft(isPortrait ? 24f : sideMargin);
             float top = MobileSafeArea.HudTop(isPortrait ? 58f : topMargin);
-            labelStyle.fontSize = isPortrait ? 13 : 14;
+            labelStyle.fontSize = isPortrait ? 14 : 14;
 
-            Rect borderRect = new Rect(left, top, currentWidth, currentHeight + 6f);
-            Rect backgroundRect = new Rect(borderRect.x + 3f, borderRect.y + 3f, borderRect.width - 6f, borderRect.height - 6f);
+            Rect borderRect = new Rect(left, top, currentWidth, currentHeight + 8f);
+            Rect backgroundRect = new Rect(borderRect.x + 4f, borderRect.y + 4f, borderRect.width - 8f, borderRect.height - 8f);
             Rect fillRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * playerHealth.HealthProgress, backgroundRect.height);
 
             Color previousColor = GUI.color;
@@ -92,6 +92,9 @@ namespace VampireLike.Combat
 
             GUI.color = GetHealthColor(playerHealth.HealthProgress);
             GUI.DrawTexture(fillRect, whiteTexture);
+
+            GUI.color = new Color(1f, 1f, 1f, 0.18f);
+            GUI.DrawTexture(new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width, Mathf.Max(2f, backgroundRect.height * 0.28f)), whiteTexture);
 
             GUI.color = Color.white;
             GUI.Label(borderRect, $"HP {playerHealth.CurrentHealth} / {playerHealth.MaxHealth}", labelStyle);

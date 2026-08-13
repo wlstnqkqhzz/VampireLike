@@ -23,6 +23,9 @@ namespace VampireLike.Growth
         private int experienceAmount = 1;
 
         [SerializeField]
+        private bool grantsImmediateLevelUp;
+
+        [SerializeField]
         private float attractSpeed = 5f;
 
         [SerializeField]
@@ -42,6 +45,7 @@ namespace VampireLike.Growth
         private const float GemDepthOrderPerUnit = 6f;
 
         public int ExperienceAmount => experienceAmount;
+        public bool GrantsImmediateLevelUp => grantsImmediateLevelUp;
         public bool IsClaimed => isCollected;
         public GemCollectorType CollectorType => collectorType;
 
@@ -134,6 +138,11 @@ namespace VampireLike.Growth
             experienceAmount = Mathf.Max(1, amount);
         }
 
+        public void SetGrantsImmediateLevelUp(bool value)
+        {
+            grantsImmediateLevelUp = value;
+        }
+
         public void Collect(PlayerExperience playerExperience)
         {
             if (isCollected || playerExperience == null)
@@ -142,7 +151,12 @@ namespace VampireLike.Growth
             isCollected = true;
             collectorType = GemCollectorType.Player;
             GameSfx.Play(SfxType.ExperiencePickup);
-            playerExperience.AddExperience(experienceAmount);
+
+            if (grantsImmediateLevelUp)
+                playerExperience.GrantImmediateLevelUp(experienceAmount);
+            else
+                playerExperience.AddExperience(experienceAmount);
+
             Destroy(gameObject);
         }
 

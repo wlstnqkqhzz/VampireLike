@@ -165,6 +165,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.ExperienceGem
   experienceAmount: 25
+  grantsImmediateLevelUp: 1
   attractSpeed: 5
   attractAcceleration: 18
   collectDistance: 0.12

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using VampireLike.Audio;
@@ -46,6 +47,19 @@ namespace VampireLike.Growth
             Hide();
         }
 
+        private void Update()
+        {
+            if (!isShowing || Keyboard.current == null)
+                return;
+
+            if (Keyboard.current.digit1Key.wasPressedThisFrame || Keyboard.current.numpad1Key.wasPressedThisFrame)
+                SelectChoice(0);
+            else if (Keyboard.current.digit2Key.wasPressedThisFrame || Keyboard.current.numpad2Key.wasPressedThisFrame)
+                SelectChoice(1);
+            else if (Keyboard.current.digit3Key.wasPressedThisFrame || Keyboard.current.numpad3Key.wasPressedThisFrame)
+                SelectChoice(2);
+        }
+
         public void Show(int level)
         {
             EnsureUI();
@@ -64,7 +78,7 @@ namespace VampireLike.Growth
                 if (!hasChoice)
                     continue;
 
-                choiceTexts[i].text = currentChoices[i].ButtonText;
+                choiceTexts[i].text = $"{i + 1}. {currentChoices[i].ButtonText}";
                 ApplyChoiceStyle(i, currentChoices[i].Definition);
                 int choiceIndex = i;
                 choiceButtons[i].onClick.RemoveAllListeners();

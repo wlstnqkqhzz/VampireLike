@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeType: 5
   displayName: 생명력 강화
-  description: 최대 체력 +20
+  description: 최대 체력 +20%
   maxLevel: 5
-  multiplier: 1
-  flatAmount: 20
+  multiplier: 1.2
+  flatAmount: 0
   unlimited: 0

@@ -179,6 +179,18 @@ namespace VampireLike.Combat
             currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         }
 
+        public void MultiplyMaxHealth(float multiplier)
+        {
+            if (multiplier <= 1f || isDead)
+                return;
+
+            int previousMaxHealth = maxHealth;
+            int increasedMaxHealth = Mathf.Max(previousMaxHealth + 1, Mathf.CeilToInt(previousMaxHealth * multiplier));
+            int increasedAmount = increasedMaxHealth - previousMaxHealth;
+            maxHealth = increasedMaxHealth;
+            currentHealth = Mathf.Min(maxHealth, currentHealth + increasedAmount);
+        }
+
         /// <summary>
         /// 회복 강화에서 호출한다. 현재 체력을 최대 체력 안에서 회복한다.
         /// </summary>

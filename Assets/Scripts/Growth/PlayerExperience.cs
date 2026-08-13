@@ -28,7 +28,7 @@ namespace VampireLike.Growth
 
         // 레벨업할 때마다 다음 필요 경험치를 얼마나 늘릴지 정한다.
         [SerializeField]
-        private float nextLevelExperienceMultiplier = 1.5f;
+        private float nextLevelExperienceMultiplier = 1.35f;
 
         // 경험치 보석을 흡수하기 시작하는 반경이다. 자석 강화로 증가한다.
         [SerializeField]
@@ -87,6 +87,20 @@ namespace VampireLike.Growth
             CheckLevelUp();
             NotifyExperienceChanged();
             Debug.Log($"Experience: {currentExperience}/{experienceToNextLevel}");
+        }
+
+        public void GrantImmediateLevelUp(int statExperienceAmount = 0)
+        {
+            if (currentLevel >= maxLevel)
+                return;
+
+            if (statExperienceAmount > 0)
+                GameSessionStats.RecordExperience(statExperienceAmount);
+
+            int requiredExperience = Mathf.Max(1, experienceToNextLevel - currentExperience);
+            currentExperience += requiredExperience;
+            CheckLevelUp();
+            NotifyExperienceChanged();
         }
 
         public void MultiplyPickupRadius(float multiplier)
