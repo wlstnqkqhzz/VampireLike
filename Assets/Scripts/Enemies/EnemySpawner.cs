@@ -141,16 +141,19 @@ namespace VampireLike.Enemies
 
         [Header("Boss Fight Tuning")]
         [SerializeField]
-        private float bossFightSpawnIntervalMultiplier = 1.8f;
+        private float bossFightSpawnIntervalMultiplier = 2.25f;
 
         [SerializeField]
-        private float bossFightMaxEnemyMultiplier = 0.45f;
+        private float bossFightMaxEnemyMultiplier = 0.32f;
 
         [SerializeField]
-        private int bossFightMinimumMaxEnemyCount = 18;
+        private int bossFightMinimumMaxEnemyCount = 10;
 
         [SerializeField]
-        private int bossFightMaxEnemyCap = 70;
+        private int bossFightMaxEnemyCap = 44;
+
+        [SerializeField]
+        private int bossFightMaxEnemiesPerSpawn = 1;
 
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
         private float spawnTimer;
@@ -228,6 +231,7 @@ namespace VampireLike.Enemies
             bossFightMaxEnemyMultiplier = Mathf.Clamp(bossFightMaxEnemyMultiplier, 0.1f, 1f);
             bossFightMinimumMaxEnemyCount = Mathf.Max(0, bossFightMinimumMaxEnemyCount);
             bossFightMaxEnemyCap = Mathf.Max(bossFightMinimumMaxEnemyCount, bossFightMaxEnemyCap);
+            bossFightMaxEnemiesPerSpawn = Mathf.Max(1, bossFightMaxEnemiesPerSpawn);
 
             if (enemySpawnEntries == null)
                 return;
@@ -337,7 +341,12 @@ namespace VampireLike.Enemies
         private int GetSpawnCountForCurrentWave()
         {
             int extraCount = extraEnemyEveryWaves <= 0 ? 0 : (currentWave - 1) / extraEnemyEveryWaves;
-            return Mathf.Clamp(enemiesPerSpawn + extraCount, 1, maxEnemiesPerSpawn);
+            int spawnCount = Mathf.Clamp(enemiesPerSpawn + extraCount, 1, maxEnemiesPerSpawn);
+
+            if (IsWaveProgressPaused)
+                return Mathf.Min(spawnCount, bossFightMaxEnemiesPerSpawn);
+
+            return spawnCount;
         }
 
         private float GetEffectiveCurrentSpawnInterval()

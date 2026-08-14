@@ -171,7 +171,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossController
   player: {fileID: 0}
-  commonRecoveryTime: 0.75
+  commonRecoveryTime: 0.42
   phase2HealthRatio: 0.7
   phase3HealthRatio: 0.35
   useDefaultEnemyMovement: 1

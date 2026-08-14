@@ -26,6 +26,21 @@ namespace VampireLike.Enemies
         private float phase3HealthRatio = 0.3f;
 
         [SerializeField]
+        private float globalPatternCooldownMultiplier = 0.85f;
+
+        [SerializeField]
+        private float phase2PatternCooldownMultiplier = 0.88f;
+
+        [SerializeField]
+        private float phase3PatternCooldownMultiplier = 0.72f;
+
+        [SerializeField]
+        private float phase2RecoveryTimeMultiplier = 0.85f;
+
+        [SerializeField]
+        private float phase3RecoveryTimeMultiplier = 0.65f;
+
+        [SerializeField]
         private bool useDefaultEnemyMovement = true;
 
         private BossPattern[] patterns;
@@ -36,13 +51,14 @@ namespace VampireLike.Enemies
         private BossSpriteAnimator spriteAnimator;
         private Rigidbody2D rb;
         private Coroutine patternRoutine;
+        private float basePatternCooldownMultiplier = 1f;
 
         public Transform Player => player;
         public Rigidbody2D BossRigidbody => rb;
         public BossState State { get; private set; } = BossState.Chasing;
         public int CurrentPhase { get; private set; } = 1;
         public int BossStage { get; private set; } = 1;
-        public float PatternCooldownMultiplier { get; private set; } = 1f;
+        public float PatternCooldownMultiplier => basePatternCooldownMultiplier * globalPatternCooldownMultiplier * GetPhasePatternCooldownMultiplier();
         public bool IsDead => enemyHealth == null || enemyHealth.IsDead;
         public float HealthProgress => enemyHealth == null ? 0f : enemyHealth.HealthProgress;
 
@@ -87,6 +103,11 @@ namespace VampireLike.Enemies
             commonRecoveryTime = Mathf.Max(0f, commonRecoveryTime);
             phase2HealthRatio = Mathf.Clamp01(phase2HealthRatio);
             phase3HealthRatio = Mathf.Clamp(phase3HealthRatio, 0f, phase2HealthRatio);
+            globalPatternCooldownMultiplier = Mathf.Clamp(globalPatternCooldownMultiplier, 0.2f, 1.5f);
+            phase2PatternCooldownMultiplier = Mathf.Clamp(phase2PatternCooldownMultiplier, 0.2f, 1f);
+            phase3PatternCooldownMultiplier = Mathf.Clamp(phase3PatternCooldownMultiplier, 0.2f, phase2PatternCooldownMultiplier);
+            phase2RecoveryTimeMultiplier = Mathf.Clamp(phase2RecoveryTimeMultiplier, 0.2f, 1f);
+            phase3RecoveryTimeMultiplier = Mathf.Clamp(phase3RecoveryTimeMultiplier, 0.2f, phase2RecoveryTimeMultiplier);
         }
 
         public void InitializeBoss(int bossStage, Transform target)
@@ -110,12 +131,12 @@ namespace VampireLike.Enemies
 
         public void MultiplyPatternCooldown(float multiplier)
         {
-            PatternCooldownMultiplier = Mathf.Max(0.1f, PatternCooldownMultiplier * multiplier);
+            basePatternCooldownMultiplier = Mathf.Max(0.1f, basePatternCooldownMultiplier * multiplier);
         }
 
         public void SetPatternCooldownMultiplier(float multiplier)
         {
-            PatternCooldownMultiplier = Mathf.Max(0.1f, multiplier);
+            basePatternCooldownMultiplier = Mathf.Max(0.1f, multiplier);
         }
 
         public void MultiplyMoveSpeed(float multiplier)
@@ -199,7 +220,7 @@ namespace VampireLike.Enemies
             if (!IsDead)
             {
                 SetState(BossState.Recovering, false);
-                yield return new WaitForSeconds(commonRecoveryTime * PatternCooldownMultiplier);
+                yield return new WaitForSeconds(commonRecoveryTime * basePatternCooldownMultiplier * GetPhaseRecoveryTimeMultiplier());
                 SetState(BossState.Chasing, true);
             }
 
@@ -236,6 +257,28 @@ namespace VampireLike.Enemies
                 nextPhase = 2;
 
             CurrentPhase = Mathf.Max(CurrentPhase, nextPhase);
+        }
+
+        private float GetPhasePatternCooldownMultiplier()
+        {
+            if (CurrentPhase >= 3)
+                return phase3PatternCooldownMultiplier;
+
+            if (CurrentPhase >= 2)
+                return phase2PatternCooldownMultiplier;
+
+            return 1f;
+        }
+
+        private float GetPhaseRecoveryTimeMultiplier()
+        {
+            if (CurrentPhase >= 3)
+                return phase3RecoveryTimeMultiplier;
+
+            if (CurrentPhase >= 2)
+                return phase2RecoveryTimeMultiplier;
+
+            return 1f;
         }
 
         private void UpdateFacingDirection()
