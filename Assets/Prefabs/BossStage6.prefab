@@ -246,10 +246,10 @@ MonoBehaviour:
   minimumPhase: 1
   maximumPhase: 3
   allowMovementDuringPattern: 0
-  prepareTime: 0.36
-  dashSpeed: 12.5
-  dashDuration: 0.45
-  endLag: 0.12
+  prepareTime: 0.32
+  dashSpeed: 14
+  dashDuration: 0.48
+  endLag: 0.1
 --- !u!114 &190006
 MonoBehaviour:
   m_ObjectHideFlags: 0

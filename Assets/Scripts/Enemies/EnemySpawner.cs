@@ -141,16 +141,16 @@ namespace VampireLike.Enemies
 
         [Header("Boss Fight Tuning")]
         [SerializeField]
-        private float bossFightSpawnIntervalMultiplier = 2.25f;
+        private float bossFightSpawnIntervalMultiplier = 3f;
 
         [SerializeField]
-        private float bossFightMaxEnemyMultiplier = 0.32f;
+        private float bossFightMaxEnemyMultiplier = 0.24f;
 
         [SerializeField]
-        private int bossFightMinimumMaxEnemyCount = 10;
+        private int bossFightMinimumMaxEnemyCount = 8;
 
         [SerializeField]
-        private int bossFightMaxEnemyCap = 44;
+        private int bossFightMaxEnemyCap = 32;
 
         [SerializeField]
         private int bossFightMaxEnemiesPerSpawn = 1;

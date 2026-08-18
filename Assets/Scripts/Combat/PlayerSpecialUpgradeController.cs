@@ -72,7 +72,7 @@ namespace VampireLike.Combat
         private float shieldRechargeReductionPerLevel = 2f;
 
         [SerializeField]
-        private float orbitRadius = 0.74f;
+        private float orbitRadius = 0.9f;
 
         [SerializeField]
         private float orbitDamageInterval = 0.55f;

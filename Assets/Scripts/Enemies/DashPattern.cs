@@ -14,22 +14,22 @@ namespace VampireLike.Enemies
         protected override bool UseAutomaticAnimation => false;
 
         [SerializeField]
-        private float prepareTime = 0.45f;
+        private float prepareTime = 0.38f;
 
         [SerializeField]
-        private float dashSpeed = 10f;
+        private float dashSpeed = 12f;
 
         [SerializeField]
-        private float dashDuration = 0.4f;
+        private float dashDuration = 0.45f;
 
         [SerializeField]
-        private float endLag = 0.15f;
+        private float endLag = 0.12f;
 
         [SerializeField]
         private float minimumTriggerDistance = 0.55f;
 
         [SerializeField]
-        private float maximumTriggerDistance = 4.2f;
+        private float maximumTriggerDistance = 4.8f;
 
         [SerializeField]
         private float mobilePortraitPrepareMultiplier = 1f;
@@ -38,7 +38,7 @@ namespace VampireLike.Enemies
         private float mobilePortraitDashSpeedMultiplier = 1f;
 
         [SerializeField]
-        private float mobilePortraitMaximumTriggerDistance = 3.6f;
+        private float mobilePortraitMaximumTriggerDistance = 4.2f;
 
         [SerializeField]
         private bool dashTowardMapEdge = true;
@@ -47,7 +47,7 @@ namespace VampireLike.Enemies
         private float boundaryStopPadding = 0.55f;
 
         [SerializeField]
-        private float maximumMapEdgeDashTime = 1.15f;
+        private float maximumMapEdgeDashTime = 1.3f;
 
         protected override bool CanExecutePattern()
         {

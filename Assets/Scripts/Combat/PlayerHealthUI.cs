@@ -16,10 +16,10 @@ namespace VampireLike.Combat
         private float topMargin = 40f;
 
         [SerializeField]
-        private float bossFightTopMargin = 74f;
+        private float bossFightTopMargin = 92f;
 
         [SerializeField]
-        private float portraitBossFightTopMargin = 96f;
+        private float portraitBossFightTopMargin = 112f;
 
         [SerializeField]
         private float sideMargin = 72f;

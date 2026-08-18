@@ -25,13 +25,22 @@ namespace VampireLike.Combat
         private SpriteRenderer arcRenderer;
         private Vector2 orbitDirection = Vector2.right;
 
+        [SerializeField]
+        private float visualScale = 0.72f;
+
+        [SerializeField]
+        private float hitCenterOffset = 0.34f;
+
+        [SerializeField]
+        private float hitRadius = 0.32f;
+
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
             spriteRenderer.sprite = CreateBladeSprite();
             spriteRenderer.color = Color.white;
             spriteRenderer.sortingOrder = 1750;
-            transform.localScale = Vector3.one * 0.58f;
+            transform.localScale = Vector3.one * visualScale;
 
             glowRenderer = CreateGlowRenderer();
             arcRenderer = CreateArcRenderer();
@@ -63,10 +72,17 @@ namespace VampireLike.Combat
             enemyLayerMask = targetLayerMask;
         }
 
+        private void OnValidate()
+        {
+            visualScale = Mathf.Clamp(visualScale, 0.4f, 1.2f);
+            hitCenterOffset = Mathf.Clamp(hitCenterOffset, 0f, 0.8f);
+            hitRadius = Mathf.Clamp(hitRadius, 0.08f, 0.8f);
+        }
+
         private void DamageNearbyEnemies()
         {
-            Vector2 hitCenter = (Vector2)transform.position + orbitDirection * 0.26f;
-            int hitCount = Physics2D.OverlapCircleNonAlloc(hitCenter, 0.2f, hitResults, enemyLayerMask);
+            Vector2 hitCenter = (Vector2)transform.position + orbitDirection * hitCenterOffset;
+            int hitCount = Physics2D.OverlapCircleNonAlloc(hitCenter, hitRadius, hitResults, enemyLayerMask);
 
             for (int i = 0; i < hitCount; i++)
             {
