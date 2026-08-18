@@ -228,5 +228,5 @@ MonoBehaviour:
   attackRange: 5
   attackInterval: 1.9
   projectileSpeed: 4
-  damage: 1
+  damage: 2
   projectileLifetime: 4

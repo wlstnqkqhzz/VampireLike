@@ -226,7 +226,7 @@ MonoBehaviour:
   triggerRange: 1.05
   warningDuration: 0.8
   explosionRadius: 1.25
-  damage: 2
+  damage: 3
   playerLayerMask:
     serializedVersion: 2
     m_Bits: 64

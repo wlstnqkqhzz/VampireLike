@@ -1,4 +1,5 @@
 using UnityEngine;
+using VampireLike.Enemies;
 using VampireLike.UI;
 
 namespace VampireLike.Combat
@@ -15,6 +16,12 @@ namespace VampireLike.Combat
         private float topMargin = 40f;
 
         [SerializeField]
+        private float bossFightTopMargin = 74f;
+
+        [SerializeField]
+        private float portraitBossFightTopMargin = 96f;
+
+        [SerializeField]
         private float sideMargin = 72f;
 
         [SerializeField]
@@ -26,14 +33,30 @@ namespace VampireLike.Combat
         [SerializeField]
         private bool drawHud = true;
 
+        [SerializeField]
+        private float damagePulseDuration = 0.35f;
+
+        [SerializeField]
+        private float delayedBarDrainSpeed = 1.8f;
+
+        [SerializeField]
+        private float lowHealthWarningRatio = 0.28f;
+
         private Texture2D whiteTexture;
         private GUIStyle labelStyle;
+        private BossSpawner bossSpawner;
+        private HiddenBossSpawner hiddenBossSpawner;
+        private int lastHealth = -1;
+        private float delayedHealthProgress = 1f;
+        private float damagePulseEndTime;
 
         private void Awake()
         {
             if (playerHealth == null)
                 playerHealth = GetComponent<PlayerHealth>();
 
+            bossSpawner = FindFirstObjectByType<BossSpawner>();
+            hiddenBossSpawner = FindFirstObjectByType<HiddenBossSpawner>();
             EnsureTexture();
         }
 
@@ -46,6 +69,8 @@ namespace VampireLike.Combat
         private void OnValidate()
         {
             topMargin = Mathf.Max(0f, topMargin);
+            bossFightTopMargin = Mathf.Max(topMargin, bossFightTopMargin);
+            portraitBossFightTopMargin = Mathf.Max(58f, portraitBossFightTopMargin);
             sideMargin = Mathf.Max(0f, sideMargin);
             width = Mathf.Max(120f, width);
             height = Mathf.Max(10f, height);
@@ -64,23 +89,31 @@ namespace VampireLike.Combat
 
             EnsureTexture();
             EnsureStyles();
+            UpdateHealthFeedbackState();
 
             GUI.depth = -999;
+            DrawDamageFeedback();
             DrawHealthBar();
         }
 
         private void DrawHealthBar()
         {
             bool isPortrait = Screen.height > Screen.width;
+            bool hasActiveBoss = HasActiveBoss();
             float currentWidth = isPortrait ? 230f : width;
             float currentHeight = isPortrait ? 20f : height;
             float left = MobileSafeArea.HudLeft(isPortrait ? 24f : sideMargin);
-            float top = MobileSafeArea.HudTop(isPortrait ? 58f : topMargin);
+            float baseTop = isPortrait
+                ? (hasActiveBoss ? portraitBossFightTopMargin : 58f)
+                : (hasActiveBoss ? bossFightTopMargin : topMargin);
+            float top = MobileSafeArea.HudTop(baseTop);
             labelStyle.fontSize = isPortrait ? 14 : 14;
 
             Rect borderRect = new Rect(left, top, currentWidth, currentHeight + 8f);
             Rect backgroundRect = new Rect(borderRect.x + 4f, borderRect.y + 4f, borderRect.width - 8f, borderRect.height - 8f);
             Rect fillRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * playerHealth.HealthProgress, backgroundRect.height);
+            Rect delayedRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * delayedHealthProgress, backgroundRect.height);
+            float pulse = GetDamagePulse();
 
             Color previousColor = GUI.color;
 
@@ -90,16 +123,96 @@ namespace VampireLike.Combat
             GUI.color = new Color(0.01f, 0.01f, 0.01f, 0.8f);
             GUI.DrawTexture(backgroundRect, whiteTexture);
 
-            GUI.color = GetHealthColor(playerHealth.HealthProgress);
+            if (delayedHealthProgress > playerHealth.HealthProgress)
+            {
+                GUI.color = new Color(0.95f, 0.72f, 0.18f, 0.55f);
+                GUI.DrawTexture(delayedRect, whiteTexture);
+            }
+
+            GUI.color = Color.Lerp(GetHealthColor(playerHealth.HealthProgress), Color.white, pulse * 0.42f);
             GUI.DrawTexture(fillRect, whiteTexture);
 
             GUI.color = new Color(1f, 1f, 1f, 0.18f);
             GUI.DrawTexture(new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width, Mathf.Max(2f, backgroundRect.height * 0.28f)), whiteTexture);
 
+            if (playerHealth.HealthProgress <= lowHealthWarningRatio)
+            {
+                float lowPulse = 0.5f + Mathf.Sin(Time.unscaledTime * 8f) * 0.5f;
+                GUI.color = new Color(1f, 0.08f, 0.04f, 0.16f + lowPulse * 0.16f);
+                GUI.DrawTexture(borderRect, whiteTexture);
+            }
+
             GUI.color = Color.white;
             GUI.Label(borderRect, $"HP {playerHealth.CurrentHealth} / {playerHealth.MaxHealth}", labelStyle);
 
             GUI.color = previousColor;
+        }
+
+        private void UpdateHealthFeedbackState()
+        {
+            if (lastHealth < 0)
+            {
+                lastHealth = playerHealth.CurrentHealth;
+                delayedHealthProgress = playerHealth.HealthProgress;
+                return;
+            }
+
+            if (playerHealth.CurrentHealth < lastHealth)
+                damagePulseEndTime = Time.unscaledTime + damagePulseDuration;
+
+            lastHealth = playerHealth.CurrentHealth;
+
+            float targetProgress = playerHealth.HealthProgress;
+
+            if (delayedHealthProgress < targetProgress)
+                delayedHealthProgress = targetProgress;
+            else
+                delayedHealthProgress = Mathf.MoveTowards(delayedHealthProgress, targetProgress, Time.unscaledDeltaTime * delayedBarDrainSpeed);
+        }
+
+        private void DrawDamageFeedback()
+        {
+            float pulse = GetDamagePulse();
+            bool lowHealth = playerHealth.HealthProgress <= lowHealthWarningRatio;
+
+            if (pulse <= 0f && !lowHealth)
+                return;
+
+            Color previousColor = GUI.color;
+            float edgeAlpha = pulse * 0.16f;
+
+            if (lowHealth)
+                edgeAlpha = Mathf.Max(edgeAlpha, 0.035f + (0.5f + Mathf.Sin(Time.unscaledTime * 5.5f) * 0.5f) * 0.035f);
+
+            GUI.color = new Color(0.9f, 0.03f, 0.02f, edgeAlpha);
+            float edgeWidth = Mathf.Max(18f, Mathf.Min(Screen.width, Screen.height) * 0.035f);
+            GUI.DrawTexture(new Rect(0f, 0f, Screen.width, edgeWidth), whiteTexture);
+            GUI.DrawTexture(new Rect(0f, Screen.height - edgeWidth, Screen.width, edgeWidth), whiteTexture);
+            GUI.DrawTexture(new Rect(0f, 0f, edgeWidth, Screen.height), whiteTexture);
+            GUI.DrawTexture(new Rect(Screen.width - edgeWidth, 0f, edgeWidth, Screen.height), whiteTexture);
+
+            GUI.color = previousColor;
+        }
+
+        private float GetDamagePulse()
+        {
+            if (damagePulseDuration <= 0f || Time.unscaledTime >= damagePulseEndTime)
+                return 0f;
+
+            float remaining = damagePulseEndTime - Time.unscaledTime;
+            return Mathf.Clamp01(remaining / damagePulseDuration);
+        }
+
+        private bool HasActiveBoss()
+        {
+            if (bossSpawner == null)
+                bossSpawner = FindFirstObjectByType<BossSpawner>();
+
+            if (hiddenBossSpawner == null)
+                hiddenBossSpawner = FindFirstObjectByType<HiddenBossSpawner>();
+
+            return (bossSpawner != null && bossSpawner.HasActiveBoss)
+                || (hiddenBossSpawner != null && hiddenBossSpawner.HasActiveHiddenBoss);
         }
 
         private static Color GetHealthColor(float progress)
