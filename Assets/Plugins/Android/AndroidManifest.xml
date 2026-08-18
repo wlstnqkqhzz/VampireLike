@@ -8,7 +8,9 @@
                   android:exported="true"
                   android:screenOrientation="portrait"
                   android:resizeableActivity="false"
-                  tools:replace="android:screenOrientation,android:resizeableActivity">
+                  android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density"
+                  android:hardwareAccelerated="true"
+                  tools:replace="android:screenOrientation,android:resizeableActivity,android:configChanges">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

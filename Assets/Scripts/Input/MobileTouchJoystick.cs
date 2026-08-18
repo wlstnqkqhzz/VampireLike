@@ -200,7 +200,7 @@ namespace VampireLike.Mobile
             startScreenPosition = ClampScreenPositionToSafeArea(screenPosition);
             hasActiveInput = true;
             SetVisualPosition(rootRect, startScreenPosition);
-            SetVisualPosition(knobRect, startScreenPosition);
+            SetKnobOffset(Vector2.zero);
             ShowVisuals();
             UpdateInput(screenPosition);
         }
@@ -215,7 +215,7 @@ namespace VampireLike.Mobile
                 normalized = Vector2.zero;
 
             currentInput = normalized;
-            SetVisualPosition(knobRect, startScreenPosition + delta);
+            SetKnobOffset(delta);
         }
 
         private Vector2 ClampScreenPositionToSafeArea(Vector2 screenPosition)
@@ -269,7 +269,7 @@ namespace VampireLike.Mobile
 
             rootRect = CreateImage("Joystick Root", canvasObject.transform, CreateCircleSprite(0.5f), backgroundColor, backgroundSize);
             rimRect = CreateImage("Joystick Rim", rootRect, CreateRingSprite(), rimColor, backgroundSize);
-            knobRect = CreateImage("Joystick Knob", canvasObject.transform, CreateCircleSprite(0.5f), knobColor, knobSize);
+            knobRect = CreateImage("Joystick Knob", rootRect, CreateCircleSprite(0.5f), knobColor, knobSize);
             UpdateVisualSizes();
         }
 
@@ -328,6 +328,12 @@ namespace VampireLike.Mobile
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPosition, null, out Vector2 localPoint);
             rectTransform.anchoredPosition = localPoint;
+        }
+
+        private void SetKnobOffset(Vector2 offset)
+        {
+            if (knobRect != null)
+                knobRect.anchoredPosition = offset;
         }
 
         private void ShowVisuals()

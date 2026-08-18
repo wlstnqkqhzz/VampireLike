@@ -296,8 +296,8 @@ public class PauseMenu : MonoBehaviour
             Vector2 buttonSize = GetMobilePauseButtonSize();
             mobilePauseButtonRect.sizeDelta = buttonSize;
             bool isPortrait = MobileSafeArea.IsPortrait;
-            float rightMargin = isPortrait ? 20f : 24f;
-            float topMargin = isPortrait ? 70f : 24f;
+            float rightMargin = isPortrait ? 24f : 24f;
+            float topMargin = isPortrait ? 92f : 24f;
             mobilePauseButtonRect.anchoredPosition = new Vector2(-MobileSafeArea.HudRight(rightMargin), -MobileSafeArea.HudTop(topMargin));
 
             Text label = mobilePauseButtonRect.GetComponentInChildren<Text>();
@@ -309,14 +309,14 @@ public class PauseMenu : MonoBehaviour
                 if (labelRect != null)
                     labelRect.sizeDelta = buttonSize;
 
-                label.fontSize = isPortrait ? 34 : 30;
+                label.fontSize = isPortrait ? 38 : 30;
             }
         }
     }
 
     private static Vector2 GetMobilePauseButtonSize()
     {
-        return MobileSafeArea.IsPortrait ? new Vector2(74f, 74f) : new Vector2(72f, 72f);
+        return MobileSafeArea.IsPortrait ? new Vector2(82f, 82f) : new Vector2(72f, 72f);
     }
 
     private static void EnsureEventSystem()
