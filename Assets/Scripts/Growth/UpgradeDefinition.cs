@@ -34,7 +34,8 @@ namespace VampireLike.Growth
         SeleneShadowStep,
         SeleneTwinMoonFlurry,
         SeleneMoonlightMark,
-        SeleneSilentBlade
+        SeleneSilentBlade,
+        SequentialShot
     }
 
     /// <summary>
@@ -92,7 +93,8 @@ namespace VampireLike.Growth
             || upgradeType == UpgradeType.OrbitingBlade
             || upgradeType == UpgradeType.ChainRicochet
             || upgradeType == UpgradeType.EclipseAura
-            || upgradeType == UpgradeType.ProjectileReflect;
+            || upgradeType == UpgradeType.ProjectileReflect
+            || upgradeType == UpgradeType.SequentialShot;
         public string GradeLabel
         {
             get

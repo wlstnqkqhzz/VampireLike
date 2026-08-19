@@ -333,6 +333,10 @@ namespace VampireLike.Growth
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddProjectileReflectLevel();
                     break;
+                case UpgradeType.SequentialShot:
+                    if (autoAttack != null)
+                        autoAttack.AddSequentialShotCount(definition.FlatAmount);
+                    break;
                 case UpgradeType.KaelBlackSwordWave:
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddKaelBlackSwordWaveLevel();

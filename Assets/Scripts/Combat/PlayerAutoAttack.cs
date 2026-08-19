@@ -40,6 +40,14 @@ namespace VampireLike.Combat
         [SerializeField]
         private float projectileBurstDelay = 0.12f;
 
+        // 투사체 연속 발사 강화로 추가 발사되는 탄 수다.
+        [SerializeField]
+        private int sequentialShotCount;
+
+        // 투사체 연속 발사 강화 시 추가 탄 사이의 시간 간격이다.
+        [SerializeField]
+        private float sequentialShotDelay = 0.16f;
+
         [SerializeField]
         private int projectilePierceCount;
 
@@ -98,6 +106,8 @@ namespace VampireLike.Combat
             projectileDamageMultiplier = Mathf.Max(0.1f, projectileDamageMultiplier);
             projectileCount = Mathf.Max(1, projectileCount);
             projectileBurstDelay = Mathf.Max(0f, projectileBurstDelay);
+            sequentialShotCount = Mathf.Max(0, sequentialShotCount);
+            sequentialShotDelay = Mathf.Max(0.02f, sequentialShotDelay);
             projectilePierceCount = Mathf.Max(0, projectilePierceCount);
         }
 
@@ -143,6 +153,14 @@ namespace VampireLike.Combat
         public void AddProjectileCount(int amount)
         {
             projectileCount = Mathf.Max(1, projectileCount + amount);
+        }
+
+        /// <summary>
+        /// 투사체 연속 발사 강화에서 호출한다.
+        /// </summary>
+        public void AddSequentialShotCount(int amount)
+        {
+            sequentialShotCount = Mathf.Max(0, sequentialShotCount + amount);
         }
 
         /// <summary>
@@ -236,6 +254,20 @@ namespace VampireLike.Combat
 
                 if (i < shotCount - 1 && projectileBurstDelay > 0f)
                     yield return new WaitForSeconds(projectileBurstDelay);
+            }
+
+            int extraShotCount = Mathf.Max(0, sequentialShotCount);
+            for (int i = 0; i < extraShotCount; i++)
+            {
+                if (sequentialShotDelay > 0f)
+                    yield return new WaitForSeconds(sequentialShotDelay);
+
+                firePosition = GetFirePosition();
+                GameSfx.Play(attackSfxType);
+
+                ProjectileController projectile = Instantiate(projectilePrefab, firePosition, Quaternion.identity);
+                projectile.SetVisual(projectileSpriteOverride, projectileVisualScale, projectileColliderRadius);
+                projectile.Launch(direction, projectileDamageMultiplier, projectilePierceCount, specialUpgradeController);
             }
 
             burstRoutine = null;
