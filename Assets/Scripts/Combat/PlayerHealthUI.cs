@@ -5,7 +5,7 @@ using VampireLike.UI;
 namespace VampireLike.Combat
 {
     /// <summary>
-    /// Draws a compact player HP bar on the combat HUD.
+    /// 전투 화면 상단에 플레이어 체력을 작고 선명한 HUD 카드로 표시한다.
     /// </summary>
     public class PlayerHealthUI : MonoBehaviour
     {
@@ -13,22 +13,22 @@ namespace VampireLike.Combat
         private PlayerHealth playerHealth;
 
         [SerializeField]
-        private float topMargin = 40f;
+        private float topMargin = 42f;
 
         [SerializeField]
-        private float bossFightTopMargin = 92f;
+        private float bossFightTopMargin = 42f;
 
         [SerializeField]
-        private float portraitBossFightTopMargin = 112f;
+        private float portraitBossFightTopMargin = 50f;
 
         [SerializeField]
         private float sideMargin = 72f;
 
         [SerializeField]
-        private float width = 220f;
+        private float width = 250f;
 
         [SerializeField]
-        private float height = 18f;
+        private float height = 22f;
 
         [SerializeField]
         private bool drawHud = true;
@@ -69,11 +69,11 @@ namespace VampireLike.Combat
         private void OnValidate()
         {
             topMargin = Mathf.Max(0f, topMargin);
-            bossFightTopMargin = Mathf.Max(topMargin, bossFightTopMargin);
-            portraitBossFightTopMargin = Mathf.Max(58f, portraitBossFightTopMargin);
+            bossFightTopMargin = Mathf.Max(0f, bossFightTopMargin);
+            portraitBossFightTopMargin = Mathf.Max(40f, portraitBossFightTopMargin);
             sideMargin = Mathf.Max(0f, sideMargin);
-            width = Mathf.Max(120f, width);
-            height = Mathf.Max(10f, height);
+            width = Mathf.Max(150f, width);
+            height = Mathf.Max(14f, height);
         }
 
         private void OnGUI()
@@ -100,27 +100,28 @@ namespace VampireLike.Combat
         {
             bool isPortrait = Screen.height > Screen.width;
             bool hasActiveBoss = HasActiveBoss();
-            float currentWidth = isPortrait ? 230f : width;
+            float currentWidth = isPortrait ? Mathf.Min(260f, Screen.width * 0.42f) : width;
             float currentHeight = isPortrait ? 20f : height;
             float left = MobileSafeArea.HudLeft(isPortrait ? 24f : sideMargin);
             float baseTop = isPortrait
-                ? (hasActiveBoss ? portraitBossFightTopMargin : 58f)
+                ? (hasActiveBoss ? portraitBossFightTopMargin : 50f)
                 : (hasActiveBoss ? bossFightTopMargin : topMargin);
             float top = MobileSafeArea.HudTop(baseTop);
-            labelStyle.fontSize = isPortrait ? 14 : 14;
+            labelStyle.fontSize = isPortrait ? 13 : 14;
 
-            Rect borderRect = new Rect(left, top, currentWidth, currentHeight + 8f);
-            Rect backgroundRect = new Rect(borderRect.x + 4f, borderRect.y + 4f, borderRect.width - 8f, borderRect.height - 8f);
+            Rect panelRect = new Rect(left, top, currentWidth, currentHeight + 10f);
+            Rect labelRect = new Rect(panelRect.x + 8f, panelRect.y + 4f, isPortrait ? 38f : 44f, currentHeight + 2f);
+            Rect backgroundRect = new Rect(labelRect.xMax + 6f, panelRect.y + 6f, panelRect.width - labelRect.width - 22f, currentHeight - 2f);
             Rect fillRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * playerHealth.HealthProgress, backgroundRect.height);
             Rect delayedRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * delayedHealthProgress, backgroundRect.height);
             float pulse = GetDamagePulse();
 
             Color previousColor = GUI.color;
 
-            GUI.color = new Color(0.03f, 0.025f, 0.02f, 0.78f);
-            GUI.DrawTexture(borderRect, whiteTexture);
+            GUI.color = new Color(0.015f, 0.012f, 0.01f, 0.86f);
+            GUI.DrawTexture(panelRect, whiteTexture);
 
-            GUI.color = new Color(0.01f, 0.01f, 0.01f, 0.8f);
+            GUI.color = new Color(0.08f, 0.02f, 0.025f, 0.9f);
             GUI.DrawTexture(backgroundRect, whiteTexture);
 
             if (delayedHealthProgress > playerHealth.HealthProgress)
@@ -135,15 +136,19 @@ namespace VampireLike.Combat
             GUI.color = new Color(1f, 1f, 1f, 0.18f);
             GUI.DrawTexture(new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width, Mathf.Max(2f, backgroundRect.height * 0.28f)), whiteTexture);
 
+            GUI.color = new Color(0.9f, 0.08f, 0.08f, 0.86f);
+            GUI.DrawTexture(labelRect, whiteTexture);
+
             if (playerHealth.HealthProgress <= lowHealthWarningRatio)
             {
                 float lowPulse = 0.5f + Mathf.Sin(Time.unscaledTime * 8f) * 0.5f;
                 GUI.color = new Color(1f, 0.08f, 0.04f, 0.16f + lowPulse * 0.16f);
-                GUI.DrawTexture(borderRect, whiteTexture);
+                GUI.DrawTexture(panelRect, whiteTexture);
             }
 
             GUI.color = Color.white;
-            GUI.Label(borderRect, $"HP {playerHealth.CurrentHealth} / {playerHealth.MaxHealth}", labelStyle);
+            GUI.Label(labelRect, "HP", labelStyle);
+            GUI.Label(backgroundRect, $"{playerHealth.CurrentHealth} / {playerHealth.MaxHealth}", labelStyle);
 
             GUI.color = previousColor;
         }

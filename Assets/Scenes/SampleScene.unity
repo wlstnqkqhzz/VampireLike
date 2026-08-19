@@ -53945,7 +53945,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossHealthBarUI
   bossSpawner: {fileID: 2200000003}
   drawHud: 1
-  topOffset: 38
+  topOffset: 74
   sideMargin: 220
   barHeight: 18
 --- !u!114 &2200000005

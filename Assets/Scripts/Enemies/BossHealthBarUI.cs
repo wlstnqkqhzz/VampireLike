@@ -19,7 +19,7 @@ namespace VampireLike.Enemies
         private bool drawHud = true;
 
         [SerializeField]
-        private float topOffset = 38f;
+        private float topOffset = 74f;
 
         [SerializeField]
         private float sideMargin = 220f;
@@ -86,7 +86,7 @@ namespace VampireLike.Enemies
         private void DrawBossHealthBar(EnemyHealth bossHealth, bool isHiddenBoss)
         {
             bool isPortrait = Screen.height > Screen.width;
-            float top = MobileSafeArea.HudTop(topOffset);
+            float top = MobileSafeArea.HudTop(isPortrait ? 82f : topOffset);
             float effectiveSideMargin = isPortrait ? 56f : sideMargin;
             float horizontalMargin = Mathf.Max(MobileSafeArea.HudLeft(effectiveSideMargin), MobileSafeArea.HudRight(effectiveSideMargin));
             float width = Mathf.Max(isPortrait ? 220f : 260f, Screen.width - horizontalMargin * 2f);
