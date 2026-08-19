@@ -26,13 +26,13 @@ namespace VampireLike.Combat
         private Vector2 orbitDirection = Vector2.right;
 
         [SerializeField]
-        private float visualScale = 0.72f;
+        private float visualScale = 0.9f;
 
         [SerializeField]
-        private float hitCenterOffset = 0.34f;
+        private float hitCenterOffset = 0.42f;
 
         [SerializeField]
-        private float hitRadius = 0.32f;
+        private float hitRadius = 0.48f;
 
         private void Awake()
         {
@@ -74,9 +74,9 @@ namespace VampireLike.Combat
 
         private void OnValidate()
         {
-            visualScale = Mathf.Clamp(visualScale, 0.4f, 1.2f);
-            hitCenterOffset = Mathf.Clamp(hitCenterOffset, 0f, 0.8f);
-            hitRadius = Mathf.Clamp(hitRadius, 0.08f, 0.8f);
+            visualScale = Mathf.Clamp(visualScale, 0.4f, 1.4f);
+            hitCenterOffset = Mathf.Clamp(hitCenterOffset, 0f, 0.9f);
+            hitRadius = Mathf.Clamp(hitRadius, 0.08f, 1f);
         }
 
         private void DamageNearbyEnemies()

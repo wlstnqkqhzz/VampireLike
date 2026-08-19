@@ -31,6 +31,12 @@ namespace VampireLike.Combat
         private float height = 22f;
 
         [SerializeField]
+        private float portraitWidthRatio = 0.48f;
+
+        [SerializeField]
+        private float outlineThickness = 2f;
+
+        [SerializeField]
         private bool drawHud = true;
 
         [SerializeField]
@@ -74,6 +80,8 @@ namespace VampireLike.Combat
             sideMargin = Mathf.Max(0f, sideMargin);
             width = Mathf.Max(150f, width);
             height = Mathf.Max(14f, height);
+            portraitWidthRatio = Mathf.Clamp(portraitWidthRatio, 0.35f, 0.72f);
+            outlineThickness = Mathf.Clamp(outlineThickness, 1f, 4f);
         }
 
         private void OnGUI()
@@ -100,18 +108,19 @@ namespace VampireLike.Combat
         {
             bool isPortrait = Screen.height > Screen.width;
             bool hasActiveBoss = HasActiveBoss();
-            float currentWidth = isPortrait ? Mathf.Min(260f, Screen.width * 0.42f) : width;
-            float currentHeight = isPortrait ? 20f : height;
+            float currentWidth = isPortrait ? Mathf.Min(300f, Screen.width * portraitWidthRatio) : width;
+            float currentHeight = isPortrait ? 22f : height;
             float left = MobileSafeArea.HudLeft(isPortrait ? 24f : sideMargin);
             float baseTop = isPortrait
                 ? (hasActiveBoss ? portraitBossFightTopMargin : 50f)
                 : (hasActiveBoss ? bossFightTopMargin : topMargin);
             float top = MobileSafeArea.HudTop(baseTop);
-            labelStyle.fontSize = isPortrait ? 13 : 14;
+            labelStyle.fontSize = isPortrait ? 12 : 14;
 
-            Rect panelRect = new Rect(left, top, currentWidth, currentHeight + 10f);
-            Rect labelRect = new Rect(panelRect.x + 8f, panelRect.y + 4f, isPortrait ? 38f : 44f, currentHeight + 2f);
-            Rect backgroundRect = new Rect(labelRect.xMax + 6f, panelRect.y + 6f, panelRect.width - labelRect.width - 22f, currentHeight - 2f);
+            Rect panelRect = new Rect(left, top, currentWidth, currentHeight + 14f);
+            Rect outlineRect = new Rect(panelRect.x + 6f, panelRect.y + 5f, panelRect.width - 12f, currentHeight + 4f);
+            Rect labelRect = new Rect(outlineRect.x + outlineThickness, outlineRect.y + outlineThickness, isPortrait ? 46f : 50f, currentHeight);
+            Rect backgroundRect = new Rect(labelRect.xMax + 4f, labelRect.y, outlineRect.width - labelRect.width - outlineThickness * 2f - 4f, currentHeight);
             Rect fillRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * playerHealth.HealthProgress, backgroundRect.height);
             Rect delayedRect = new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width * delayedHealthProgress, backgroundRect.height);
             float pulse = GetDamagePulse();
@@ -120,6 +129,13 @@ namespace VampireLike.Combat
 
             GUI.color = new Color(0.015f, 0.012f, 0.01f, 0.86f);
             GUI.DrawTexture(panelRect, whiteTexture);
+
+            GUI.color = new Color(0.68f, 0.16f, 0.16f, 0.78f);
+            GUI.DrawTexture(outlineRect, whiteTexture);
+
+            Rect innerRect = new Rect(outlineRect.x + outlineThickness, outlineRect.y + outlineThickness, outlineRect.width - outlineThickness * 2f, outlineRect.height - outlineThickness * 2f);
+            GUI.color = new Color(0.02f, 0.015f, 0.012f, 0.94f);
+            GUI.DrawTexture(innerRect, whiteTexture);
 
             GUI.color = new Color(0.08f, 0.02f, 0.025f, 0.9f);
             GUI.DrawTexture(backgroundRect, whiteTexture);
@@ -136,7 +152,7 @@ namespace VampireLike.Combat
             GUI.color = new Color(1f, 1f, 1f, 0.18f);
             GUI.DrawTexture(new Rect(backgroundRect.x, backgroundRect.y, backgroundRect.width, Mathf.Max(2f, backgroundRect.height * 0.28f)), whiteTexture);
 
-            GUI.color = new Color(0.9f, 0.08f, 0.08f, 0.86f);
+            GUI.color = new Color(0.72f, 0.08f, 0.1f, 0.94f);
             GUI.DrawTexture(labelRect, whiteTexture);
 
             if (playerHealth.HealthProgress <= lowHealthWarningRatio)

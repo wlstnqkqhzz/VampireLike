@@ -141,19 +141,28 @@ namespace VampireLike.Enemies
 
         [Header("Boss Fight Tuning")]
         [SerializeField]
-        private float bossFightSpawnIntervalMultiplier = 3f;
+        private float bossFightSpawnIntervalMultiplier = 4f;
 
         [SerializeField]
-        private float bossFightMaxEnemyMultiplier = 0.24f;
+        private float bossFightMaxEnemyMultiplier = 0.18f;
 
         [SerializeField]
-        private int bossFightMinimumMaxEnemyCount = 8;
+        private int bossFightMinimumMaxEnemyCount = 6;
 
         [SerializeField]
-        private int bossFightMaxEnemyCap = 32;
+        private int bossFightMaxEnemyCap = 24;
 
         [SerializeField]
         private int bossFightMaxEnemiesPerSpawn = 1;
+
+        [SerializeField]
+        private bool trimExistingEnemiesOnBossFight = true;
+
+        [SerializeField]
+        private int bossFightTrimTargetEnemyCount = 16;
+
+        [SerializeField]
+        private float bossFightTrimProtectedPlayerRadius = 4f;
 
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
         private float spawnTimer;
@@ -162,6 +171,7 @@ namespace VampireLike.Enemies
         private int currentMaxEnemyCount;
         private int currentWave;
         private bool isWaveProgressPaused;
+        private bool wasWaveProgressPausedLastFrame;
         private readonly HashSet<object> wavePauseSources = new HashSet<object>();
 
         public event Action<int> WaveChanged;
@@ -189,6 +199,7 @@ namespace VampireLike.Enemies
 
             UpdateWaveTimer();
             RemoveMissingEnemies();
+            UpdateBossFightDensity();
 
             if (spawnedEnemies.Count >= CurrentMaxEnemyCount)
                 return;
@@ -232,6 +243,8 @@ namespace VampireLike.Enemies
             bossFightMinimumMaxEnemyCount = Mathf.Max(0, bossFightMinimumMaxEnemyCount);
             bossFightMaxEnemyCap = Mathf.Max(bossFightMinimumMaxEnemyCount, bossFightMaxEnemyCap);
             bossFightMaxEnemiesPerSpawn = Mathf.Max(1, bossFightMaxEnemiesPerSpawn);
+            bossFightTrimTargetEnemyCount = Mathf.Max(0, bossFightTrimTargetEnemyCount);
+            bossFightTrimProtectedPlayerRadius = Mathf.Max(0f, bossFightTrimProtectedPlayerRadius);
 
             if (enemySpawnEntries == null)
                 return;
@@ -365,6 +378,57 @@ namespace VampireLike.Enemies
             int bossFightMax = Mathf.RoundToInt(currentMaxEnemyCount * bossFightMaxEnemyMultiplier);
             bossFightMax = Mathf.Min(bossFightMax, bossFightMaxEnemyCap);
             return Mathf.Max(bossFightMinimumMaxEnemyCount, bossFightMax);
+        }
+
+        private void UpdateBossFightDensity()
+        {
+            bool isBossFight = IsWaveProgressPaused;
+
+            if (isBossFight && !wasWaveProgressPausedLastFrame && trimExistingEnemiesOnBossFight)
+                TrimEnemiesForBossFight();
+
+            wasWaveProgressPausedLastFrame = isBossFight;
+        }
+
+        private void TrimEnemiesForBossFight()
+        {
+            int targetEnemyCount = Mathf.Min(bossFightTrimTargetEnemyCount, CurrentMaxEnemyCount);
+
+            if (player == null || spawnedEnemies.Count <= targetEnemyCount)
+                return;
+
+            float protectedRadiusSqr = bossFightTrimProtectedPlayerRadius * bossFightTrimProtectedPlayerRadius;
+
+            while (spawnedEnemies.Count > targetEnemyCount)
+            {
+                int farthestIndex = -1;
+                float farthestDistanceSqr = -1f;
+
+                for (int i = 0; i < spawnedEnemies.Count; i++)
+                {
+                    GameObject enemy = spawnedEnemies[i];
+
+                    if (enemy == null)
+                        continue;
+
+                    float distanceSqr = ((Vector2)enemy.transform.position - (Vector2)player.position).sqrMagnitude;
+
+                    if (distanceSqr < protectedRadiusSqr || distanceSqr <= farthestDistanceSqr)
+                        continue;
+
+                    farthestDistanceSqr = distanceSqr;
+                    farthestIndex = i;
+                }
+
+                if (farthestIndex < 0)
+                    break;
+
+                GameObject enemyToRemove = spawnedEnemies[farthestIndex];
+                spawnedEnemies.RemoveAt(farthestIndex);
+
+                if (enemyToRemove != null)
+                    Destroy(enemyToRemove);
+            }
         }
 
         private void SpawnEnemy()
