@@ -43491,7 +43491,9 @@ MonoBehaviour:
   currentLevel: 1
   maxLevel: 50
   experienceToNextLevel: 6
-  nextLevelExperienceMultiplier: 1.35
+  nextLevelExperienceMultiplier: 1.18
+  nextLevelFlatIncrease: 1
+  maxExperienceToNextLevel: 120
   pickupRadius: 0.45
   pickupLayerMask:
     serializedVersion: 2

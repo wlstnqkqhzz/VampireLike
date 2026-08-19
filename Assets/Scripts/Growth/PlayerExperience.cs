@@ -26,9 +26,17 @@ namespace VampireLike.Growth
         [SerializeField]
         private int experienceToNextLevel = 5;
 
-        // 레벨업할 때마다 다음 필요 경험치를 얼마나 늘릴지 정한다.
+        // 레벨업할 때마다 다음 필요 경험치를 얼마나 완만하게 늘릴지 정한다.
         [SerializeField]
-        private float nextLevelExperienceMultiplier = 1.35f;
+        private float nextLevelExperienceMultiplier = 1.18f;
+
+        // 순수 곱연산만 쓰면 후반 요구량이 급격히 튀므로, 작은 고정 증가로 곡선을 안정화한다.
+        [SerializeField]
+        private int nextLevelFlatIncrease = 1;
+
+        // 레벨업 요구량이 과하게 커져 성장 체감이 끊기지 않도록 상한을 둔다.
+        [SerializeField]
+        private int maxExperienceToNextLevel = 120;
 
         // 경험치 보석을 흡수하기 시작하는 반경이다. 자석 강화로 증가한다.
         [SerializeField]
@@ -126,6 +134,8 @@ namespace VampireLike.Growth
             maxLevel = Mathf.Max(currentLevel, maxLevel);
             experienceToNextLevel = Mathf.Max(1, experienceToNextLevel);
             nextLevelExperienceMultiplier = Mathf.Max(1f, nextLevelExperienceMultiplier);
+            nextLevelFlatIncrease = Mathf.Max(0, nextLevelFlatIncrease);
+            maxExperienceToNextLevel = Mathf.Max(experienceToNextLevel, maxExperienceToNextLevel);
             pickupRadius = Mathf.Max(0.05f, pickupRadius);
         }
 
@@ -136,7 +146,7 @@ namespace VampireLike.Growth
             {
                 currentExperience -= experienceToNextLevel;
                 currentLevel++;
-                experienceToNextLevel = Mathf.CeilToInt(experienceToNextLevel * nextLevelExperienceMultiplier);
+                experienceToNextLevel = CalculateNextExperienceRequirement();
                 GameSfx.Play(SfxType.LevelUp);
                 Debug.Log($"Level Up! Level {currentLevel} / Next EXP: {currentExperience}/{experienceToNextLevel}");
                 hasPendingLevelUpChoice = true;
@@ -153,6 +163,13 @@ namespace VampireLike.Growth
                 hasPendingLevelUpChoice = false;
                 levelUpChoiceUI.Show(currentLevel);
             }
+        }
+
+        private int CalculateNextExperienceRequirement()
+        {
+            // 곱연산만 사용하면 요구량이 눈덩이처럼 커지므로, 완만한 배율과 작은 고정 증가를 함께 쓴다.
+            int nextRequirement = Mathf.CeilToInt(experienceToNextLevel * nextLevelExperienceMultiplier) + nextLevelFlatIncrease;
+            return Mathf.Clamp(nextRequirement, 1, maxExperienceToNextLevel);
         }
 
         private void NotifyExperienceChanged()
