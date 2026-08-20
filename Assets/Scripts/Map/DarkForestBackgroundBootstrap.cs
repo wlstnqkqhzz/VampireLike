@@ -6,7 +6,7 @@ using VampireLike.World;
 namespace VampireLike.Map
 {
     /// <summary>
-    /// Replaces the visible floor tilemap with one large background sprite and syncs map bounds to it.
+    /// Applies the map-sized composite forest background and syncs playable bounds to it.
     /// </summary>
     public static class DarkForestBackgroundBootstrap
     {
@@ -15,7 +15,7 @@ namespace VampireLike.Map
         private const string BackgroundResourcePath = "Tiles/DarkForestBackground";
         private const string TilemapObjectName = "Tilemap";
         private const int BackgroundSortingOrder = -100;
-        private const float TargetWorldWidth = 56f;
+        private const float TargetMapWorldWidth = 56f;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialize()
@@ -88,7 +88,8 @@ namespace VampireLike.Map
             renderer.sortingOrder = BackgroundSortingOrder;
 
             float spriteWorldWidth = backgroundSprite.bounds.size.x;
-            float scale = spriteWorldWidth <= 0f ? 1f : TargetWorldWidth / spriteWorldWidth;
+            // The source image is composed for the whole map, so keep uniform scaling.
+            float scale = spriteWorldWidth <= 0f ? 1f : TargetMapWorldWidth / spriteWorldWidth;
             backgroundObject.transform.localScale = Vector3.one * scale;
 
             Vector3 scaledSize = backgroundSprite.bounds.size * scale;

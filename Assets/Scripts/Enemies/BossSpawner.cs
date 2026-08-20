@@ -66,7 +66,13 @@ namespace VampireLike.Enemies
         private float maxBossMoveSpeed = 1.8f;
 
         [SerializeField]
-        private float bossArenaBoundsScale = 0.72f;
+        private float bossArenaBoundsScale = 0.5f;
+
+        [SerializeField]
+        private float bossArenaMinWidth = 18f;
+
+        [SerializeField]
+        private float bossArenaMinHeight = 12f;
 
         private GameObject activeBoss;
         private EnemyHealth activeBossHealth;
@@ -147,7 +153,9 @@ namespace VampireLike.Enemies
             contactDamageMultiplierPerAppearance = Mathf.Max(1f, contactDamageMultiplierPerAppearance);
             moveSpeedMultiplierPerAppearance = Mathf.Max(1f, moveSpeedMultiplierPerAppearance);
             maxBossMoveSpeed = Mathf.Max(0.1f, maxBossMoveSpeed);
-            bossArenaBoundsScale = Mathf.Clamp(bossArenaBoundsScale, 0.35f, 1f);
+            bossArenaBoundsScale = Mathf.Clamp(bossArenaBoundsScale, 0.3f, 1f);
+            bossArenaMinWidth = Mathf.Max(6f, bossArenaMinWidth);
+            bossArenaMinHeight = Mathf.Max(6f, bossArenaMinHeight);
 
             if (bossSpawnEntries == null)
                 return;
@@ -244,8 +252,9 @@ namespace VampireLike.Enemies
             if (player == null || !MapBoundary.TryGetBaseWorldBounds(out Bounds baseBounds))
                 return;
 
-            Vector3 arenaSize = baseBounds.size * bossArenaBoundsScale;
-            arenaSize.z = baseBounds.size.z;
+            float arenaWidth = Mathf.Clamp(baseBounds.size.x * bossArenaBoundsScale, bossArenaMinWidth, baseBounds.size.x);
+            float arenaHeight = Mathf.Clamp(baseBounds.size.y * bossArenaBoundsScale, bossArenaMinHeight, baseBounds.size.y);
+            Vector3 arenaSize = new Vector3(arenaWidth, arenaHeight, baseBounds.size.z);
 
             Vector3 center = player.position;
             float halfWidth = arenaSize.x * 0.5f;
