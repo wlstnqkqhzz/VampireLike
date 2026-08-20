@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using VampireLike.Audio;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -60,8 +61,10 @@ namespace VampireLike.Enemies
             for (int i = 0; i < count && !Boss.IsDead; i++)
             {
                 Boss.SetState(BossState.Burrowed, false);
+                CombatVFX.PlayBossCastAura(transform, CombatVFXKind.Shockwave, 0.82f, burrowDelay, 1500);
                 yield return new WaitForSeconds(burrowDelay);
 
+                CombatVFX.PlayTeleportBurst(transform.position, 0.8f, 0.22f, 1500);
                 SetBurrowedVisualState(true);
                 yield return new WaitForSeconds(GetCurrentUndergroundDuration());
 
@@ -75,6 +78,7 @@ namespace VampireLike.Enemies
                 BossRigidbody.position = reappearPosition;
                 SetBurrowedVisualState(false);
                 GameSfx.Play(SfxType.BossZone);
+                CombatVFX.PlayExpandingRing(reappearPosition, CombatVFXKind.Shockwave, 0.18f, 1.35f, 0.28f, 1500);
 
                 if (i < count - 1)
                     yield return new WaitForSeconds(repeatDelay);
@@ -119,7 +123,7 @@ namespace VampireLike.Enemies
         private GameObject CreateWarning(Vector2 position)
         {
             if (warningPrefab == null)
-                return null;
+                return CombatVFX.PlayWarning(position, CombatVFXKind.TargetWarning, 0.95f, warningDuration, 1450);
 
             return Instantiate(warningPrefab, position, Quaternion.identity);
         }

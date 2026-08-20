@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -23,6 +24,7 @@ namespace VampireLike.Enemies
         protected override IEnumerator ExecutePattern()
         {
             Boss.SetState(BossState.Preparing, false);
+            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.FireZone, 0.9f, Mathf.Max(0.25f, volleyInterval), 1500);
 
             for (int i = 0; i < volleyCount && !Boss.IsDead; i++)
             {

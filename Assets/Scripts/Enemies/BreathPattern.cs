@@ -51,6 +51,7 @@ namespace VampireLike.Enemies
             if (direction.sqrMagnitude <= 0.001f)
                 direction = Vector2.down;
 
+            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.FireZone, 0.86f, prepareTime, 1500);
             GameObject warning = SpawnEffect(warningPrefab, direction, false);
             yield return new WaitForSeconds(prepareTime);
 
@@ -60,6 +61,7 @@ namespace VampireLike.Enemies
             GameObject breath = SpawnEffect(breathPrefab, direction, true);
             Boss.SetState(BossState.Attacking, false);
             GameSfx.Play(SfxType.BossZone);
+            CombatVFX.PlayDirectionalStreak(transform.position, direction, CombatVFXKind.ConeImpact, range * 0.7f, 0.22f, 0.18f, 1650);
 
             float elapsedTime = 0f;
             float nextDamageTime = 0f;

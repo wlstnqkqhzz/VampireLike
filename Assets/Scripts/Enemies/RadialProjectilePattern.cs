@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using VampireLike.Audio;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -38,6 +39,7 @@ namespace VampireLike.Enemies
         protected override IEnumerator ExecutePattern()
         {
             Boss.SetState(BossState.Preparing, false);
+            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.FireZone, 0.82f, prepareTime, 1500);
 
             if (prepareTime > 0f)
                 yield return new WaitForSeconds(prepareTime);
@@ -52,6 +54,7 @@ namespace VampireLike.Enemies
                 return;
 
             GameSfx.Play(SfxType.BossProjectile);
+            CombatVFX.PlayExpandingRing(transform.position, CombatVFXKind.FireZone, 0.22f, 1.1f, 0.22f, 1500);
 
             for (int i = 0; i < count; i++)
             {

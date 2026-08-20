@@ -68,6 +68,8 @@ namespace VampireLike.Enemies
         {
             Boss.SetState(BossState.Preparing, false);
             RemoveMissingZones();
+            CombatVFXKind vfxKind = GetVfxKind();
+            CombatVFX.PlayBossCastAura(transform, vfxKind, 0.76f, 0.32f, 1500);
 
             int availableSlots = GetMaxActiveZones() - activeZones.Count;
             int count = Mathf.Min(availableSlots, zonesPerCast + Mathf.Max(0, Boss.CurrentPhase - 1) * phaseBonusZonesPerCast);
@@ -110,7 +112,9 @@ namespace VampireLike.Enemies
                 ScaleZoneVisual(zone);
 
             GameSfx.Play(SfxType.BossZone);
-            CombatVFX.CreateZoneVisual(zone.transform, GetVfxKind(), radius, fallbackZoneColor);
+            CombatVFXKind vfxKind = GetVfxKind();
+            CombatVFX.PlayExpandingRing(position, vfxKind, radius * 0.35f, radius * 2f, 0.28f, 620);
+            CombatVFX.CreateZoneVisual(zone.transform, vfxKind, radius, fallbackZoneColor);
             return zone;
         }
 

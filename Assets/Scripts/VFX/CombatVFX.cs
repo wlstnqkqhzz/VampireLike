@@ -129,6 +129,91 @@ namespace VampireLike.VFX
             effect.Play(duration, 1f, 1f, 0f, true);
         }
 
+        public static GameObject PlayBossCastAura(Transform target, CombatVFXKind kind, float size, float duration = 0.45f, int sortingOrder = 1500)
+        {
+            if (target == null)
+                return null;
+
+            size *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject($"VFX Boss {kind} Cast Aura");
+            root.transform.position = target.position;
+
+            Color main = GetMainColor(kind);
+            Color secondary = GetSecondaryColor(kind);
+            SpriteRenderer fill = CreateRenderer(root.transform, "Gather Fill", VFXSprites.SoftDisc, WithAlpha(main, 0.14f), sortingOrder);
+            SpriteRenderer ring = CreateRenderer(root.transform, "Gather Ring", VFXSprites.WarningRing, WithAlpha(secondary, 0.58f), sortingOrder + 1);
+            SpriteRenderer glyph = CreateRenderer(root.transform, "Gather Glyph", VFXSprites.Glyph, WithAlpha(secondary, 0.36f), sortingOrder + 2);
+            SpriteRenderer sparks = CreateRenderer(root.transform, "Gather Sparks", VFXSprites.Sparks, WithAlpha(main, 0.42f), sortingOrder + 3);
+
+            fill.transform.localScale = Vector3.one * size * 0.95f;
+            ring.transform.localScale = Vector3.one * size;
+            glyph.transform.localScale = Vector3.one * size * 0.64f;
+            sparks.transform.localScale = Vector3.one * size * 0.78f;
+
+            CombatVFXFollow follow = root.AddComponent<CombatVFXFollow>();
+            follow.Configure(target);
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.78f, 1.15f, 115f, true);
+            return root;
+        }
+
+        public static void PlayExpandingRing(Vector2 position, CombatVFXKind kind, float startSize, float endSize, float duration = 0.35f, int sortingOrder = 1600)
+        {
+            startSize *= SizeMultiplier;
+            endSize *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject($"VFX {kind} Expanding Ring");
+            root.transform.position = position;
+
+            Color main = GetMainColor(kind);
+            Color secondary = GetSecondaryColor(kind);
+            SpriteRenderer fill = CreateRenderer(root.transform, "Pressure Fill", VFXSprites.SoftDisc, WithAlpha(main, 0.11f), sortingOrder);
+            SpriteRenderer edge = CreateRenderer(root.transform, "Pressure Edge", VFXSprites.WarningRing, WithAlpha(secondary, 0.72f), sortingOrder + 1);
+            SpriteRenderer sparks = CreateRenderer(root.transform, "Pressure Sparks", VFXSprites.Sparks, WithAlpha(secondary, 0.38f), sortingOrder + 2);
+
+            fill.transform.localScale = Vector3.one;
+            edge.transform.localScale = Vector3.one;
+            sparks.transform.localScale = Vector3.one * 0.82f;
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, Mathf.Max(0.02f, startSize), Mathf.Max(startSize, endSize), 36f, true);
+        }
+
+        public static void PlayDirectionalStreak(Vector2 position, Vector2 direction, CombatVFXKind kind, float length = 0.8f, float width = 0.12f, float duration = 0.14f, int sortingOrder = 1700)
+        {
+            direction = direction.sqrMagnitude <= 0.001f ? Vector2.right : direction.normalized;
+            length *= SizeMultiplier;
+            width *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject($"VFX {kind} Directional Streak");
+            root.transform.position = position;
+            root.transform.right = direction;
+
+            Color main = WithAlpha(GetMainColor(kind), 0.42f);
+            Color secondary = WithAlpha(GetSecondaryColor(kind), 0.68f);
+            SpriteRenderer trail = CreateRenderer(root.transform, "Motion Trail", VFXSprites.Line, main, sortingOrder);
+            SpriteRenderer core = CreateRenderer(root.transform, "Motion Core", VFXSprites.LineCore, secondary, sortingOrder + 1);
+            trail.transform.localScale = new Vector3(length, width, 1f);
+            core.transform.localScale = new Vector3(length * 0.72f, width * 0.32f, 1f);
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 1f, 0.92f, 0f, true);
+        }
+
+        public static void PlayTeleportBurst(Vector2 position, float size = 0.85f, float duration = 0.24f, int sortingOrder = 1700)
+        {
+            PlayBurst(position, CombatVFXKind.ArcaneImpact, size, duration, sortingOrder);
+            PlayExpandingRing(position, CombatVFXKind.ArcaneImpact, size * 0.35f, size * 1.35f, duration * 1.15f, sortingOrder - 1);
+        }
+
         public static void PlayChainLightning(Vector2 from, Vector2 to, float duration = 0.22f, float width = 0.07f, int sortingOrder = 1900)
         {
             duration *= DurationMultiplier;
@@ -256,6 +341,9 @@ namespace VampireLike.VFX
                 case CombatVFXKind.ConeWarning:
                 case CombatVFXKind.TargetWarning:
                     return new Color(1f, 0.18f, 0.12f, 0.38f);
+                case CombatVFXKind.ConeImpact:
+                case CombatVFXKind.TargetImpact:
+                    return new Color(1f, 0.24f, 0.08f, 0.76f);
                 default:
                     return new Color(0.72f, 0.42f, 1f, 0.78f);
             }
@@ -277,6 +365,9 @@ namespace VampireLike.VFX
                     return new Color(0.98f, 1f, 0.58f, 0.92f);
                 case CombatVFXKind.WebZone:
                     return new Color(0.95f, 0.98f, 1f, 0.76f);
+                case CombatVFXKind.ConeImpact:
+                case CombatVFXKind.TargetImpact:
+                    return new Color(1f, 0.82f, 0.2f, 0.9f);
                 default:
                     return new Color(0.95f, 0.88f, 1f, 0.9f);
             }
@@ -405,6 +496,24 @@ namespace VampireLike.VFX
 
             if (progress >= 1f && destroyWhenDone)
                 Destroy(gameObject);
+        }
+    }
+
+    public class CombatVFXFollow : MonoBehaviour
+    {
+        private Transform target;
+
+        public void Configure(Transform followTarget)
+        {
+            target = followTarget;
+        }
+
+        private void LateUpdate()
+        {
+            if (target == null)
+                return;
+
+            transform.position = target.position;
         }
     }
 

@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using VampireLike.Audio;
 using VampireLike.Settings;
+using VampireLike.VFX;
 using VampireLike.World;
 
 namespace VampireLike.Enemies
@@ -73,6 +74,7 @@ namespace VampireLike.Enemies
 
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(0);
+            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.9f, GetEffectivePrepareTime(), 1500);
 
             yield return new WaitForSeconds(GetEffectivePrepareTime());
 
@@ -82,12 +84,20 @@ namespace VampireLike.Enemies
             GameSfx.Play(SfxType.BossDash);
             float elapsedTime = 0f;
             float effectiveDashDuration = GetEffectiveDashDuration(dashDirection);
+            float nextTrailTime = 0f;
 
             while (elapsedTime < effectiveDashDuration && !Boss.IsDead)
             {
                 Vector2 nextPosition = BossRigidbody.position + dashDirection * GetEffectiveDashSpeed() * Time.fixedDeltaTime;
                 nextPosition = ClampDashPosition(nextPosition);
                 BossRigidbody.MovePosition(nextPosition);
+
+                if (elapsedTime >= nextTrailTime)
+                {
+                    CombatVFX.PlayDirectionalStreak(BossRigidbody.position - dashDirection * 0.18f, -dashDirection, CombatVFXKind.TargetImpact, 0.62f, 0.1f, 0.12f, 1400);
+                    nextTrailTime = elapsedTime + 0.08f;
+                }
+
                 elapsedTime += Time.fixedDeltaTime;
                 yield return new WaitForFixedUpdate();
             }

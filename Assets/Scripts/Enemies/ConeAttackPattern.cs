@@ -55,6 +55,7 @@ namespace VampireLike.Enemies
             if (direction.sqrMagnitude <= 0.001f)
                 direction = Vector2.down;
 
+            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.ConeWarning, 0.68f, prepareTime, 1500);
             activeWarning = SpawnEffect(warningPrefab, direction);
             yield return new WaitForSeconds(prepareTime);
             DestroyActiveWarning();
@@ -63,6 +64,7 @@ namespace VampireLike.Enemies
             {
                 GameSfx.Play(SfxType.BossDash);
                 SpawnEffect(impactPrefab, direction, true);
+                CombatVFX.PlayDirectionalStreak(transform.position, direction, CombatVFXKind.ConeImpact, range * 0.55f, 0.16f, 0.14f, 1650);
                 ApplyDamage(direction);
             }
 

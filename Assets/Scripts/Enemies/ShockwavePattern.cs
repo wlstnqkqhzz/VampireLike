@@ -47,6 +47,7 @@ namespace VampireLike.Enemies
         protected override IEnumerator ExecutePattern()
         {
             Boss.SetState(BossState.Preparing, false);
+            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.Shockwave, 0.9f, prepareTime, 1500);
 
             if (prepareTime > 0f)
                 yield return new WaitForSeconds(prepareTime);
@@ -61,6 +62,7 @@ namespace VampireLike.Enemies
             float elapsedTime = 0f;
             bool hasHitPlayer = false;
             GameObject visual = CreateVisual(center);
+            CombatVFX.PlayExpandingRing(center, CombatVFXKind.Shockwave, 0.18f, targetRadius * 2f, expandDuration, 1550);
             GameSfx.Play(SfxType.BossZone);
 
             while (elapsedTime < expandDuration && !Boss.IsDead)

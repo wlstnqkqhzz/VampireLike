@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using VampireLike.Audio;
 using VampireLike.Combat;
+using VampireLike.VFX;
 
 namespace VampireLike.Enemies
 {
@@ -53,18 +54,23 @@ namespace VampireLike.Enemies
             for (int i = 0; i < count && !Boss.IsDead; i++)
             {
                 Boss.SetState(BossState.Teleporting, false);
+                CombatVFX.PlayBossCastAura(transform, CombatVFXKind.ArcaneImpact, 0.78f, vanishDelay, 1500);
                 SetVisible(false);
                 SetContactDamageEnabled(false);
                 GameSfx.Play(SfxType.BossTeleport);
+                CombatVFX.PlayTeleportBurst(transform.position, 0.8f, 0.24f, 1600);
 
                 yield return new WaitForSeconds(vanishDelay);
 
-                BossRigidbody.position = FindTeleportPosition();
+                Vector2 teleportPosition = FindTeleportPosition();
+                CombatVFX.PlayWarning(teleportPosition, CombatVFXKind.TargetWarning, 0.72f, reappearDelay, 1450);
+                BossRigidbody.position = teleportPosition;
 
                 yield return new WaitForSeconds(reappearDelay);
 
                 SetVisible(true);
                 SetContactDamageEnabled(true);
+                CombatVFX.PlayTeleportBurst(transform.position, 0.9f, 0.22f, 1600);
 
                 if (i < count - 1)
                     yield return new WaitForSeconds(reappearDelay);

@@ -58,6 +58,7 @@ namespace VampireLike.Enemies
                 yield break;
 
             Boss.SetState(BossState.Preparing, false);
+            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.72f, warningDuration * 0.55f, 1500);
             Vector2[] targetPositions = GetTargetPositions();
 
             foreach (Vector2 targetPosition in targetPositions)
