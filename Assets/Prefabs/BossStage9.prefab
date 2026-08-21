@@ -136,7 +136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e49223c768843d1b10e75211e2971a3, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyHealth
-  maxHealth: 165
+  maxHealth: 2800
   hitFlashDuration: 0.08
   experienceGemPrefab: {fileID: 400005, guid: 11ed6501a06941049f1bff2dc0b4e971, type: 3}
   experienceRewardOverride: 92
@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 113ec33c53d640779794ad63f17b84ec, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyContactDamage
-  contactDamage: 5
+  contactDamage: 6
 --- !u!114 &100008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,7 +192,7 @@ MonoBehaviour:
   duration: 1.35
   range: 2.4
   angle: 55
-  damagePerTick: 1
+  damagePerTick: 2
   damageInterval: 0.35
   playerLayerMask:
     serializedVersion: 2
@@ -220,7 +220,7 @@ MonoBehaviour:
   prepareTime: 0.55
   range: 1.8
   angle: 75
-  damage: 2
+  damage: 3
   endLag: 0.2
   playerLayerMask:
     serializedVersion: 2
@@ -256,7 +256,7 @@ MonoBehaviour:
   maxActiveZones: 3
   phaseBonusMaxZones: 1
   slowMultiplier: 0.85
-  damagePerTick: 1
+  damagePerTick: 2
   damageInterval: 0.8
   spawnNearPlayer: 1
   clearZonesOnBossDeath: 1
@@ -283,7 +283,7 @@ MonoBehaviour:
   projectileCount: 8
   phaseBonusProjectileCount: 2
   projectileSpeed: 3.3
-  damage: 1
+  damage: 2
   projectileLifetime: 5.5
   startAngle: 0
   prepareTime: 0.45

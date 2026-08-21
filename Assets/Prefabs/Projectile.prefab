@@ -167,3 +167,5 @@ MonoBehaviour:
   moveSpeed: 8
   damage: 1
   lifeTime: 3
+  repeatedSameAttackDamageMultiplier: 0.35
+  repeatedSameAttackHistorySeconds: 6

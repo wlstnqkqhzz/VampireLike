@@ -228,6 +228,8 @@ namespace VampireLike.Combat
             if (spriteAnimator != null && (playerController == null || !playerController.IsMoving))
                 spriteAnimator.PlayAttack();
 
+            // 한 번의 자동 공격에서 나온 산탄/다중/연속 발사를 같은 묶음으로 취급해 같은 적 중복 피해를 감쇠한다.
+            int attackGroupId = ProjectileController.CreateAttackGroupId();
             int shotCount = Mathf.Max(1, projectileCount);
             for (int i = 0; i < shotCount; i++)
             {
@@ -249,7 +251,7 @@ namespace VampireLike.Combat
                 {
                     ProjectileController projectile = Instantiate(projectilePrefab, firePosition, Quaternion.identity);
                     projectile.SetVisual(projectileSpriteOverride, projectileVisualScale, projectileColliderRadius);
-                    projectile.Launch(shotDirection, projectileDamageMultiplier * scatterDamageMultiplier, projectilePierceCount, specialUpgradeController);
+                    projectile.Launch(shotDirection, projectileDamageMultiplier * scatterDamageMultiplier, projectilePierceCount, specialUpgradeController, attackGroupId);
                 }
 
                 if (i < shotCount - 1 && projectileBurstDelay > 0f)
@@ -267,7 +269,7 @@ namespace VampireLike.Combat
 
                 ProjectileController projectile = Instantiate(projectilePrefab, firePosition, Quaternion.identity);
                 projectile.SetVisual(projectileSpriteOverride, projectileVisualScale, projectileColliderRadius);
-                projectile.Launch(direction, projectileDamageMultiplier, projectilePierceCount, specialUpgradeController);
+                projectile.Launch(direction, projectileDamageMultiplier, projectilePierceCount, specialUpgradeController, attackGroupId);
             }
 
             burstRoutine = null;

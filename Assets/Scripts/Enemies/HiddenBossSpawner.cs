@@ -196,14 +196,20 @@ namespace VampireLike.Enemies
 
         private void HandleHiddenBossDied(EnemyHealth defeatedBoss)
         {
+            int absorbedExperience = 0;
+
             if (activeGreedBoss != null)
             {
-                Debug.Log($"Greed Lord defeated. Absorbed EXP: {activeGreedBoss.TotalAbsorbedExperience}");
-                DropAbsorbedExperienceReward(activeGreedBoss.TotalAbsorbedExperience, defeatedBoss.transform.position);
+                absorbedExperience = activeGreedBoss.TotalAbsorbedExperience;
+                Debug.Log($"Greed Lord defeated. Absorbed EXP: {absorbedExperience}");
             }
 
-            SetWaveProgressPaused(false);
-            GameBgm.Play(BgmType.Battle);
+            if (activeHiddenBossHealth != null)
+                activeHiddenBossHealth.Died -= HandleHiddenBossDied;
+
+            SetWaveProgressPaused(true);
+            GameBgm.Play(BgmType.GameOver);
+            EndingCreditsUI.ShowHiddenBossEnding(absorbedExperience);
         }
 
         private void DropAbsorbedExperienceReward(int absorbedExperience, Vector3 dropPosition)

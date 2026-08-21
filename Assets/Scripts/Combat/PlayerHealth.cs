@@ -32,7 +32,20 @@ namespace VampireLike.Combat
         [SerializeField]
         private float hitFlashInterval = 0.08f;
 
-        // 적과 계속 붙어 있을 때 충돌 이벤트 누락을 보완하는 접촉 검사 반경이다.
+        [Header("Hit Detection")]
+        // 이동용 Collider와 별개로 플레이어 몸통 피격 범위를 조절한다.
+        [SerializeField]
+        private bool useCustomHurtbox = true;
+
+        // 플레이어 위치 기준 피격 범위 중심 보정값이다.
+        [SerializeField]
+        private Vector2 hurtboxOffset = Vector2.zero;
+
+        // 실제 피해를 받을 몸통 판정 크기다. 무기/머리카락보다 몸통 중심에 맞춘다.
+        [SerializeField]
+        private Vector2 hurtboxSize = new Vector2(0.42f, 0.58f);
+
+        // Collider를 찾지 못했을 때만 사용하는 예비 접촉 검사 반경이다.
         [SerializeField]
         private float contactCheckRadius = 0.35f;
 
@@ -50,6 +63,8 @@ namespace VampireLike.Combat
         private float invincibleTimer;
         private bool isDead;
         private readonly Collider2D[] contactResults = new Collider2D[8];
+        private Collider2D playerContactCollider;
+        private ContactFilter2D enemyContactFilter;
         private SpriteRenderer[] spriteRenderers;
         private Color[] originalColors;
         private bool[] originalRendererEnabledStates;
@@ -68,6 +83,8 @@ namespace VampireLike.Combat
             GameState.ResetGame();
             currentHealth = maxHealth;
             spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
+            playerContactCollider = GetComponent<Collider2D>();
+            RefreshEnemyContactFilter();
 
             if (GetComponent<GameOverUI>() == null)
                 gameObject.AddComponent<GameOverUI>();
@@ -106,10 +123,10 @@ namespace VampireLike.Combat
             if (isDead || Time.timeScale <= 0f)
                 return;
 
-            if (!other.CompareTag("Enemy") && other.GetComponentInParent<EnemyHealth>() == null)
+            if (!IsEnemyObject(other))
                 return;
 
-            TakeDamage(GetContactDamage(other), (Vector2)transform.position - (Vector2)other.transform.position);
+            TakeDamage(GetContactDamage(other), GetHitDirection(other));
         }
 
         private void OnValidate()
@@ -120,9 +137,23 @@ namespace VampireLike.Combat
             shieldBlockInvincibleDuration = Mathf.Max(0f, shieldBlockInvincibleDuration);
             hitFlashDuration = Mathf.Max(0f, hitFlashDuration);
             hitFlashInterval = Mathf.Max(0.01f, hitFlashInterval);
+            hurtboxSize.x = Mathf.Max(0.05f, hurtboxSize.x);
+            hurtboxSize.y = Mathf.Max(0.05f, hurtboxSize.y);
             contactCheckRadius = Mathf.Max(0.01f, contactCheckRadius);
             deathSlowMotionScale = Mathf.Clamp(deathSlowMotionScale, 0.05f, 1f);
             gameOverDelay = Mathf.Max(0f, gameOverDelay);
+            RefreshEnemyContactFilter();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (!useCustomHurtbox)
+                return;
+
+            // Scene 뷰에서 실제 피격 범위를 확인하며 캐릭터별로 조절할 수 있게 표시한다.
+            Gizmos.color = new Color(1f, 0.2f, 0.15f, 0.55f);
+            Vector3 center = transform.position + (Vector3)hurtboxOffset;
+            Gizmos.DrawWireCube(center, new Vector3(hurtboxSize.x, hurtboxSize.y, 0f));
         }
 
         public void TakeDamage(int damage)
@@ -256,18 +287,85 @@ namespace VampireLike.Combat
             if (isDead || Time.timeScale <= 0f || invincibleTimer > 0f)
                 return;
 
-            int hitCount = Physics2D.OverlapCircleNonAlloc(transform.position, contactCheckRadius, contactResults, enemyLayerMask);
+            int hitCount = GetEnemyContactCount();
 
             for (int i = 0; i < hitCount; i++)
             {
                 Collider2D enemyCollider = contactResults[i];
 
-                if (enemyCollider != null && enemyCollider.GetComponentInParent<EnemyHealth>() != null)
+                if (enemyCollider != null && IsEnemyObject(enemyCollider.gameObject))
                 {
-                    TakeDamage(GetContactDamage(enemyCollider.gameObject), (Vector2)transform.position - (Vector2)enemyCollider.transform.position);
+                    TakeDamage(GetContactDamage(enemyCollider.gameObject), GetHitDirection(enemyCollider.gameObject));
                     return;
                 }
             }
+        }
+
+        private int GetEnemyContactCount()
+        {
+            if (useCustomHurtbox)
+            {
+                Vector2 hurtboxCenter = (Vector2)transform.position + hurtboxOffset;
+
+                // 실제 피격 범위를 별도 Capsule로 검사해 캐릭터 몸통 중심에 맞는 판정을 만든다.
+                return Physics2D.OverlapCapsule(
+                    hurtboxCenter,
+                    hurtboxSize,
+                    CapsuleDirection2D.Vertical,
+                    0f,
+                    enemyContactFilter,
+                    contactResults);
+            }
+
+            if (playerContactCollider == null)
+                playerContactCollider = GetComponent<Collider2D>();
+
+            if (playerContactCollider != null)
+            {
+                // 실제 플레이어 Collider와 겹친 적만 접촉 피해 후보로 본다.
+                // transform 기준 원형 검사보다 시각적으로 납득되는 피격 판정을 만든다.
+                return playerContactCollider.Overlap(enemyContactFilter, contactResults);
+            }
+
+            return Physics2D.OverlapCircle(transform.position, contactCheckRadius, enemyContactFilter, contactResults);
+        }
+
+        private void RefreshEnemyContactFilter()
+        {
+            enemyContactFilter = new ContactFilter2D();
+            enemyContactFilter.SetLayerMask(enemyLayerMask);
+            enemyContactFilter.useTriggers = true;
+        }
+
+        private bool IsEnemyObject(GameObject target)
+        {
+            return target != null && (target.CompareTag("Enemy") || target.GetComponentInParent<EnemyHealth>() != null);
+        }
+
+        private Vector2 GetHitDirection(GameObject attacker)
+        {
+            if (attacker == null)
+                return Vector2.zero;
+
+            if (useCustomHurtbox)
+            {
+                Vector2 hurtboxCenter = (Vector2)transform.position + hurtboxOffset;
+                Vector2 directionFromAttacker = hurtboxCenter - (Vector2)attacker.transform.position;
+
+                if (directionFromAttacker.sqrMagnitude > 0.0001f)
+                    return directionFromAttacker.normalized;
+            }
+
+            if (playerContactCollider != null)
+            {
+                Vector2 closestPoint = playerContactCollider.ClosestPoint(attacker.transform.position);
+                Vector2 directionFromContact = (Vector2)transform.position - closestPoint;
+
+                if (directionFromContact.sqrMagnitude > 0.0001f)
+                    return directionFromContact.normalized;
+            }
+
+            return ((Vector2)transform.position - (Vector2)attacker.transform.position).normalized;
         }
 
         private int GetContactDamage(GameObject enemyObject)

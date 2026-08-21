@@ -53,14 +53,18 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float cameraSafeSpawnPadding = 2f;
 
+        // 보스별 프리팹 수치를 기본 기준으로 사용한다. 전체 보정이 필요할 때만 Inspector에서 배율을 올린다.
         [SerializeField]
-        private float healthMultiplierPerAppearance = 1.35f;
+        private float baseBossHealthMultiplier = 1f;
 
         [SerializeField]
-        private float contactDamageMultiplierPerAppearance = 1.25f;
+        private float healthMultiplierPerAppearance = 1f;
 
         [SerializeField]
-        private float moveSpeedMultiplierPerAppearance = 1.08f;
+        private float contactDamageMultiplierPerAppearance = 1f;
+
+        [SerializeField]
+        private float moveSpeedMultiplierPerAppearance = 1f;
 
         [SerializeField]
         private float maxBossMoveSpeed = 1.8f;
@@ -73,6 +77,9 @@ namespace VampireLike.Enemies
 
         [SerializeField]
         private float bossArenaMinHeight = 12f;
+
+        [SerializeField]
+        private float bossArenaScreenPadding = 0.25f;
 
         private GameObject activeBoss;
         private EnemyHealth activeBossHealth;
@@ -149,6 +156,7 @@ namespace VampireLike.Enemies
             minSpawnDistance = Mathf.Max(0f, minSpawnDistance);
             maxSpawnDistance = Mathf.Max(minSpawnDistance, maxSpawnDistance);
             cameraSafeSpawnPadding = Mathf.Max(0f, cameraSafeSpawnPadding);
+            baseBossHealthMultiplier = Mathf.Max(1f, baseBossHealthMultiplier);
             healthMultiplierPerAppearance = Mathf.Max(1f, healthMultiplierPerAppearance);
             contactDamageMultiplierPerAppearance = Mathf.Max(1f, contactDamageMultiplierPerAppearance);
             moveSpeedMultiplierPerAppearance = Mathf.Max(1f, moveSpeedMultiplierPerAppearance);
@@ -156,6 +164,7 @@ namespace VampireLike.Enemies
             bossArenaBoundsScale = Mathf.Clamp(bossArenaBoundsScale, 0.3f, 1f);
             bossArenaMinWidth = Mathf.Max(6f, bossArenaMinWidth);
             bossArenaMinHeight = Mathf.Max(6f, bossArenaMinHeight);
+            bossArenaScreenPadding = Mathf.Max(0f, bossArenaScreenPadding);
 
             if (bossSpawnEntries == null)
                 return;
@@ -252,19 +261,59 @@ namespace VampireLike.Enemies
             if (player == null || !MapBoundary.TryGetBaseWorldBounds(out Bounds baseBounds))
                 return;
 
+            Bounds arenaBounds = TryGetCameraWorldBounds(baseBounds, out Bounds cameraBounds)
+                ? cameraBounds
+                : CreateFallbackArenaBounds(baseBounds);
+
+            MapBoundary.OverrideTemporaryBounds(this, arenaBounds);
+        }
+
+        private Bounds CreateFallbackArenaBounds(Bounds baseBounds)
+        {
             float arenaWidth = Mathf.Clamp(baseBounds.size.x * bossArenaBoundsScale, bossArenaMinWidth, baseBounds.size.x);
             float arenaHeight = Mathf.Clamp(baseBounds.size.y * bossArenaBoundsScale, bossArenaMinHeight, baseBounds.size.y);
             Vector3 arenaSize = new Vector3(arenaWidth, arenaHeight, baseBounds.size.z);
-
             Vector3 center = player.position;
+            ClampArenaCenterToBaseBounds(ref center, arenaSize, baseBounds);
+
+            return new Bounds(center, arenaSize);
+        }
+
+        private bool TryGetCameraWorldBounds(Bounds baseBounds, out Bounds cameraBounds)
+        {
+            cameraBounds = default;
+
+            if (mainCamera == null)
+                mainCamera = Camera.main;
+
+            if (mainCamera == null || !mainCamera.orthographic)
+                return false;
+
+            float halfHeight = Mathf.Max(0.1f, mainCamera.orthographicSize - bossArenaScreenPadding);
+            float halfWidth = Mathf.Max(0.1f, mainCamera.orthographicSize * mainCamera.aspect - bossArenaScreenPadding);
+            Vector3 arenaSize = new Vector3(halfWidth * 2f, halfHeight * 2f, baseBounds.size.z);
+            Vector3 center = mainCamera.transform.position;
+            center.z = baseBounds.center.z;
+
+            ClampArenaCenterToBaseBounds(ref center, arenaSize, baseBounds);
+            cameraBounds = new Bounds(center, arenaSize);
+            return true;
+        }
+
+        private static void ClampArenaCenterToBaseBounds(ref Vector3 center, Vector3 arenaSize, Bounds baseBounds)
+        {
             float halfWidth = arenaSize.x * 0.5f;
             float halfHeight = arenaSize.y * 0.5f;
 
-            center.x = Mathf.Clamp(center.x, baseBounds.min.x + halfWidth, baseBounds.max.x - halfWidth);
-            center.y = Mathf.Clamp(center.y, baseBounds.min.y + halfHeight, baseBounds.max.y - halfHeight);
-            center.z = baseBounds.center.z;
+            center.x = arenaSize.x >= baseBounds.size.x
+                ? baseBounds.center.x
+                : Mathf.Clamp(center.x, baseBounds.min.x + halfWidth, baseBounds.max.x - halfWidth);
 
-            MapBoundary.OverrideTemporaryBounds(this, new Bounds(center, arenaSize));
+            center.y = arenaSize.y >= baseBounds.size.y
+                ? baseBounds.center.y
+                : Mathf.Clamp(center.y, baseBounds.min.y + halfHeight, baseBounds.max.y - halfHeight);
+
+            center.z = baseBounds.center.z;
         }
 
         private GameObject GetBossPrefabForStage(int bossStage)
@@ -293,7 +342,7 @@ namespace VampireLike.Enemies
         private void ApplyBossScaling(GameObject boss, int wave)
         {
             int appearanceIndex = Mathf.Max(1, wave / bossWaveInterval);
-            float healthMultiplier = Mathf.Pow(healthMultiplierPerAppearance, appearanceIndex - 1);
+            float healthMultiplier = baseBossHealthMultiplier * Mathf.Pow(healthMultiplierPerAppearance, appearanceIndex - 1);
             float damageMultiplier = Mathf.Pow(contactDamageMultiplierPerAppearance, appearanceIndex - 1);
             float speedMultiplier = Mathf.Pow(moveSpeedMultiplierPerAppearance, appearanceIndex - 1);
 

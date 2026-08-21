@@ -53929,6 +53929,7 @@ MonoBehaviour:
   minSpawnDistance: 5
   maxSpawnDistance: 7
   cameraSafeSpawnPadding: 2
+  baseBossHealthMultiplier: 1
   healthMultiplierPerAppearance: 1
   contactDamageMultiplierPerAppearance: 1
   moveSpeedMultiplierPerAppearance: 1

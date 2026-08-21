@@ -170,7 +170,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e49223c768843d1b10e75211e2971a3, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyHealth
-  maxHealth: 85
+  maxHealth: 1000
   hitFlashDuration: 0.08
   experienceGemPrefab: {fileID: 400005, guid: 11ed6501a06941049f1bff2dc0b4e971, type: 3}
   experienceRewardOverride: 45
@@ -227,7 +227,7 @@ MonoBehaviour:
   maxRadius: 1.4
   phaseBonusRadius: 0.45
   expandDuration: 0.5
-  damage: 2
+  damage: 3
   slowMultiplier: 0.65
   slowDuration: 0.8
   playerLayerMask:
@@ -253,7 +253,7 @@ MonoBehaviour:
   allowMovementDuringPattern: 0
   warningDuration: 1
   radius: 1
-  damage: 2
+  damage: 3
   warningPrefab: {fileID: 550000, guid: 5e6248361905416994cad8285a2acbb9, type: 3}
   impactPrefab: {fileID: 560000, guid: ed377b1111354708a53c4de286efde90, type: 3}
   impactLifetime: 0.35
