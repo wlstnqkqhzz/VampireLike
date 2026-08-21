@@ -9,7 +9,7 @@ namespace VampireLike.Enemies
     /// <summary>
     /// 일정 시간 동안 한 방향으로 유지되는 부채꼴 반복 피해 패턴이다.
     /// </summary>
-    public class BreathPattern : BossPattern
+    public class BreathPattern : BossPattern, IBossDamageScaler
     {
         [SerializeField]
         private float prepareTime = 0.75f;
@@ -114,6 +114,11 @@ namespace VampireLike.Enemies
                 playerHealth.TakeDamage(damagePerTick);
                 return;
             }
+        }
+
+        public void ScaleBossDamage(float multiplier)
+        {
+            damagePerTick = Mathf.Max(1, Mathf.RoundToInt(damagePerTick * Mathf.Max(0.1f, multiplier)));
         }
 
         protected override void OnValidate()

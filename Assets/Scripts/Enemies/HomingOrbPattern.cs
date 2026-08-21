@@ -7,7 +7,7 @@ namespace VampireLike.Enemies
     /// <summary>
     /// 플레이어를 일정 시간만 추적하는 적 투사체를 생성하는 워록 계열 패턴이다.
     /// </summary>
-    public class HomingOrbPattern : BossPattern
+    public class HomingOrbPattern : BossPattern, IBossDamageScaler
     {
         protected override bool UseSkillAnimation => true;
 
@@ -66,6 +66,11 @@ namespace VampireLike.Enemies
                 if (spawnInterval > 0f)
                     yield return new WaitForSeconds(spawnInterval);
             }
+        }
+
+        public void ScaleBossDamage(float multiplier)
+        {
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
         protected override void OnValidate()

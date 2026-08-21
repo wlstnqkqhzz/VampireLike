@@ -10,7 +10,7 @@ namespace VampireLike.Enemies
     /// <summary>
     /// 보스 중심에서 확장되는 원형 충격파를 발생시키는 패턴이다.
     /// </summary>
-    public class ShockwavePattern : BossPattern
+    public class ShockwavePattern : BossPattern, IBossDamageScaler
     {
         protected override bool UseSkillAnimation => true;
 
@@ -134,6 +134,11 @@ namespace VampireLike.Enemies
             }
 
             slowedPlayers.Clear();
+        }
+
+        public void ScaleBossDamage(float multiplier)
+        {
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
         protected override void OnValidate()

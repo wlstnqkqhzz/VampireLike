@@ -9,7 +9,7 @@ namespace VampireLike.Enemies
     /// <summary>
     /// 플레이어의 현재 위치를 겨냥해 경고 원을 표시한 뒤 범위 피해를 주는 패턴이다.
     /// </summary>
-    public class TargetAreaPattern : BossPattern
+    public class TargetAreaPattern : BossPattern, IBossDamageScaler
     {
         protected override bool UseSkillAnimation => true;
 
@@ -220,6 +220,11 @@ namespace VampireLike.Enemies
                 playerHealth.TakeDamage(damage);
                 return;
             }
+        }
+
+        public void ScaleBossDamage(float multiplier)
+        {
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
         protected override void OnValidate()

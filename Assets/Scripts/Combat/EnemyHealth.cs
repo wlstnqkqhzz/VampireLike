@@ -40,6 +40,7 @@ namespace VampireLike.Combat
 
         public static IReadOnlyList<EnemyHealth> ActiveEnemies => activeEnemies;
         public bool IsDead { get; private set; }
+        public bool IsBoss => IsBossEnemy();
         public int MaxHealth => maxHealth;
         public int CurrentHealth => Mathf.CeilToInt(currentHealth);
         public float HealthProgress => maxHealth <= 0 ? 0f : Mathf.Clamp01(currentHealth / maxHealth);

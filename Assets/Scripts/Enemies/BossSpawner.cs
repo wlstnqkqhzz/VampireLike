@@ -58,10 +58,22 @@ namespace VampireLike.Enemies
         private float baseBossHealthMultiplier = 1f;
 
         [SerializeField]
+        private float bossHealthBalanceMultiplier = 2f;
+
+        [SerializeField]
+        private float healthMultiplierPerBossStage = 1.22f;
+
+        [SerializeField]
         private float healthMultiplierPerAppearance = 1f;
 
         [SerializeField]
+        private float contactDamageMultiplierPerBossStage = 1.12f;
+
+        [SerializeField]
         private float contactDamageMultiplierPerAppearance = 1f;
+
+        [SerializeField]
+        private float patternDamageMultiplierPerBossStage = 1.12f;
 
         [SerializeField]
         private float moveSpeedMultiplierPerAppearance = 1f;
@@ -157,8 +169,12 @@ namespace VampireLike.Enemies
             maxSpawnDistance = Mathf.Max(minSpawnDistance, maxSpawnDistance);
             cameraSafeSpawnPadding = Mathf.Max(0f, cameraSafeSpawnPadding);
             baseBossHealthMultiplier = Mathf.Max(1f, baseBossHealthMultiplier);
+            bossHealthBalanceMultiplier = Mathf.Max(1f, bossHealthBalanceMultiplier);
+            healthMultiplierPerBossStage = Mathf.Max(1f, healthMultiplierPerBossStage);
             healthMultiplierPerAppearance = Mathf.Max(1f, healthMultiplierPerAppearance);
+            contactDamageMultiplierPerBossStage = Mathf.Max(1f, contactDamageMultiplierPerBossStage);
             contactDamageMultiplierPerAppearance = Mathf.Max(1f, contactDamageMultiplierPerAppearance);
+            patternDamageMultiplierPerBossStage = Mathf.Max(1f, patternDamageMultiplierPerBossStage);
             moveSpeedMultiplierPerAppearance = Mathf.Max(1f, moveSpeedMultiplierPerAppearance);
             maxBossMoveSpeed = Mathf.Max(0.1f, maxBossMoveSpeed);
             bossArenaBoundsScale = Mathf.Clamp(bossArenaBoundsScale, 0.3f, 1f);
@@ -341,10 +357,16 @@ namespace VampireLike.Enemies
 
         private void ApplyBossScaling(GameObject boss, int wave)
         {
-            int appearanceIndex = Mathf.Max(1, wave / bossWaveInterval);
-            float healthMultiplier = baseBossHealthMultiplier * Mathf.Pow(healthMultiplierPerAppearance, appearanceIndex - 1);
-            float damageMultiplier = Mathf.Pow(contactDamageMultiplierPerAppearance, appearanceIndex - 1);
-            float speedMultiplier = Mathf.Pow(moveSpeedMultiplierPerAppearance, appearanceIndex - 1);
+            int bossStage = Mathf.Max(1, wave / bossWaveInterval);
+            int stageOffset = Mathf.Max(0, bossStage - 1);
+            float healthMultiplier = baseBossHealthMultiplier
+                * bossHealthBalanceMultiplier
+                * Mathf.Pow(healthMultiplierPerBossStage, stageOffset)
+                * Mathf.Pow(healthMultiplierPerAppearance, stageOffset);
+            float damageMultiplier = Mathf.Pow(contactDamageMultiplierPerBossStage, stageOffset)
+                * Mathf.Pow(contactDamageMultiplierPerAppearance, stageOffset);
+            float patternDamageMultiplier = Mathf.Pow(patternDamageMultiplierPerBossStage, stageOffset);
+            float speedMultiplier = Mathf.Pow(moveSpeedMultiplierPerAppearance, stageOffset);
 
             EnemyHealth enemyHealth = boss.GetComponent<EnemyHealth>();
             if (enemyHealth != null)
@@ -357,6 +379,22 @@ namespace VampireLike.Enemies
             EnemyController enemyController = boss.GetComponent<EnemyController>();
             if (enemyController != null)
                 enemyController.SetMoveSpeed(Mathf.Min(maxBossMoveSpeed, enemyController.MoveSpeed * speedMultiplier));
+
+            ApplyBossPatternDamageScaling(boss, patternDamageMultiplier);
+        }
+
+        private void ApplyBossPatternDamageScaling(GameObject boss, float multiplier)
+        {
+            if (boss == null || multiplier <= 0f)
+                return;
+
+            MonoBehaviour[] behaviours = boss.GetComponentsInChildren<MonoBehaviour>(true);
+
+            foreach (MonoBehaviour behaviour in behaviours)
+            {
+                if (behaviour is IBossDamageScaler scaler)
+                    scaler.ScaleBossDamage(multiplier);
+            }
         }
 
         private Vector2 GetRandomSpawnPosition()

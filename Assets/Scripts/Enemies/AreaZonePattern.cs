@@ -10,7 +10,7 @@ namespace VampireLike.Enemies
     /// <summary>
     /// 보스 주변에 둔화 장판을 생성해 플레이어의 이동 공간을 제한하는 패턴이다.
     /// </summary>
-    public class AreaZonePattern : BossPattern
+    public class AreaZonePattern : BossPattern, IBossDamageScaler
     {
         protected override bool UseSkillAnimation => true;
 
@@ -189,6 +189,14 @@ namespace VampireLike.Enemies
             }
 
             activeZones.Clear();
+        }
+
+        public void ScaleBossDamage(float multiplier)
+        {
+            if (damagePerTick <= 0)
+                return;
+
+            damagePerTick = Mathf.Max(1, Mathf.RoundToInt(damagePerTick * Mathf.Max(0.1f, multiplier)));
         }
 
         protected override void OnValidate()

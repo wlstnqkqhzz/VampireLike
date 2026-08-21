@@ -23,7 +23,7 @@ namespace VampireLike.Combat
         [SerializeField]
         private float lifeTime = 3f;
 
-        // 같은 공격 묶음에서 한 적에게 여러 투사체가 동시에 맞을 때 후속 피해에 적용할 배율이다.
+        // 같은 공격 묶음에서 보스에게 여러 투사체가 동시에 맞을 때 후속 피해에 적용할 배율이다.
         [SerializeField]
         private float repeatedSameAttackDamageMultiplier = 0.35f;
 
@@ -173,7 +173,7 @@ namespace VampireLike.Combat
 
         private float GetDamageForEnemy(EnemyHealth enemyHealth)
         {
-            if (attackGroupId <= 0)
+            if (attackGroupId <= 0 || !enemyHealth.IsBoss)
                 return effectiveDamage;
 
             PruneAttackGroups();

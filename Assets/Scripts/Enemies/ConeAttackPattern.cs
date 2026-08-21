@@ -9,7 +9,7 @@ namespace VampireLike.Enemies
     /// <summary>
     /// 플레이어 방향을 저장한 뒤 전방 부채꼴 범위에 피해를 주는 공통 근접 패턴이다.
     /// </summary>
-    public class ConeAttackPattern : BossPattern
+    public class ConeAttackPattern : BossPattern, IBossDamageScaler
     {
         [SerializeField]
         private float prepareTime = 0.65f;
@@ -143,6 +143,11 @@ namespace VampireLike.Enemies
 
             Destroy(activeWarning);
             activeWarning = null;
+        }
+
+        public void ScaleBossDamage(float multiplier)
+        {
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
         protected override void OnValidate()

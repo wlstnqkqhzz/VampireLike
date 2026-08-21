@@ -8,7 +8,7 @@ namespace VampireLike.Enemies
     /// <summary>
     /// 보스 중심에서 여러 방향으로 적 전용 투사체를 발사하는 패턴이다.
     /// </summary>
-    public class RadialProjectilePattern : BossPattern
+    public class RadialProjectilePattern : BossPattern, IBossDamageScaler
     {
         protected override bool UseSkillAnimation => true;
 
@@ -63,6 +63,11 @@ namespace VampireLike.Enemies
                 EnemyProjectileController projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
                 projectile.Initialize(direction, projectileSpeed, damage, projectileLifetime);
             }
+        }
+
+        public void ScaleBossDamage(float multiplier)
+        {
+            damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
         protected override void OnValidate()
