@@ -41,13 +41,25 @@ namespace VampireLike.Enemies
         [SerializeField]
         private LayerMask playerLayerMask = ~0;
 
+        [Header("경고/충격 연출")]
+        [SerializeField]
+        private Color telegraphColor = new Color(0.65f, 0.9f, 1f, 0.36f);
+
+        [SerializeField]
+        private int telegraphSortingOrder = 1480;
+
+        [SerializeField]
+        private float impactSizeMultiplier = 1f;
+
         private readonly Collider2D[] hitResults = new Collider2D[4];
         private readonly HashSet<global::PlayerController> slowedPlayers = new HashSet<global::PlayerController>();
 
         protected override IEnumerator ExecutePattern()
         {
+            float targetRadius = GetTargetRadius();
             Boss.SetState(BossState.Preparing, false);
             CombatVFX.PlayBossCastAura(transform, CombatVFXKind.Shockwave, 0.9f, prepareTime, 1500);
+            BossTelegraph.ShowCircle(transform.position, targetRadius, prepareTime, telegraphColor, telegraphSortingOrder);
 
             if (prepareTime > 0f)
                 yield return new WaitForSeconds(prepareTime);
@@ -58,11 +70,12 @@ namespace VampireLike.Enemies
         private IEnumerator ExpandShockwave()
         {
             Vector2 center = transform.position;
-            float targetRadius = maxRadius + Mathf.Max(0, Boss.CurrentPhase - 1) * phaseBonusRadius;
+            float targetRadius = GetTargetRadius();
             float elapsedTime = 0f;
             bool hasHitPlayer = false;
             GameObject visual = CreateVisual(center);
             CombatVFX.PlayExpandingRing(center, CombatVFXKind.Shockwave, 0.18f, targetRadius * 2f, expandDuration, 1550);
+            BossImpact.PlayShockwaveImpact(center, targetRadius * impactSizeMultiplier);
             GameSfx.Play(SfxType.BossZone);
 
             while (elapsedTime < expandDuration && !Boss.IsDead)
@@ -116,6 +129,11 @@ namespace VampireLike.Enemies
             return false;
         }
 
+        private float GetTargetRadius()
+        {
+            return maxRadius + Mathf.Max(0, Boss.CurrentPhase - 1) * phaseBonusRadius;
+        }
+
         private IEnumerator ApplySlow(global::PlayerController playerController)
         {
             slowedPlayers.Add(playerController);
@@ -151,6 +169,8 @@ namespace VampireLike.Enemies
             damage = Mathf.Max(1, damage);
             slowMultiplier = Mathf.Clamp(slowMultiplier, 0.25f, 1f);
             slowDuration = Mathf.Max(0f, slowDuration);
+            telegraphSortingOrder = Mathf.Max(0, telegraphSortingOrder);
+            impactSizeMultiplier = Mathf.Max(0.1f, impactSizeMultiplier);
         }
     }
 }

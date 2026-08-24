@@ -19,6 +19,13 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float commonRecoveryTime = 0.8f;
 
+        [Header("페이즈 전환 연출")]
+        [SerializeField]
+        private float phaseTransitionDuration = 0.55f;
+
+        [SerializeField]
+        private bool phaseTransitionInvulnerability = true;
+
         [SerializeField]
         private float phase2HealthRatio = 0.6f;
 
@@ -51,7 +58,9 @@ namespace VampireLike.Enemies
         private BossSpriteAnimator spriteAnimator;
         private Rigidbody2D rb;
         private Coroutine patternRoutine;
+        private Coroutine phaseTransitionRoutine;
         private float basePatternCooldownMultiplier = 1f;
+        private int requestedPhase = 1;
 
         public Transform Player => player;
         public Rigidbody2D BossRigidbody => rb;
@@ -83,11 +92,21 @@ namespace VampireLike.Enemies
             {
                 SetState(BossState.Dead, false);
                 StopRunningPattern();
+                StopPhaseTransition();
                 return;
             }
 
-            UpdatePhase();
+            UpdateRequestedPhase();
             UpdateFacingDirection();
+
+            if (phaseTransitionRoutine != null)
+                return;
+
+            if (requestedPhase > CurrentPhase && patternRoutine == null)
+            {
+                phaseTransitionRoutine = StartCoroutine(PlayPhaseTransition(requestedPhase));
+                return;
+            }
 
             if (patternRoutine == null)
                 TryExecuteNextPattern();
@@ -96,11 +115,13 @@ namespace VampireLike.Enemies
         private void OnDisable()
         {
             StopRunningPattern();
+            StopPhaseTransition();
         }
 
         private void OnValidate()
         {
             commonRecoveryTime = Mathf.Max(0f, commonRecoveryTime);
+            phaseTransitionDuration = Mathf.Max(0f, phaseTransitionDuration);
             phase2HealthRatio = Mathf.Clamp01(phase2HealthRatio);
             phase3HealthRatio = Mathf.Clamp(phase3HealthRatio, 0f, phase2HealthRatio);
             globalPatternCooldownMultiplier = Mathf.Clamp(globalPatternCooldownMultiplier, 0.2f, 1.5f);
@@ -217,11 +238,13 @@ namespace VampireLike.Enemies
 
             yield return pattern.Execute();
 
-            if (!IsDead)
+            if (!IsDead && !GameState.IsGameOver)
             {
                 SetState(BossState.Recovering, false);
                 yield return new WaitForSeconds(commonRecoveryTime * basePatternCooldownMultiplier * GetPhaseRecoveryTimeMultiplier());
-                SetState(BossState.Chasing, true);
+
+                if (phaseTransitionRoutine == null && !IsDead && !GameState.IsGameOver)
+                    SetState(BossState.Chasing, true);
             }
 
             lastPattern = pattern;
@@ -239,11 +262,11 @@ namespace VampireLike.Enemies
 
             currentPattern = null;
 
-            if (!IsDead)
+            if (!IsDead && !GameState.IsGameOver && phaseTransitionRoutine == null)
                 SetState(BossState.Chasing, true);
         }
 
-        private void UpdatePhase()
+        private void UpdateRequestedPhase()
         {
             if (enemyHealth == null)
                 return;
@@ -256,7 +279,46 @@ namespace VampireLike.Enemies
             else if (healthProgress <= phase2HealthRatio)
                 nextPhase = 2;
 
+            requestedPhase = Mathf.Max(requestedPhase, nextPhase);
+        }
+
+        /// <summary>
+        /// 새 페이즈 진입 시 보스를 잠깐 멈추고 무적, 오라, 흔들림 연출을 재생한다.
+        /// </summary>
+        private IEnumerator PlayPhaseTransition(int nextPhase)
+        {
+            SetState(BossState.PhaseChanging, false);
+
+            if (phaseTransitionInvulnerability)
+                enemyHealth.SetInvulnerable(true);
+
+            PlaySkillAnimation();
+            BossImpact.PlayPhaseTransitionImpact(transform, nextPhase, phaseTransitionDuration);
+
+            if (phaseTransitionDuration > 0f)
+                yield return new WaitForSeconds(phaseTransitionDuration);
+
             CurrentPhase = Mathf.Max(CurrentPhase, nextPhase);
+
+            if (phaseTransitionInvulnerability)
+                enemyHealth.SetInvulnerable(false);
+
+            if (!IsDead && !GameState.IsGameOver)
+                SetState(BossState.Chasing, true);
+
+            phaseTransitionRoutine = null;
+        }
+
+        private void StopPhaseTransition()
+        {
+            if (phaseTransitionRoutine != null)
+            {
+                StopCoroutine(phaseTransitionRoutine);
+                phaseTransitionRoutine = null;
+            }
+
+            if (enemyHealth != null)
+                enemyHealth.SetInvulnerable(false);
         }
 
         private float GetPhasePatternCooldownMultiplier()

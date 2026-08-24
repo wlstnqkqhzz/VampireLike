@@ -50,6 +50,19 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float maximumMapEdgeDashTime = 1.3f;
 
+        [Header("돌진 경고/충격 연출")]
+        [SerializeField]
+        private float telegraphWidth = 0.08f;
+
+        [SerializeField]
+        private float telegraphLength = 5.5f;
+
+        [SerializeField]
+        private Color telegraphColor = new Color(1f, 0.56f, 0.18f, 0.34f);
+
+        [SerializeField]
+        private float impactSize = 0.85f;
+
         protected override bool CanExecutePattern()
         {
             if (Player == null || BossRigidbody == null)
@@ -72,18 +85,21 @@ namespace VampireLike.Enemies
             if (dashDirection.sqrMagnitude <= 0.001f)
                 dashDirection = Vector2.down;
 
+            float effectivePrepareTime = GetEffectivePrepareTime();
+            float effectiveDashDuration = GetEffectiveDashDuration(dashDirection);
+
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(0);
-            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.9f, GetEffectivePrepareTime(), 1500);
+            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.9f, effectivePrepareTime, 1500);
+            BossTelegraph.ShowLine(BossRigidbody.position, dashDirection, GetTelegraphDistance(effectiveDashDuration), telegraphWidth, effectivePrepareTime, telegraphColor, 1480);
 
-            yield return new WaitForSeconds(GetEffectivePrepareTime());
+            yield return new WaitForSeconds(effectivePrepareTime);
 
             Boss.SetState(BossState.Attacking, false);
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(1);
             GameSfx.Play(SfxType.BossDash);
             float elapsedTime = 0f;
-            float effectiveDashDuration = GetEffectiveDashDuration(dashDirection);
             float nextTrailTime = 0f;
 
             while (elapsedTime < effectiveDashDuration && !Boss.IsDead)
@@ -103,6 +119,7 @@ namespace VampireLike.Enemies
             }
 
             BossRigidbody.linearVelocity = Vector2.zero;
+            BossImpact.PlayDashImpact(BossRigidbody.position, dashDirection, impactSize);
             Boss.SetState(BossState.Recovering, false);
             yield return new WaitForSeconds(endLag);
         }
@@ -121,6 +138,9 @@ namespace VampireLike.Enemies
             mobilePortraitMaximumTriggerDistance = Mathf.Max(minimumTriggerDistance, mobilePortraitMaximumTriggerDistance);
             boundaryStopPadding = Mathf.Max(0f, boundaryStopPadding);
             maximumMapEdgeDashTime = Mathf.Max(dashDuration, maximumMapEdgeDashTime);
+            telegraphWidth = Mathf.Max(0.01f, telegraphWidth);
+            telegraphLength = Mathf.Max(0.1f, telegraphLength);
+            impactSize = Mathf.Max(0.1f, impactSize);
         }
 
         private float GetEffectivePrepareTime()
@@ -164,6 +184,12 @@ namespace VampireLike.Enemies
 
             float durationToEdge = distanceToEdge / dashSpeedValue;
             return Mathf.Clamp(durationToEdge, dashDuration, maximumMapEdgeDashTime);
+        }
+
+        private float GetTelegraphDistance(float effectiveDashDuration)
+        {
+            float estimatedDistance = GetEffectiveDashSpeed() * effectiveDashDuration;
+            return Mathf.Clamp(estimatedDistance, 0.1f, telegraphLength);
         }
 
         private Vector2 ClampDashPosition(Vector2 position)

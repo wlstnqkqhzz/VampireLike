@@ -40,6 +40,7 @@ namespace VampireLike.Combat
 
         public static IReadOnlyList<EnemyHealth> ActiveEnemies => activeEnemies;
         public bool IsDead { get; private set; }
+        public bool IsInvulnerable { get; private set; }
         public bool IsBoss => IsBossEnemy();
         public int MaxHealth => maxHealth;
         public int CurrentHealth => Mathf.CeilToInt(currentHealth);
@@ -86,6 +87,12 @@ namespace VampireLike.Combat
             if (IsDead || damage <= 0)
                 return;
 
+            if (IsInvulnerable)
+            {
+                PlayHitFlash();
+                return;
+            }
+
             currentHealth -= damage;
             bossSpriteAnimator?.PlayHit();
 
@@ -106,6 +113,14 @@ namespace VampireLike.Combat
         {
             maxHealth = Mathf.Max(1, value);
             currentHealth = maxHealth;
+        }
+
+        /// <summary>
+        /// 페이즈 전환처럼 보스가 잠깐 피해를 받지 않아야 하는 순간에 사용한다.
+        /// </summary>
+        public void SetInvulnerable(bool isInvulnerable)
+        {
+            IsInvulnerable = isInvulnerable;
         }
 
         public void Heal(int amount)
