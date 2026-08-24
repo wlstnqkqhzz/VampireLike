@@ -27,6 +27,15 @@ namespace VampireLike.Enemies
         private float endLag = 0.12f;
 
         [SerializeField]
+        private int dashChainCount = 1;
+
+        [SerializeField]
+        private float chainedDashPrepareMultiplier = 0f;
+
+        [SerializeField]
+        private float chainedDashDelay = 0f;
+
+        [SerializeField]
         private float minimumTriggerDistance = 0.55f;
 
         [SerializeField]
@@ -82,24 +91,43 @@ namespace VampireLike.Enemies
             if (Player == null || BossRigidbody == null)
                 yield break;
 
-            Boss.SetState(BossState.Preparing, false);
-            Vector2 dashDirection = ((Vector2)Player.position - BossRigidbody.position).normalized;
+            int chainCount = Mathf.Max(1, dashChainCount);
 
-            if (dashDirection.sqrMagnitude <= 0.001f)
-                dashDirection = Vector2.down;
+            for (int i = 0; i < chainCount && !Boss.IsDead; i++)
+            {
+                float prepareMultiplier = i == 0 ? 1f : chainedDashPrepareMultiplier;
+                yield return ExecuteSingleDash(prepareMultiplier);
 
+                if (i < chainCount - 1 && chainedDashDelay > 0f)
+                    yield return new WaitForSeconds(chainedDashDelay);
+            }
+
+            Boss.SetState(BossState.Recovering, false);
+            yield return new WaitForSeconds(endLag);
+        }
+
+        private IEnumerator ExecuteSingleDash(float prepareMultiplier)
+        {
+            Vector2 dashDirection = GetDashDirection();
             float effectivePrepareTime = GetEffectivePrepareTime();
+            effectivePrepareTime *= Mathf.Max(0f, prepareMultiplier);
             float effectiveDashDuration = GetEffectiveDashDuration(dashDirection);
 
-            Boss.FaceDirection(dashDirection);
-            Boss.ShowAttackFrame(0);
-            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.9f, effectivePrepareTime, 1500);
+            if (effectivePrepareTime > 0f)
+            {
+                Boss.SetState(BossState.Preparing, false);
+                Boss.FaceDirection(dashDirection);
+                Boss.ShowAttackFrame(0);
+                CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.9f, effectivePrepareTime, 1500);
 
-            if (showDashPathIndicator)
-                BossTelegraph.ShowLine(BossRigidbody.position, dashDirection, GetTelegraphDistance(effectiveDashDuration), telegraphWidth, effectivePrepareTime, telegraphColor, 1480);
+                if (showDashPathIndicator)
+                    BossTelegraph.ShowLine(BossRigidbody.position, dashDirection, GetTelegraphDistance(effectiveDashDuration), telegraphWidth, effectivePrepareTime, telegraphColor, 1480);
 
-            yield return new WaitForSeconds(effectivePrepareTime);
+                yield return new WaitForSeconds(effectivePrepareTime);
+            }
 
+            dashDirection = GetDashDirection();
+            effectiveDashDuration = GetEffectiveDashDuration(dashDirection);
             Boss.SetState(BossState.Attacking, false);
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(1);
@@ -125,8 +153,15 @@ namespace VampireLike.Enemies
 
             BossRigidbody.linearVelocity = Vector2.zero;
             BossImpact.PlayDashImpact(BossRigidbody.position, dashDirection, impactSize);
-            Boss.SetState(BossState.Recovering, false);
-            yield return new WaitForSeconds(endLag);
+        }
+
+        private Vector2 GetDashDirection()
+        {
+            if (Player == null || BossRigidbody == null)
+                return Vector2.down;
+
+            Vector2 dashDirection = ((Vector2)Player.position - BossRigidbody.position).normalized;
+            return dashDirection.sqrMagnitude <= 0.001f ? Vector2.down : dashDirection;
         }
 
         protected override void OnValidate()
@@ -136,6 +171,9 @@ namespace VampireLike.Enemies
             dashSpeed = Mathf.Max(0f, dashSpeed);
             dashDuration = Mathf.Max(0f, dashDuration);
             endLag = Mathf.Max(0f, endLag);
+            dashChainCount = Mathf.Max(1, dashChainCount);
+            chainedDashPrepareMultiplier = Mathf.Max(0f, chainedDashPrepareMultiplier);
+            chainedDashDelay = Mathf.Max(0f, chainedDashDelay);
             minimumTriggerDistance = Mathf.Max(0f, minimumTriggerDistance);
             maximumTriggerDistance = Mathf.Max(minimumTriggerDistance, maximumTriggerDistance);
             mobilePortraitPrepareMultiplier = Mathf.Max(1f, mobilePortraitPrepareMultiplier);

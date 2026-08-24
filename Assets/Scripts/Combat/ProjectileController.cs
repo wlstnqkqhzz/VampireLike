@@ -39,6 +39,8 @@ namespace VampireLike.Combat
         private float effectiveDamage;
         private int remainingPierceCount;
         private int remainingReflectCount;
+        private bool canSplitProjectile;
+        private bool isSplitProjectile;
         private PlayerSpecialUpgradeController specialUpgradeController;
         private CombatVFXKind vfxKind = CombatVFXKind.ArcaneImpact;
         private bool isDestroying;
@@ -103,6 +105,7 @@ namespace VampireLike.Combat
             float appliedDamage = GetDamageForEnemy(enemyHealth);
             enemyHealth.TakeDamage(appliedDamage);
             CombatVFX.PlayBurst(transform.position, vfxKind, 0.42f, 0.18f);
+            TrySplitProjectile(enemyHealth, appliedDamage);
             specialUpgradeController?.HandleProjectileHit(enemyHealth, appliedDamage, transform.position);
 
             if (enemyHealth.IsDead)
@@ -167,8 +170,66 @@ namespace VampireLike.Combat
             effectiveDamage = Mathf.Max(0.1f, damage * Mathf.Max(0.1f, damageMultiplier));
             remainingPierceCount = Mathf.Max(0, pierceCount);
             remainingReflectCount = specialUpgradeController == null ? 0 : specialUpgradeController.GetProjectileReflectCount();
+            canSplitProjectile = !isSplitProjectile
+                && specialUpgradeController != null
+                && specialUpgradeController.GetProjectileSplitLevel() > 0;
             hitEnemies.Clear();
             CombatVFX.AttachTrail(gameObject, vfxKind, 0.08f, 0.16f);
+        }
+
+        private void InitializeSplitProjectile(
+            Vector2 direction,
+            float splitDamage,
+            EnemyHealth ignoredEnemy,
+            PlayerSpecialUpgradeController ownerSpecialUpgradeController,
+            int ownerAttackGroupId)
+        {
+            isSplitProjectile = true;
+            canSplitProjectile = false;
+            specialUpgradeController = ownerSpecialUpgradeController;
+            attackGroupId = ownerAttackGroupId;
+            moveDirection = direction.sqrMagnitude <= 0.001f ? Vector2.right : direction.normalized;
+            transform.right = moveDirection;
+            effectiveDamage = Mathf.Max(0.1f, splitDamage);
+            remainingPierceCount = 0;
+            remainingReflectCount = 0;
+            lifeTimer = 0f;
+            hitEnemies.Clear();
+
+            if (ignoredEnemy != null)
+                hitEnemies.Add(ignoredEnemy);
+
+            transform.localScale = new Vector3(transform.localScale.x * 0.5f, transform.localScale.y * 0.5f, transform.localScale.z);
+
+            if (circleCollider != null)
+                circleCollider.radius *= 0.5f;
+
+            CombatVFX.AttachTrail(gameObject, vfxKind, 0.06f, 0.12f);
+        }
+
+        private void TrySplitProjectile(EnemyHealth sourceEnemy, float sourceDamage)
+        {
+            if (!canSplitProjectile || isSplitProjectile || specialUpgradeController == null)
+                return;
+
+            canSplitProjectile = false;
+            const float SplitAngle = 28f;
+            const float SplitDamageMultiplier = 0.5f;
+            Vector2 leftDirection = Rotate(moveDirection, -SplitAngle).normalized;
+            Vector2 rightDirection = Rotate(moveDirection, SplitAngle).normalized;
+            SpawnSplitProjectile(leftDirection, sourceDamage * SplitDamageMultiplier, sourceEnemy);
+            SpawnSplitProjectile(rightDirection, sourceDamage * SplitDamageMultiplier, sourceEnemy);
+        }
+
+        private void SpawnSplitProjectile(Vector2 direction, float splitDamage, EnemyHealth ignoredEnemy)
+        {
+            GameObject splitObject = Instantiate(gameObject, transform.position, Quaternion.identity);
+            ProjectileController splitProjectile = splitObject.GetComponent<ProjectileController>();
+
+            if (splitProjectile == null)
+                return;
+
+            splitProjectile.InitializeSplitProjectile(direction, splitDamage, ignoredEnemy, specialUpgradeController, attackGroupId);
         }
 
         private float GetDamageForEnemy(EnemyHealth enemyHealth)
@@ -229,6 +290,14 @@ namespace VampireLike.Combat
             transform.right = moveDirection;
             lifeTimer = Mathf.Min(lifeTimer, lifeTime * 0.45f);
             return true;
+        }
+
+        private static Vector2 Rotate(Vector2 vector, float degrees)
+        {
+            float radians = degrees * Mathf.Deg2Rad;
+            float sin = Mathf.Sin(radians);
+            float cos = Mathf.Cos(radians);
+            return new Vector2(vector.x * cos - vector.y * sin, vector.x * sin + vector.y * cos);
         }
 
         public void SetVisual(Sprite sprite, float visualScale, float colliderRadius)

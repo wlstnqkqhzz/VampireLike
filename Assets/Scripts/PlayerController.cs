@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private const int DirectionFrameCount = 4;
     private const float MinimumMoveSpeedMultiplier = 0.25f;
     private const float BoundarySkin = 0.02f;
+    private const float BottomBoundaryInset = -0.55f;
     private const string PlayerVisualName = "PlayerVisual";
     private const string WalkSpritePath = "Assets/Art/Characters/Vampire/SeparateAnim/Walk.png";
     private static readonly Vector2 PlayerColliderOffset = new Vector2(0f, -0.03f);
@@ -276,6 +277,7 @@ public class PlayerController : MonoBehaviour
         Vector2 position = transform.position;
         minInset = new Vector2(position.x - bounds.min.x, position.y - bounds.min.y) + Vector2.one * BoundarySkin;
         maxInset = new Vector2(bounds.max.x - position.x, bounds.max.y - position.y) + Vector2.one * BoundarySkin;
+        minInset.y = BottomBoundaryInset;
     }
 
     private void UpdateFacingDirection()

@@ -26,6 +26,9 @@ namespace VampireLike.Growth
         private bool grantsImmediateLevelUp;
 
         [SerializeField]
+        private PlayerExperience.LevelUpSource immediateLevelUpSource = PlayerExperience.LevelUpSource.Normal;
+
+        [SerializeField]
         private float attractSpeed = 5f;
 
         [SerializeField]
@@ -143,6 +146,11 @@ namespace VampireLike.Growth
             grantsImmediateLevelUp = value;
         }
 
+        public void SetImmediateLevelUpSource(PlayerExperience.LevelUpSource value)
+        {
+            immediateLevelUpSource = value;
+        }
+
         public void Collect(PlayerExperience playerExperience)
         {
             if (isCollected || playerExperience == null)
@@ -153,7 +161,7 @@ namespace VampireLike.Growth
             GameSfx.Play(SfxType.ExperiencePickup);
 
             if (grantsImmediateLevelUp)
-                playerExperience.GrantImmediateLevelUp(experienceAmount);
+                playerExperience.GrantImmediateLevelUp(experienceAmount, immediateLevelUpSource);
             else
                 playerExperience.AddExperience(experienceAmount);
 

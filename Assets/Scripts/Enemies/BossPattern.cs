@@ -78,12 +78,21 @@ namespace VampireLike.Enemies
             nextReadyTime = Time.time + cooldown * multiplier;
         }
 
+        public void CancelPattern()
+        {
+            OnPatternCancelled();
+        }
+
         protected virtual bool CanExecutePattern()
         {
             return true;
         }
 
         protected abstract IEnumerator ExecutePattern();
+
+        protected virtual void OnPatternCancelled()
+        {
+        }
 
         protected virtual void OnValidate()
         {

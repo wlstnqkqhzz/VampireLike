@@ -14,6 +14,12 @@ namespace VampireLike.Growth
     /// </summary>
     public class LevelUpChoiceUI : MonoBehaviour
     {
+        public enum ChoiceMode
+        {
+            Normal,
+            BossReward
+        }
+
         private const string CanvasName = "Level Up Choice Canvas";
         private const string RootName = "Level Up Choice";
         private const int ChoiceCount = 3;
@@ -62,10 +68,15 @@ namespace VampireLike.Growth
 
         public void Show(int level)
         {
+            Show(level, ChoiceMode.Normal);
+        }
+
+        public void Show(int level, ChoiceMode choiceMode)
+        {
             EnsureUI();
 
             // 媛뺥솕 而⑦듃濡ㅻ윭?먯꽌 ?꾩옱 ?좏깮 媛?ν븳 媛뺥솕 3媛쒕? ?쒕뜡?쇰줈 諛쏆븘?⑤떎.
-            currentChoices = upgradeController.GetRandomChoices(ChoiceCount, level);
+            currentChoices = upgradeController.GetRandomChoices(ChoiceCount, level, choiceMode == ChoiceMode.BossReward);
 
             if (currentChoices.Count == 0)
                 return;

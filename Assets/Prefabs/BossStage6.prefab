@@ -250,6 +250,9 @@ MonoBehaviour:
   dashSpeed: 14
   dashDuration: 0.48
   endLag: 0.1
+  dashChainCount: 2
+  chainedDashPrepareMultiplier: 0
+  chainedDashDelay: 0
 --- !u!114 &190006
 MonoBehaviour:
   m_ObjectHideFlags: 0

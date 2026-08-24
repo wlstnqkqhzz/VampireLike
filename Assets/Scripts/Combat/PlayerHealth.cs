@@ -234,6 +234,22 @@ namespace VampireLike.Combat
             GameSfx.Play(SfxType.Heal);
         }
 
+        public bool IsHitByProjectileSweep(Vector2 startPosition, Vector2 endPosition, float projectileRadius)
+        {
+            Bounds hurtboxBounds = GetHurtboxBounds();
+            float radius = Mathf.Max(0f, projectileRadius);
+            Rect expandedBounds = new Rect(
+                hurtboxBounds.min.x - radius,
+                hurtboxBounds.min.y - radius,
+                hurtboxBounds.size.x + radius * 2f,
+                hurtboxBounds.size.y + radius * 2f);
+
+            if (expandedBounds.Contains(startPosition) || expandedBounds.Contains(endPosition))
+                return true;
+
+            return SegmentIntersectsRect(startPosition, endPosition, expandedBounds);
+        }
+
         private void CacheSpriteRenderer()
         {
             // PlayerVisual을 포함한 모든 자식 SpriteRenderer의 원래 상태를 저장한다.
@@ -328,6 +344,54 @@ namespace VampireLike.Combat
             }
 
             return Physics2D.OverlapCircle(transform.position, contactCheckRadius, enemyContactFilter, contactResults);
+        }
+
+        private Bounds GetHurtboxBounds()
+        {
+            if (useCustomHurtbox)
+            {
+                Vector3 center = transform.position + (Vector3)hurtboxOffset;
+                return new Bounds(center, new Vector3(hurtboxSize.x, hurtboxSize.y, 0f));
+            }
+
+            if (playerContactCollider == null)
+                playerContactCollider = GetComponent<Collider2D>();
+
+            if (playerContactCollider != null)
+                return playerContactCollider.bounds;
+
+            return new Bounds(transform.position, Vector3.one * contactCheckRadius * 2f);
+        }
+
+        private static bool SegmentIntersectsRect(Vector2 startPosition, Vector2 endPosition, Rect rect)
+        {
+            Vector2 delta = endPosition - startPosition;
+            float minT = 0f;
+            float maxT = 1f;
+
+            return ClipSegmentAxis(startPosition.x, delta.x, rect.xMin, rect.xMax, ref minT, ref maxT)
+                && ClipSegmentAxis(startPosition.y, delta.y, rect.yMin, rect.yMax, ref minT, ref maxT);
+        }
+
+        private static bool ClipSegmentAxis(float start, float delta, float min, float max, ref float minT, ref float maxT)
+        {
+            if (Mathf.Abs(delta) < 0.0001f)
+                return start >= min && start <= max;
+
+            float inverseDelta = 1f / delta;
+            float t1 = (min - start) * inverseDelta;
+            float t2 = (max - start) * inverseDelta;
+
+            if (t1 > t2)
+            {
+                float swap = t1;
+                t1 = t2;
+                t2 = swap;
+            }
+
+            minT = Mathf.Max(minT, t1);
+            maxT = Mathf.Min(maxT, t2);
+            return minT <= maxT;
         }
 
         private void RefreshEnemyContactFilter()

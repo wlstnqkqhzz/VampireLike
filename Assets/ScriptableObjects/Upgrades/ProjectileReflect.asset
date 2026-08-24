@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: ProjectileReflect
   m_EditorClassIdentifier: 
   upgradeType: 17
-  displayName: 반사탄
-  description: 적 적중 후 근처 다른 적에게 투사체 반사
+  displayName: 분열탄
+  description: 적 최초 명중 시 작은 파생 투사체 2개 생성
   maxLevel: 3
   multiplier: 1
   flatAmount: 0

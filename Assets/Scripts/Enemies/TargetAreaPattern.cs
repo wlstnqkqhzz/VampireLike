@@ -91,9 +91,14 @@ namespace VampireLike.Enemies
             DestroyActiveWarnings();
         }
 
+        protected override void OnPatternCancelled()
+        {
+            DestroyActiveWarnings();
+        }
+
         private GameObject CreateWarning(Vector2 position)
         {
-            return CombatVFX.PlayWarning(position, CombatVFXKind.TargetWarning, radius * 2f, warningDuration, 12);
+            return CreateWarningCircle(position);
         }
 
         private Vector2[] GetTargetPositions()
@@ -136,7 +141,8 @@ namespace VampireLike.Enemies
         private void SpawnImpact(Vector2 position)
         {
             GameSfx.Play(SfxType.BossZone);
-            CombatVFX.PlayBurst(position, CombatVFXKind.TargetImpact, radius * 1.25f, impactLifetime, 15);
+            CombatVFX.PlayBurst(position, CombatVFXKind.TargetImpact, radius * 2f, impactLifetime, 1550);
+            CombatVFX.PlayExpandingRing(position, CombatVFXKind.TargetImpact, radius * 0.35f, radius * 2f, impactLifetime, 1551);
         }
 
         private void ScaleEffectToRadius(GameObject effect)
@@ -164,7 +170,7 @@ namespace VampireLike.Enemies
             SpriteRenderer fillRenderer = fill.AddComponent<SpriteRenderer>();
             fillRenderer.sprite = SpecialUpgradePulse.GetFilledCircleSprite();
             fillRenderer.color = new Color(warningColor.r, warningColor.g, warningColor.b, warningColor.a * 0.35f);
-            fillRenderer.sortingOrder = 11;
+            fillRenderer.sortingOrder = 1480;
 
             LineRenderer lineRenderer = warning.AddComponent<LineRenderer>();
             lineRenderer.useWorldSpace = false;
@@ -172,7 +178,7 @@ namespace VampireLike.Enemies
             lineRenderer.positionCount = 48;
             lineRenderer.startWidth = 0.04f;
             lineRenderer.endWidth = 0.04f;
-            lineRenderer.sortingOrder = 12;
+            lineRenderer.sortingOrder = 1481;
             lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
             lineRenderer.startColor = warningColor;
             lineRenderer.endColor = warningColor;

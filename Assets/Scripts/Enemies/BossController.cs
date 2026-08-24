@@ -254,6 +254,9 @@ namespace VampireLike.Enemies
 
         private void StopRunningPattern()
         {
+            if (currentPattern != null)
+                currentPattern.CancelPattern();
+
             if (patternRoutine != null)
             {
                 StopCoroutine(patternRoutine);

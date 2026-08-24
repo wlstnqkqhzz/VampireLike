@@ -108,6 +108,12 @@ namespace VampireLike.Enemies
                 ClearZones();
         }
 
+        protected override void OnPatternCancelled()
+        {
+            if (clearZonesOnBossDeath)
+                ClearZones();
+        }
+
         private GameObject CreateZone(Vector2 position)
         {
             GameObject zone = zonePrefab == null ? CreateFallbackZone() : Instantiate(zonePrefab);

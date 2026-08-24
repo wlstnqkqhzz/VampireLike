@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using VampireLike.Audio;
+using VampireLike.Growth;
 using VampireLike.Settings;
 using VampireLike.UI;
 
@@ -18,6 +19,7 @@ public class PauseMenu : MonoBehaviour
     private const string PauseRootName = "Pause Menu";
     private const string PausePanelName = "Pause Panel";
     private const string OptionsPanelName = "Options Panel";
+    private const string UpgradeStatusName = "Upgrade Status";
 
     [SerializeField]
     private GameObject pauseMenuRoot;
@@ -44,6 +46,7 @@ public class PauseMenu : MonoBehaviour
     private Text resolutionText;
     private Text appliedScreenText;
     private Text fullscreenModeText;
+    private Text upgradeStatusText;
     private Button previousResolutionButton;
     private Button nextResolutionButton;
     private Button optionsConfirmButton;
@@ -151,7 +154,10 @@ public class PauseMenu : MonoBehaviour
             pauseMenuRoot.SetActive(isPaused);
 
         if (isPaused)
+        {
+            RefreshUpgradeStatus();
             ShowPausePanel();
+        }
 
         UpdateMobilePauseButton();
     }
@@ -162,6 +168,7 @@ public class PauseMenu : MonoBehaviour
         if (pauseMenuRoot != null)
         {
             CachePausePanel();
+            EnsureUpgradeStatusText();
             CenterPauseMenu();
             return;
         }
@@ -186,12 +193,64 @@ public class PauseMenu : MonoBehaviour
         Image panelImage = panel.AddComponent<Image>();
         panelImage.color = new Color(0.12f, 0.14f, 0.12f, 0.92f);
 
-        CreateLabel(panel.transform, "\uC77C\uC2DC\uC815\uC9C0", new Vector2(0f, 108f), 32, Color.white);
-        resumeButton = CreateButton(panel.transform, "\uACC4\uC18D\uD558\uAE30", new Vector2(0f, 54f), new Vector2(260f, 54f));
-        optionsButton = CreateButton(panel.transform, "\uC635\uC158", new Vector2(0f, -18f), new Vector2(260f, 54f));
-        quitButton = CreateButton(panel.transform, "\uAC8C\uC784 \uC885\uB8CC", new Vector2(0f, -90f), new Vector2(260f, 54f));
+        CreateLabel(panel.transform, "\uC77C\uC2DC\uC815\uC9C0", new Vector2(0f, 116f), 32, Color.white);
+        resumeButton = CreateButton(panel.transform, "\uACC4\uC18D\uD558\uAE30", new Vector2(-128f, 54f), new Vector2(220f, 50f));
+        optionsButton = CreateButton(panel.transform, "\uC635\uC158", new Vector2(-128f, -8f), new Vector2(220f, 50f));
+        quitButton = CreateButton(panel.transform, "\uAC8C\uC784 \uC885\uB8CC", new Vector2(-128f, -70f), new Vector2(220f, 50f));
+        EnsureUpgradeStatusText();
 
         CreateOptionsPanel(root.transform);
+    }
+
+    private void EnsureUpgradeStatusText()
+    {
+        if (upgradeStatusText != null || pausePanel == null)
+            return;
+
+        Transform existing = pausePanel.Find(UpgradeStatusName);
+
+        if (existing != null)
+        {
+            upgradeStatusText = existing.GetComponent<Text>();
+            return;
+        }
+
+        upgradeStatusText = CreateText(pausePanel, string.Empty, new Vector2(116f, -10f), 15, new Color(0.9f, 0.95f, 0.86f, 1f), new Vector2(220f, 220f));
+        upgradeStatusText.gameObject.name = UpgradeStatusName;
+        upgradeStatusText.alignment = TextAnchor.UpperLeft;
+    }
+
+    private void RefreshUpgradeStatus()
+    {
+        if (upgradeStatusText == null)
+            return;
+
+        PlayerUpgradeController upgradeController = FindFirstObjectByType<PlayerUpgradeController>();
+
+        if (upgradeController == null)
+        {
+            upgradeStatusText.text = "\uD604\uC7AC \uAC15\uD654: -";
+            return;
+        }
+
+        System.Collections.Generic.List<string> lines = upgradeController.GetUpgradeStatusLines();
+
+        if (lines.Count == 0)
+        {
+            upgradeStatusText.text = "\uD604\uC7AC \uAC15\uD654\n-";
+            return;
+        }
+
+        int maxLines = Mathf.Min(8, lines.Count);
+        string text = "\uD604\uC7AC \uAC15\uD654";
+
+        for (int i = 0; i < maxLines; i++)
+            text += $"\n{lines[i]}";
+
+        if (lines.Count > maxLines)
+            text += $"\n... +{lines.Count - maxLines}";
+
+        upgradeStatusText.text = text;
     }
 
     private static Canvas CreatePauseCanvas()
@@ -337,6 +396,14 @@ public class PauseMenu : MonoBehaviour
         if (panelTransform != null)
             pausePanel = panelTransform.GetComponent<RectTransform>();
 
+        if (pausePanel != null)
+        {
+            Transform upgradeStatusTransform = pausePanel.Find(UpgradeStatusName);
+
+            if (upgradeStatusTransform != null)
+                upgradeStatusText = upgradeStatusTransform.GetComponent<Text>();
+        }
+
         Transform optionsTransform = pauseMenuRoot.transform.Find(OptionsPanelName);
 
         if (optionsTransform != null)
@@ -371,7 +438,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = isPortrait ? new Vector2(560f, 720f) : new Vector2(420f, 320f);
+        rectTransform.sizeDelta = isPortrait ? new Vector2(560f, 720f) : new Vector2(560f, 320f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 

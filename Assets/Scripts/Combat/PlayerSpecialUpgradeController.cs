@@ -338,6 +338,11 @@ namespace VampireLike.Combat
             projectileReflectLevel++;
         }
 
+        public int GetProjectileSplitLevel()
+        {
+            return Mathf.Clamp(projectileReflectLevel, 0, 3);
+        }
+
         public void AddKaelBlackSwordWaveLevel()
         {
             kaelBlackSwordWaveLevel++;
@@ -391,7 +396,7 @@ namespace VampireLike.Combat
 
         public int GetProjectileReflectCount()
         {
-            return Mathf.Clamp(projectileReflectLevel, 0, 3);
+            return 0;
         }
 
         public Vector2[] GetProjectileDirections(Vector2 baseDirection)

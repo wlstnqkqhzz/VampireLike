@@ -76,6 +76,11 @@ namespace VampireLike.Enemies
             DestroyActiveWarning();
         }
 
+        protected override void OnPatternCancelled()
+        {
+            DestroyActiveWarning();
+        }
+
         private GameObject SpawnEffect(GameObject prefab, Vector2 direction, bool autoDestroy = false)
         {
             Vector2 effectPosition = (Vector2)transform.position + direction * range * 0.5f;

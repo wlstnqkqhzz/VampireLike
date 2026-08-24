@@ -108,7 +108,8 @@ namespace VampireLike.Enemies
             GUI.DrawTexture(fillRect, whiteTexture);
 
             GUI.color = Color.white;
-            GUI.Label(borderRect, isHiddenBoss ? "GREED LORD" : "BOSS", labelStyle);
+            string bossLabel = isHiddenBoss ? "GREED LORD" : "BOSS";
+            GUI.Label(borderRect, $"{bossLabel} {bossHealth.CurrentHealth} / {bossHealth.MaxHealth}", labelStyle);
 
             GUI.color = previousColor;
         }

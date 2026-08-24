@@ -1,6 +1,8 @@
 using UnityEngine;
 using VampireLike.Combat;
 using System;
+using System.Collections;
+using VampireLike.Growth;
 using VampireLike.Audio;
 using VampireLike.World;
 
@@ -42,6 +44,9 @@ namespace VampireLike.Enemies
         private Transform player;
 
         [SerializeField]
+        private BossPhaseDecorationController bossPhaseDecorationController;
+
+        [SerializeField]
         private int bossWaveInterval = 5;
 
         [SerializeField]
@@ -58,10 +63,10 @@ namespace VampireLike.Enemies
         private float baseBossHealthMultiplier = 1f;
 
         [SerializeField]
-        private float bossHealthBalanceMultiplier = 1.65f;
+        private float bossHealthBalanceMultiplier = 1.05f;
 
         [SerializeField]
-        private float healthMultiplierPerBossStage = 1.18f;
+        private float healthMultiplierPerBossStage = 1.12f;
 
         [SerializeField]
         private float healthMultiplierPerAppearance = 1f;
@@ -97,16 +102,23 @@ namespace VampireLike.Enemies
         private float bossArenaTopHudPadding = 1.25f;
 
         [SerializeField]
-        private float bossArenaBottomPadding = 0.25f;
+        private float bossArenaBottomPadding = 0f;
 
         [SerializeField]
-        private float bossArenaPlayerBottomVisualAllowance = 0.9f;
+        private float bossArenaPlayerBottomVisualAllowance = 2f;
+
+        [SerializeField]
+        private float bossSpawnPlayerSeparation = 1.4f;
+
+        [SerializeField]
+        private float bossDeathGemAttractDelay = 0.45f;
 
         private GameObject activeBoss;
         private EnemyHealth activeBossHealth;
         private int activeBossStage;
         private int lastBossSpawnWave;
         private bool hasPausedWaveProgress;
+        private bool hasClearedBossPhaseDecorations;
         private Camera mainCamera;
 
         public EnemyHealth ActiveBossHealth => activeBossHealth;
@@ -123,6 +135,7 @@ namespace VampireLike.Enemies
             if (player == null)
                 player = GameObject.Find("Player")?.transform;
 
+            ResolveBossPhaseDecorationController();
             mainCamera = Camera.main;
         }
 
@@ -138,6 +151,7 @@ namespace VampireLike.Enemies
         private void OnDisable()
         {
             UnsubscribeActiveBossDeath();
+            RestoreBossPhaseDecorationsIfNeeded();
 
             if (enemySpawner != null)
             {
@@ -156,6 +170,7 @@ namespace VampireLike.Enemies
                 activeBossStage = 0;
                 SetWaveProgressPaused(false);
                 MapBoundary.ClearTemporaryBounds(this);
+                RestoreBossPhaseDecorationsIfNeeded();
             }
             else
             {
@@ -193,6 +208,8 @@ namespace VampireLike.Enemies
             bossArenaTopHudPadding = Mathf.Max(0f, bossArenaTopHudPadding);
             bossArenaBottomPadding = Mathf.Max(0f, bossArenaBottomPadding);
             bossArenaPlayerBottomVisualAllowance = Mathf.Max(0f, bossArenaPlayerBottomVisualAllowance);
+            bossSpawnPlayerSeparation = Mathf.Max(0f, bossSpawnPlayerSeparation);
+            bossDeathGemAttractDelay = Mathf.Max(0f, bossDeathGemAttractDelay);
 
             if (bossSpawnEntries == null)
                 return;
@@ -238,7 +255,10 @@ namespace VampireLike.Enemies
                 return;
             }
 
-            Vector2 spawnPosition = GetRandomSpawnPosition();
+            SetWaveProgressPaused(true);
+            Bounds arenaBounds = ActivateBossArena();
+            ClearBossPhaseDecorations();
+            Vector2 spawnPosition = GetBossSpawnPosition(arenaBounds);
             activeBoss = Instantiate(selectedBossPrefab, spawnPosition, Quaternion.identity, transform);
             activeBossHealth = activeBoss.GetComponent<EnemyHealth>();
             activeBossStage = bossStage;
@@ -252,8 +272,6 @@ namespace VampireLike.Enemies
                 bossController.InitializeBoss(bossStage, player);
 
             ApplyBossScaling(activeBoss, wave);
-            ActivateBossArena();
-            SetWaveProgressPaused(true);
             Debug.Log($"Boss appeared - Wave {wave}");
             GameSfx.Play(SfxType.BossAppear);
             GameBgm.PlayBoss(bossStage);
@@ -264,9 +282,11 @@ namespace VampireLike.Enemies
         {
             int defeatedStage = activeBossStage;
             BossDefeated?.Invoke(defeatedStage, defeatedBoss);
+            StartCoroutine(AttractFieldExperienceGemsAfterDelay());
             GameBgm.Play(BgmType.Battle);
             UnsubscribeActiveBossDeath();
             MapBoundary.ClearTemporaryBounds(this);
+            RestoreBossPhaseDecorationsIfNeeded();
         }
 
         private void UnsubscribeActiveBossDeath()
@@ -284,10 +304,48 @@ namespace VampireLike.Enemies
             enemySpawner.SetWaveProgressPaused(this, paused);
         }
 
-        private void ActivateBossArena()
+        private void ResolveBossPhaseDecorationController()
+        {
+            if (bossPhaseDecorationController != null)
+                return;
+
+            bossPhaseDecorationController = FindFirstObjectByType<BossPhaseDecorationController>();
+
+            if (bossPhaseDecorationController != null)
+                return;
+
+            GameObject decorationRoot = GameObject.Find("Decorations");
+
+            if (decorationRoot != null)
+                bossPhaseDecorationController = decorationRoot.AddComponent<BossPhaseDecorationController>();
+        }
+
+        private void ClearBossPhaseDecorations()
+        {
+            ResolveBossPhaseDecorationController();
+
+            if (bossPhaseDecorationController == null || !bossPhaseDecorationController.HasManagedDecorations)
+                return;
+
+            bossPhaseDecorationController.ClearForBossPhase();
+            hasClearedBossPhaseDecorations = true;
+        }
+
+        private void RestoreBossPhaseDecorationsIfNeeded()
+        {
+            if (!hasClearedBossPhaseDecorations)
+                return;
+
+            if (bossPhaseDecorationController != null)
+                bossPhaseDecorationController.RestoreIfCleared();
+
+            hasClearedBossPhaseDecorations = false;
+        }
+
+        private Bounds ActivateBossArena()
         {
             if (player == null || !MapBoundary.TryGetBaseWorldBounds(out Bounds baseBounds))
-                return;
+                return default;
 
             Bounds arenaBounds = TryGetCameraWorldBounds(baseBounds, out Bounds cameraBounds)
                 ? cameraBounds
@@ -295,6 +353,47 @@ namespace VampireLike.Enemies
 
             arenaBounds = ApplyBossArenaBottomVisualAllowance(arenaBounds, baseBounds);
             MapBoundary.OverrideTemporaryBounds(this, arenaBounds);
+            return arenaBounds;
+        }
+
+        private Vector2 GetBossSpawnPosition(Bounds arenaBounds)
+        {
+            Vector2 spawnPosition = arenaBounds.size == Vector3.zero
+                ? (Vector2)(mainCamera == null ? player.position : mainCamera.transform.position)
+                : (Vector2)arenaBounds.center;
+
+            if (player == null)
+                return MapBoundary.ClampToPlayableArea(spawnPosition);
+
+            Vector2 fromPlayer = spawnPosition - (Vector2)player.position;
+            float minDistance = bossSpawnPlayerSeparation;
+
+            if (minDistance <= 0f || fromPlayer.sqrMagnitude >= minDistance * minDistance)
+                return MapBoundary.ClampToPlayableArea(spawnPosition);
+
+            Vector2 direction = fromPlayer.sqrMagnitude <= 0.001f ? Vector2.up : fromPlayer.normalized;
+            return MapBoundary.ClampToPlayableArea((Vector2)player.position + direction * minDistance);
+        }
+
+        private IEnumerator AttractFieldExperienceGemsAfterDelay()
+        {
+            if (bossDeathGemAttractDelay > 0f)
+                yield return new WaitForSeconds(bossDeathGemAttractDelay);
+
+            PlayerExperience playerExperience = player == null ? null : player.GetComponent<PlayerExperience>();
+
+            if (playerExperience == null)
+                yield break;
+
+            ExperienceGem[] gems = FindObjectsByType<ExperienceGem>(FindObjectsSortMode.None);
+
+            foreach (ExperienceGem gem in gems)
+            {
+                if (gem == null || gem.IsClaimed)
+                    continue;
+
+                gem.StartAttract(playerExperience);
+            }
         }
 
         private Bounds CreateFallbackArenaBounds(Bounds baseBounds)

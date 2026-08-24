@@ -20,7 +20,16 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float lifetime = 5f;
 
+        [SerializeField]
+        private LayerMask playerLayerMask = 1 << 6;
+
+        [SerializeField]
+        private float visibleHitboxCoverage = 0.72f;
+
         private Rigidbody2D rb;
+        private Collider2D projectileCollider;
+        private SpriteRenderer spriteRenderer;
+        private PlayerHealth playerHealth;
         private Vector2 direction = Vector2.down;
         private Transform homingTarget;
         private float homingDuration;
@@ -57,9 +66,13 @@ namespace VampireLike.Enemies
             rb = GetComponent<Rigidbody2D>();
             rb.gravityScale = 0f;
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
 
-            Collider2D projectileCollider = GetComponent<Collider2D>();
+            projectileCollider = GetComponent<Collider2D>();
             projectileCollider.isTrigger = true;
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            playerHealth = FindAnyObjectByType<PlayerHealth>();
             CombatVFX.AttachTrail(gameObject, CombatVFXKind.Explosion, 0.07f, 0.18f);
         }
 
@@ -74,12 +87,95 @@ namespace VampireLike.Enemies
         private void FixedUpdate()
         {
             UpdateHomingDirection();
-            rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
+            Vector2 startPosition = rb.position;
+            Vector2 nextPosition = startPosition + direction * speed * Time.fixedDeltaTime;
+
+            if (TrySweepDamagePlayer(startPosition, nextPosition))
+                return;
+
+            rb.MovePosition(nextPosition);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            PlayerHealth playerHealth = other.GetComponentInParent<PlayerHealth>();
+            TryDamagePlayer(other);
+        }
+
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (collision == null || collision.collider == null)
+                return;
+
+            TryDamagePlayer(collision.collider);
+        }
+
+        private bool TrySweepDamagePlayer(Vector2 startPosition, Vector2 nextPosition)
+        {
+            if (isDestroying)
+                return true;
+
+            Vector2 delta = nextPosition - startPosition;
+            float distance = delta.magnitude;
+
+            if (distance <= 0.0001f)
+                return false;
+
+            float sweepRadius = GetSweepRadius();
+
+            if (TryDamagePlayerByHurtbox(startPosition, nextPosition, sweepRadius))
+                return true;
+
+            RaycastHit2D hit = Physics2D.CircleCast(
+                startPosition,
+                sweepRadius,
+                delta.normalized,
+                distance,
+                playerLayerMask);
+
+            if (hit.collider == null)
+                return false;
+
+            TryDamagePlayer(hit.collider);
+            return isDestroying;
+        }
+
+        private float GetSweepRadius()
+        {
+            float radius = 0.08f;
+
+            if (projectileCollider is CircleCollider2D circleCollider)
+                radius = Mathf.Max(radius, circleCollider.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y));
+
+            if (projectileCollider != null)
+                radius = Mathf.Max(radius, Mathf.Min(projectileCollider.bounds.extents.x, projectileCollider.bounds.extents.y));
+
+            if (spriteRenderer == null)
+                spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+            if (spriteRenderer != null)
+                radius = Mathf.Max(radius, Mathf.Max(spriteRenderer.bounds.extents.x, spriteRenderer.bounds.extents.y) * visibleHitboxCoverage);
+
+            return radius;
+        }
+
+        private bool TryDamagePlayerByHurtbox(Vector2 startPosition, Vector2 nextPosition, float sweepRadius)
+        {
+            if (playerHealth == null)
+                playerHealth = FindAnyObjectByType<PlayerHealth>();
+
+            if (playerHealth == null || !playerHealth.IsHitByProjectileSweep(startPosition, nextPosition, sweepRadius))
+                return false;
+
+            TryDamagePlayer(playerHealth);
+            return isDestroying;
+        }
+
+        private void TryDamagePlayer(Component hit)
+        {
+            if (isDestroying || hit == null)
+                return;
+
+            PlayerHealth playerHealth = hit.GetComponentInParent<PlayerHealth>();
 
             if (playerHealth == null)
                 return;
@@ -94,6 +190,7 @@ namespace VampireLike.Enemies
             speed = Mathf.Max(0f, speed);
             damage = Mathf.Max(1, damage);
             lifetime = Mathf.Max(0.1f, lifetime);
+            visibleHitboxCoverage = Mathf.Clamp(visibleHitboxCoverage, 0.1f, 1f);
         }
 
         private void UpdateHomingDirection()

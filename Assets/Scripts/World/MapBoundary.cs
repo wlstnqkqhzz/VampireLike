@@ -21,6 +21,9 @@ namespace VampireLike.World
         private float spawnInset = 0.75f;
 
         [SerializeField]
+        private float bottomWallVisualAllowance = 0.9f;
+
+        [SerializeField]
         private bool rebuildOnStart = true;
 
         private Bounds worldBounds;
@@ -73,7 +76,6 @@ namespace VampireLike.World
 
         private static Vector2 ClampToBounds(Vector2 position, Bounds bounds, Vector2 minInset, Vector2 maxInset)
         {
-            minInset = Vector2.Max(Vector2.zero, minInset);
             maxInset = Vector2.Max(Vector2.zero, maxInset);
 
             return new Vector2(
@@ -159,6 +161,7 @@ namespace VampireLike.World
         {
             wallThickness = Mathf.Max(0.1f, wallThickness);
             spawnInset = Mathf.Max(0f, spawnInset);
+            bottomWallVisualAllowance = Mathf.Max(0f, bottomWallVisualAllowance);
         }
 
         private void BuildBounds()
@@ -264,7 +267,7 @@ namespace VampireLike.World
                 new Vector2(thickness, height + thickness * 2f));
 
             CreateWall(root.transform, "Bottom Wall",
-                new Vector2(worldBounds.center.x, worldBounds.min.y - thickness * 0.5f),
+                new Vector2(worldBounds.center.x, worldBounds.min.y - bottomWallVisualAllowance - thickness * 0.5f),
                 new Vector2(width + thickness * 2f, thickness));
 
             CreateWall(root.transform, "Top Wall",

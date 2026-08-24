@@ -107,8 +107,13 @@ namespace VampireLike.Growth
 
         public List<UpgradeChoice> GetRandomChoices(int count, int playerLevel = 0)
         {
+            return GetRandomChoices(count, playerLevel, false);
+        }
+
+        public List<UpgradeChoice> GetRandomChoices(int count, int playerLevel, bool bossRewardOnly)
+        {
             // 최대 레벨에 도달하지 않은 강화 중에서 중복 없이 랜덤 선택한다.
-            List<UpgradeDefinition> availableDefinitions = GetAvailableDefinitions(playerLevel);
+            List<UpgradeDefinition> availableDefinitions = GetAvailableDefinitions(playerLevel, bossRewardOnly);
             List<UpgradeChoice> choices = new List<UpgradeChoice>();
             List<UpgradeDefinition> normalDefinitions = new List<UpgradeDefinition>();
             List<UpgradeDefinition> specialDefinitions = new List<UpgradeDefinition>();
@@ -126,13 +131,13 @@ namespace VampireLike.Growth
                     normalDefinitions.Add(definition);
             }
 
-            bool hasNormalChoice = false;
+            bool hasNormalChoice = bossRewardOnly;
             int specialChoiceCount = 0;
             int characterChoiceCount = 0;
 
             while (choices.Count < count && (normalDefinitions.Count > 0 || specialDefinitions.Count > 0 || characterDefinitions.Count > 0))
             {
-                bool chooseCharacter = ShouldChooseCharacterExclusiveChoice(
+                bool chooseCharacter = bossRewardOnly || ShouldChooseCharacterExclusiveChoice(
                     choices.Count,
                     count,
                     hasNormalChoice,
@@ -140,13 +145,13 @@ namespace VampireLike.Growth
                     normalDefinitions.Count,
                     characterDefinitions.Count);
 
-                bool chooseSpecial = !chooseCharacter && ShouldChooseSpecialChoice(
+                bool chooseSpecial = !chooseCharacter && (bossRewardOnly || ShouldChooseSpecialChoice(
                     choices.Count,
                     count,
                     hasNormalChoice,
                     specialChoiceCount,
                     normalDefinitions.Count,
-                    specialDefinitions.Count);
+                    specialDefinitions.Count));
 
                 UpgradeDefinition definition = null;
 
@@ -157,7 +162,7 @@ namespace VampireLike.Growth
                 else
                     definition = TakeRandomDefinition(normalDefinitions);
 
-                if (definition == null)
+                if (!bossRewardOnly && definition == null)
                     definition = TakeRandomDefinition(normalDefinitions);
 
                 if (definition == null)
@@ -335,7 +340,7 @@ namespace VampireLike.Growth
                     break;
                 case UpgradeType.SequentialShot:
                     if (autoAttack != null)
-                        autoAttack.AddSequentialShotCount(definition.FlatAmount);
+                        autoAttack.AddProjectileCount(definition.FlatAmount);
                     break;
                 case UpgradeType.KaelBlackSwordWave:
                     if (specialUpgradeController != null)
@@ -383,7 +388,65 @@ namespace VampireLike.Growth
             Debug.Log($"Upgrade Selected: {definition.DisplayName}");
         }
 
+        public List<string> GetUpgradeStatusLines()
+        {
+            List<string> lines = new List<string>();
+
+            if (upgradeDefinitions == null)
+                return lines;
+
+            HashSet<UpgradeType> addedTypes = new HashSet<UpgradeType>();
+
+            foreach (UpgradeDefinition definition in upgradeDefinitions)
+            {
+                if (definition == null || definition.Unlimited)
+                    continue;
+
+                UpgradeType upgradeType = definition.UpgradeType == UpgradeType.SequentialShot
+                    ? UpgradeType.ProjectileCount
+                    : definition.UpgradeType;
+
+                if (!addedTypes.Add(upgradeType))
+                    continue;
+
+                int level = GetLevel(upgradeType);
+
+                if (level <= 0)
+                    continue;
+
+                string valueText = GetUpgradeValueText(definition, level);
+                lines.Add(string.IsNullOrEmpty(valueText)
+                    ? $"{definition.DisplayName} Lv.{level}"
+                    : $"{definition.DisplayName} Lv.{level} ({valueText})");
+            }
+
+            return lines;
+        }
+
+        private static string GetUpgradeValueText(UpgradeDefinition definition, int level)
+        {
+            if (definition == null)
+                return string.Empty;
+
+            if (definition.FlatAmount > 0)
+                return $"+{definition.FlatAmount * level}";
+
+            if (!Mathf.Approximately(definition.Multiplier, 1f) && definition.Multiplier > 0f)
+            {
+                float totalMultiplier = Mathf.Pow(definition.Multiplier, level);
+                float percent = (totalMultiplier - 1f) * 100f;
+                return $"{percent:+0;-0;0}%";
+            }
+
+            return string.Empty;
+        }
+
         private List<UpgradeDefinition> GetAvailableDefinitions(int playerLevel)
+        {
+            return GetAvailableDefinitions(playerLevel, false);
+        }
+
+        private List<UpgradeDefinition> GetAvailableDefinitions(int playerLevel, bool bossRewardOnly)
         {
             // 제한 레벨이 남아 있거나 무제한 강화인 것만 후보로 사용한다.
             List<UpgradeDefinition> availableDefinitions = new List<UpgradeDefinition>();
@@ -400,13 +463,19 @@ namespace VampireLike.Growth
                 if (!definition.CanAppearForCharacter(CharacterSelection.SelectedCharacter.Id))
                     continue;
 
+                if (definition.UpgradeType == UpgradeType.SequentialShot)
+                    continue;
+
+                if (bossRewardOnly && !definition.IsSpecialUpgrade && !definition.IsCharacterExclusiveUpgrade)
+                    continue;
+
                 if (!definition.Unlimited && !addedLimitedTypes.Add(definition.UpgradeType))
                     continue;
 
                 availableDefinitions.Add(definition);
             }
 
-            if (ShouldUseSimpleEarlyChoices(playerLevel))
+            if (!bossRewardOnly && ShouldUseSimpleEarlyChoices(playerLevel))
             {
                 List<UpgradeDefinition> simpleDefinitions = new List<UpgradeDefinition>();
 

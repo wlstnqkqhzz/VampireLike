@@ -10,6 +10,12 @@ namespace VampireLike.Growth
     /// </summary>
     public class PlayerExperience : MonoBehaviour
     {
+        public enum LevelUpSource
+        {
+            Normal,
+            BossReward
+        }
+
         // 현재 레벨에서 누적된 경험치다.
         [SerializeField]
         private int currentExperience;
@@ -48,6 +54,7 @@ namespace VampireLike.Growth
 
         private LevelUpChoiceUI levelUpChoiceUI;
         private bool hasPendingLevelUpChoice;
+        private LevelUpSource pendingLevelUpSource = LevelUpSource.Normal;
         private readonly Collider2D[] pickupResults = new Collider2D[16];
 
         public int CurrentExperience => currentExperience;
@@ -92,12 +99,17 @@ namespace VampireLike.Growth
 
             currentExperience += amount;
             GameSessionStats.RecordExperience(amount);
-            CheckLevelUp();
+            CheckLevelUp(LevelUpSource.Normal);
             NotifyExperienceChanged();
             Debug.Log($"Experience: {currentExperience}/{experienceToNextLevel}");
         }
 
         public void GrantImmediateLevelUp(int statExperienceAmount = 0)
+        {
+            GrantImmediateLevelUp(statExperienceAmount, LevelUpSource.Normal);
+        }
+
+        public void GrantImmediateLevelUp(int statExperienceAmount, LevelUpSource levelUpSource)
         {
             if (currentLevel >= maxLevel)
                 return;
@@ -107,7 +119,7 @@ namespace VampireLike.Growth
 
             int requiredExperience = Mathf.Max(1, experienceToNextLevel - currentExperience);
             currentExperience += requiredExperience;
-            CheckLevelUp();
+            CheckLevelUp(levelUpSource);
             NotifyExperienceChanged();
         }
 
@@ -139,7 +151,7 @@ namespace VampireLike.Growth
             pickupRadius = Mathf.Max(0.05f, pickupRadius);
         }
 
-        private void CheckLevelUp()
+        private void CheckLevelUp(LevelUpSource levelUpSource)
         {
             // 한 번에 많은 경험치를 얻어도 필요한 만큼 레벨업을 처리한다.
             while (currentLevel < maxLevel && currentExperience >= experienceToNextLevel)
@@ -150,6 +162,7 @@ namespace VampireLike.Growth
                 GameSfx.Play(SfxType.LevelUp);
                 Debug.Log($"Level Up! Level {currentLevel} / Next EXP: {currentExperience}/{experienceToNextLevel}");
                 hasPendingLevelUpChoice = true;
+                pendingLevelUpSource = levelUpSource;
             }
 
             if (currentLevel >= maxLevel)
@@ -161,7 +174,11 @@ namespace VampireLike.Growth
             if (hasPendingLevelUpChoice)
             {
                 hasPendingLevelUpChoice = false;
-                levelUpChoiceUI.Show(currentLevel);
+                LevelUpChoiceUI.ChoiceMode choiceMode = pendingLevelUpSource == LevelUpSource.BossReward
+                    ? LevelUpChoiceUI.ChoiceMode.BossReward
+                    : LevelUpChoiceUI.ChoiceMode.Normal;
+                pendingLevelUpSource = LevelUpSource.Normal;
+                levelUpChoiceUI.Show(currentLevel, choiceMode);
             }
         }
 

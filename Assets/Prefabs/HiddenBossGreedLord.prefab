@@ -216,11 +216,17 @@ MonoBehaviour:
   maximumPhase: 3
   allowMovementDuringPattern: 1
   summonPrefab: {fileID: 100000, guid: 3bbc1b47b74e4f02bbf976b4e6c38c22, type: 3}
-  summonCount: 2
-  phaseBonusSummonCount: 1
+  summonPrefabs:
+  - {fileID: 100000, guid: fd98e3cf5845494ea3c88e97324ef5eb, type: 3}
+  - {fileID: 100000, guid: 8b21dd4087434b79bd232748b3f5fbe3, type: 3}
+  - {fileID: 100000, guid: d204816acc014397a58ae453e1ba97f0, type: 3}
+  minSummonCount: 2
+  summonCount: 5
+  phaseBonusSummonCount: 0
   maxActiveSummons: 6
   spawnRadius: 1.6
   summonInterval: 0.15
+  summonTelegraphDelay: 0.45
 --- !u!114 &100011
 MonoBehaviour:
   m_ObjectHideFlags: 0

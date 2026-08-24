@@ -199,6 +199,10 @@ MonoBehaviour:
     m_Bits: 64
   warningPrefab: {fileID: 570000, guid: bcc9f62a6bd04cb4a9bb22eb9b920a66, type: 3}
   breathPrefab: {fileID: 590000, guid: d3cb206fa2874a76905a09965d252fb0, type: 3}
+  moveDuringBreath: 1
+  breathMoveSpeed: 1.8
+  trackPlayerDuringBreath: 1
+  breathTurnSpeed: 105
 --- !u!114 &100010
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -159,10 +159,10 @@ namespace VampireLike.Enemies
         private bool trimExistingEnemiesOnBossFight = true;
 
         [SerializeField]
-        private int bossFightTrimTargetEnemyCount = 16;
+        private int bossFightTrimTargetEnemyCount = 0;
 
         [SerializeField]
-        private float bossFightTrimProtectedPlayerRadius = 4f;
+        private float bossFightTrimProtectedPlayerRadius = 0f;
 
         private readonly List<GameObject> spawnedEnemies = new List<GameObject>();
         private float spawnTimer;
@@ -200,6 +200,12 @@ namespace VampireLike.Enemies
             UpdateWaveTimer();
             RemoveMissingEnemies();
             UpdateBossFightDensity();
+
+            if (IsWaveProgressPaused)
+            {
+                spawnTimer = 0f;
+                return;
+            }
 
             if (spawnedEnemies.Count >= CurrentMaxEnemyCount)
                 return;
@@ -357,7 +363,7 @@ namespace VampireLike.Enemies
             int spawnCount = Mathf.Clamp(enemiesPerSpawn + extraCount, 1, maxEnemiesPerSpawn);
 
             if (IsWaveProgressPaused)
-                return Mathf.Min(spawnCount, bossFightMaxEnemiesPerSpawn);
+                return 0;
 
             return spawnCount;
         }
@@ -367,7 +373,7 @@ namespace VampireLike.Enemies
             if (!IsWaveProgressPaused)
                 return currentSpawnInterval;
 
-            return currentSpawnInterval * bossFightSpawnIntervalMultiplier;
+            return float.PositiveInfinity;
         }
 
         private int GetEffectiveCurrentMaxEnemyCount()
