@@ -52,5 +52,11 @@ Desktop.ini
 *.aab
 *.unitypackage
 
+# 원본 효과음 팩 및 조사용 임시 자료
+/AudioSourcePacks/
+
+# 로컬 분석 보고서
+/APK_Optimization_Report.md
+
 # 외부 에셋 전체 제외
 /Assets/ExternalAssets/
