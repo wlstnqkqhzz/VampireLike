@@ -9,6 +9,8 @@ namespace VampireLike.Menu
     /// </summary>
     public readonly struct CharacterDefinition
     {
+        private const int UpgradeMaxLevelExpansionMultiplier = 2;
+
         public CharacterDefinition(
             string id,
             string displayName,
@@ -71,13 +73,20 @@ namespace VampireLike.Menu
                 return 0;
 
             if (definition.Unlimited || definition.IsSpecialUpgrade || definition.IsCharacterExclusiveUpgrade)
-                return definition.MaxLevel;
+                return GetExpandedMaxLevel(definition.MaxLevel);
 
             if (NormalUpgradeMaxLevels != null
                 && NormalUpgradeMaxLevels.TryGetValue(definition.UpgradeType, out int maxLevel))
-                return maxLevel;
+                return GetExpandedMaxLevel(maxLevel);
 
-            return definition.MaxLevel;
+            return GetExpandedMaxLevel(definition.MaxLevel);
+        }
+
+        private static int GetExpandedMaxLevel(int baseMaxLevel)
+        {
+            return baseMaxLevel <= 0
+                ? 0
+                : baseMaxLevel * UpgradeMaxLevelExpansionMultiplier;
         }
     }
 }

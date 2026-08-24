@@ -29,6 +29,8 @@ namespace VampireLike.Menu
         private GUIStyle labelStyle;
         private GUIStyle descriptionStyle;
         private GUIStyle statStyle;
+        private GUIStyle statNameStyle;
+        private GUIStyle statValueStyle;
         private GUIStyle buttonStyle;
         private GUIStyle secondaryButtonStyle;
         private GUIStyle footerStyle;
@@ -447,17 +449,30 @@ namespace VampireLike.Menu
 
             GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 22f, cardRect.width - 36f, 34f), character.DisplayName, labelStyle);
             GUI.Label(new Rect(cardRect.x + 18f, cardRect.y + 58f, cardRect.width - 36f, 26f), character.Role, subtitleStyle);
-            GUI.Label(new Rect(cardRect.x + 26f, cardRect.y + 96f, cardRect.width - 52f, 110f), character.Description, descriptionStyle);
+            GUI.Label(new Rect(cardRect.x + 26f, cardRect.y + 94f, cardRect.width - 52f, 128f), character.Description, descriptionStyle);
 
-            string statText = $"이동 x{character.MoveSpeedMultiplier:0.00}\n공격 간격 x{character.AttackIntervalMultiplier:0.00}\n투사체 피해 x{character.ProjectileDamageMultiplier:0.00}\n최대 레벨 {character.MaxPlayerLevel}";
+            DrawCharacterStatRows(
+                new Rect(cardRect.x + 42f, cardRect.y + 218f, cardRect.width - 84f, 122f),
+                ("이동", FormatSpeedRating(character.MoveSpeedMultiplier)),
+                ("공격 속도", FormatAttackSpeedRating(character.AttackIntervalMultiplier)),
+                ("투사체 피해", FormatPowerRating(character.ProjectileDamageMultiplier)),
+                ("투사체 수", FormatBonusRating(character.BonusProjectileCount)),
+                ("체력", FormatHealthRating(character.BonusMaxHealth)));
+        }
 
-            if (character.BonusProjectileCount > 0)
-                statText += $"\n투사체 +{character.BonusProjectileCount}";
+        private void DrawCharacterStatRows(Rect statRect, params (string Label, string Rating)[] rows)
+        {
+            float rowHeight = 24f;
+            float labelWidth = 118f;
+            float columnGap = 18f;
+            float valueWidth = statRect.width - labelWidth - columnGap;
 
-            if (character.BonusMaxHealth > 0)
-                statText += $"\n최대 체력 +{character.BonusMaxHealth}";
-
-            GUI.Label(new Rect(cardRect.x + 26f, cardRect.y + 222f, cardRect.width - 52f, 112f), statText, statStyle);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                float y = statRect.y + rowHeight * i;
+                GUI.Label(new Rect(statRect.x, y, labelWidth, rowHeight), rows[i].Label, statNameStyle);
+                GUI.Label(new Rect(statRect.x + labelWidth + columnGap, y, valueWidth, rowHeight), GetColoredRatingText(rows[i].Rating), statValueStyle);
+            }
         }
 
         private void ShowNotice(string message)
@@ -506,6 +521,66 @@ namespace VampireLike.Menu
             return $"{minutes:00}:{remainingSeconds:00}";
         }
 
+        private static string FormatSpeedRating(float multiplier)
+        {
+            if (multiplier < 0.95f)
+                return "느림";
+
+            if (multiplier > 1.05f)
+                return "빠름";
+
+            return "보통";
+        }
+
+        private static string FormatAttackSpeedRating(float attackIntervalMultiplier)
+        {
+            if (attackIntervalMultiplier > 1.05f)
+                return "느림";
+
+            if (attackIntervalMultiplier < 0.95f)
+                return "빠름";
+
+            return "보통";
+        }
+
+        private static string FormatPowerRating(float multiplier)
+        {
+            if (multiplier < 0.9f)
+                return "약함";
+
+            if (multiplier > 1.1f)
+                return "좋음";
+
+            return "보통";
+        }
+
+        private static string FormatBonusRating(int bonus)
+        {
+            return bonus > 0 ? "좋음" : "보통";
+        }
+
+        private static string FormatHealthRating(int bonusMaxHealth)
+        {
+            if (bonusMaxHealth <= 0)
+                return "약함";
+
+            if (bonusMaxHealth >= 15)
+                return "좋음";
+
+            return "보통";
+        }
+
+        private static string GetColoredRatingText(string rating)
+        {
+            if (rating == "약함" || rating == "느림")
+                return $"<color=#ff6b6b>{rating}</color>";
+
+            if (rating == "좋음" || rating == "빠름")
+                return $"<color=#6ba8ff>{rating}</color>";
+
+            return rating;
+        }
+
         private void EnsureStyles()
         {
             if (titleStyle != null)
@@ -547,13 +622,29 @@ namespace VampireLike.Menu
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontSize = 15,
-                wordWrap = true
+                wordWrap = true,
+                clipping = TextClipping.Overflow
             };
             descriptionStyle.normal.textColor = new Color(0.9f, 0.95f, 0.86f, 1f);
 
             statStyle = new GUIStyle(descriptionStyle)
             {
                 fontSize = 14
+            };
+
+            statNameStyle = new GUIStyle(statStyle)
+            {
+                alignment = TextAnchor.MiddleRight,
+                wordWrap = false,
+                clipping = TextClipping.Clip
+            };
+
+            statValueStyle = new GUIStyle(statStyle)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                wordWrap = false,
+                clipping = TextClipping.Clip,
+                richText = true
             };
 
             footerStyle = new GUIStyle(GUI.skin.label)
@@ -612,6 +703,8 @@ namespace VampireLike.Menu
             labelStyle.fontSize = Mathf.RoundToInt(26 * scale);
             descriptionStyle.fontSize = Mathf.RoundToInt(15 * scale);
             statStyle.fontSize = Mathf.RoundToInt(14 * scale);
+            statNameStyle.fontSize = statStyle.fontSize;
+            statValueStyle.fontSize = statStyle.fontSize;
             footerStyle.fontSize = Mathf.RoundToInt(14 * scale);
             optionLabelStyle.fontSize = Mathf.RoundToInt(18 * scale);
             optionValueStyle.fontSize = Mathf.RoundToInt(18 * scale);

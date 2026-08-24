@@ -24,9 +24,9 @@ namespace VampireLike.Growth
         [SerializeField]
         private int currentLevel = 1;
 
-        // 선택한 캐릭터가 도달할 수 있는 최대 레벨입니다.
+        // 플레이어 레벨 상한이다. 기본값은 사실상 제한 없음으로 둔다.
         [SerializeField]
-        private int maxLevel = 50;
+        private int maxLevel = int.MaxValue;
 
         // 다음 레벨까지 필요한 경험치다.
         [SerializeField]
@@ -68,6 +68,8 @@ namespace VampireLike.Growth
 
         private void Awake()
         {
+            maxLevel = int.MaxValue;
+
             // 성장 관련 컴포넌트가 빠져 있어도 Player에 자동으로 붙여 학습 프로젝트 설정 부담을 줄인다.
             levelUpChoiceUI = GetComponent<LevelUpChoiceUI>();
 
@@ -134,7 +136,7 @@ namespace VampireLike.Growth
 
         public void SetMaxLevel(int value)
         {
-            maxLevel = Mathf.Max(1, value);
+            maxLevel = value <= 0 ? int.MaxValue : Mathf.Max(1, value);
             currentLevel = Mathf.Min(currentLevel, maxLevel);
             NotifyExperienceChanged();
         }
