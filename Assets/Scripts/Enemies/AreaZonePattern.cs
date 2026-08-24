@@ -47,6 +47,19 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float damageInterval = 0.7f;
 
+        [Header("Center Bind")]
+        [SerializeField]
+        private bool centerBindEnabled;
+
+        [SerializeField]
+        private float centerBindRadius = 0.35f;
+
+        [SerializeField]
+        private float centerBindDuration = 2f;
+
+        [SerializeField]
+        private bool bindOncePerZone = true;
+
         [SerializeField]
         private bool spawnNearPlayer = true;
 
@@ -106,7 +119,8 @@ namespace VampireLike.Enemies
             if (areaZone == null)
                 areaZone = zone.AddComponent<BossAreaZone>();
 
-            areaZone.Initialize(duration, slowMultiplier, damagePerTick, damageInterval, radius);
+            areaZone.Initialize(duration, slowMultiplier, damagePerTick, damageInterval, radius,
+                centerBindEnabled, centerBindRadius, centerBindDuration, bindOncePerZone);
 
             if (zonePrefab != null)
                 ScaleZoneVisual(zone);
@@ -212,6 +226,8 @@ namespace VampireLike.Enemies
             slowMultiplier = Mathf.Clamp(slowMultiplier, 0.25f, 1f);
             damagePerTick = Mathf.Max(0, damagePerTick);
             damageInterval = Mathf.Max(0.1f, damageInterval);
+            centerBindRadius = Mathf.Clamp(centerBindRadius, 0.05f, radius);
+            centerBindDuration = Mathf.Max(0f, centerBindDuration);
         }
     }
 }

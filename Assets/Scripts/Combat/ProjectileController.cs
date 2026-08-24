@@ -46,7 +46,7 @@ namespace VampireLike.Combat
         private readonly HashSet<EnemyHealth> hitEnemies = new HashSet<EnemyHealth>();
         private const int ProjectileSortingOrder = 1800;
         private static int nextAttackGroupId = 1;
-        private static readonly Dictionary<int, Dictionary<int, int>> attackGroupHitCounts = new Dictionary<int, Dictionary<int, int>>();
+        private static readonly Dictionary<int, Dictionary<EnemyHealth, int>> attackGroupHitCounts = new Dictionary<int, Dictionary<EnemyHealth, int>>();
         private static readonly Dictionary<int, float> attackGroupLastUsedTimes = new Dictionary<int, float>();
         private static readonly List<int> expiredAttackGroupIds = new List<int>();
 
@@ -178,16 +178,15 @@ namespace VampireLike.Combat
 
             PruneAttackGroups();
 
-            int enemyId = enemyHealth.GetInstanceID();
-            if (!attackGroupHitCounts.TryGetValue(attackGroupId, out Dictionary<int, int> hitCounts))
+            if (!attackGroupHitCounts.TryGetValue(attackGroupId, out Dictionary<EnemyHealth, int> hitCounts))
             {
-                hitCounts = new Dictionary<int, int>();
+                hitCounts = new Dictionary<EnemyHealth, int>();
                 attackGroupHitCounts[attackGroupId] = hitCounts;
             }
 
             attackGroupLastUsedTimes[attackGroupId] = Time.time;
-            int previousHitCount = hitCounts.TryGetValue(enemyId, out int count) ? count : 0;
-            hitCounts[enemyId] = previousHitCount + 1;
+            int previousHitCount = hitCounts.TryGetValue(enemyHealth, out int count) ? count : 0;
+            hitCounts[enemyHealth] = previousHitCount + 1;
 
             if (previousHitCount == 0)
                 return effectiveDamage;

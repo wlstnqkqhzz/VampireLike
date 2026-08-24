@@ -60,9 +60,33 @@ namespace VampireLike.World
                 return position;
 
             float inset = activeBoundary == null ? 0f : activeBoundary.spawnInset;
+            return ClampToBounds(position, bounds, Vector2.one * inset, Vector2.one * inset);
+        }
+
+        public static Vector2 ClampToPlayableArea(Vector2 position, Vector2 minInset, Vector2 maxInset)
+        {
+            if (!TryGetWorldBounds(out Bounds bounds))
+                return position;
+
+            return ClampToBounds(position, bounds, minInset, maxInset);
+        }
+
+        private static Vector2 ClampToBounds(Vector2 position, Bounds bounds, Vector2 minInset, Vector2 maxInset)
+        {
+            minInset = Vector2.Max(Vector2.zero, minInset);
+            maxInset = Vector2.Max(Vector2.zero, maxInset);
+
             return new Vector2(
-                Mathf.Clamp(position.x, bounds.min.x + inset, bounds.max.x - inset),
-                Mathf.Clamp(position.y, bounds.min.y + inset, bounds.max.y - inset));
+                ClampAxis(position.x, bounds.min.x + minInset.x, bounds.max.x - maxInset.x),
+                ClampAxis(position.y, bounds.min.y + minInset.y, bounds.max.y - maxInset.y));
+        }
+
+        private static float ClampAxis(float value, float min, float max)
+        {
+            if (min > max)
+                return (min + max) * 0.5f;
+
+            return Mathf.Clamp(value, min, max);
         }
 
         public static void OverrideActiveBounds(Bounds bounds)

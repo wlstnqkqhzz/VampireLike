@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     private const int SpriteSize = 16;
     private const int DirectionFrameCount = 4;
     private const float MinimumMoveSpeedMultiplier = 0.25f;
+    private const float BoundarySkin = 0.02f;
     private const string PlayerVisualName = "PlayerVisual";
     private const string WalkSpritePath = "Assets/Art/Characters/Vampire/SeparateAnim/Walk.png";
     private static readonly Vector2 PlayerColliderOffset = new Vector2(0f, -0.03f);
@@ -41,6 +42,7 @@ public class PlayerController : MonoBehaviour
     private Sprite[][] walkFramesByDirection;
     private readonly Dictionary<object, float> moveSpeedMultipliers = new Dictionary<object, float>();
     private float currentMoveSpeedMultiplier = 1f;
+    private float movementLockTimer;
     private float animationTimer;
     private int animationFrameIndex;
     private bool wasMoving;
@@ -57,6 +59,7 @@ public class PlayerController : MonoBehaviour
 
     public Vector2 MoveInput => moveInput;
     public bool IsMoving => moveInput.sqrMagnitude > 0.01f;
+    public bool IsMovementLocked => movementLockTimer > 0f;
 
     private void Awake()
     {
@@ -101,9 +104,15 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = Vector2.zero;
 
+        if (movementLockTimer > 0f)
+            movementLockTimer = Mathf.Max(0f, movementLockTimer - Time.deltaTime);
+
         if (MobileTouchJoystick.HasActiveInput)
         {
             moveInput = MobileTouchJoystick.MoveInput;
+            if (IsMovementLocked)
+                moveInput = Vector2.zero;
+
             UpdateFacingDirection();
             UpdateAnimation();
             return;
@@ -128,15 +137,22 @@ public class PlayerController : MonoBehaviour
             moveInput.y -= 1;
 
         moveInput = moveInput.normalized;
+        if (IsMovementLocked)
+            moveInput = Vector2.zero;
+
         UpdateFacingDirection();
         UpdateAnimation();
     }
 
     private void FixedUpdate()
     {
+        if (IsMovementLocked)
+            return;
+
         // Transform 직접 변경 대신 Rigidbody2D.MovePosition으로 이동해 충돌과 함께 동작하게 한다.
         Vector2 nextPosition = rb.position + moveInput * moveSpeed * currentMoveSpeedMultiplier * Time.fixedDeltaTime;
-        nextPosition = MapBoundary.ClampToPlayableArea(nextPosition);
+        GetPlayerBoundaryInsets(out Vector2 minInset, out Vector2 maxInset);
+        nextPosition = MapBoundary.ClampToPlayableArea(nextPosition, minInset, maxInset);
         rb.MovePosition(nextPosition);
     }
 
@@ -149,6 +165,17 @@ public class PlayerController : MonoBehaviour
             return;
 
         moveSpeed *= multiplier;
+    }
+
+    /// <summary>
+    /// 거미줄 중심부 같은 속박 효과로 일정 시간 플레이어 이동을 막는다.
+    /// </summary>
+    public void ApplyMovementLock(float duration)
+    {
+        if (duration <= 0f)
+            return;
+
+        movementLockTimer = Mathf.Max(movementLockTimer, duration);
     }
 
     /// <summary>
@@ -233,6 +260,22 @@ public class PlayerController : MonoBehaviour
             boxCollider.offset = PlayerColliderOffset;
             boxCollider.size = PlayerColliderSize;
         }
+    }
+
+    private void GetPlayerBoundaryInsets(out Vector2 minInset, out Vector2 maxInset)
+    {
+        if (playerCollider == null)
+        {
+            Vector2 fallbackInset = Vector2.one * BoundarySkin;
+            minInset = fallbackInset;
+            maxInset = fallbackInset;
+            return;
+        }
+
+        Bounds bounds = playerCollider.bounds;
+        Vector2 position = transform.position;
+        minInset = new Vector2(position.x - bounds.min.x, position.y - bounds.min.y) + Vector2.one * BoundarySkin;
+        maxInset = new Vector2(bounds.max.x - position.x, bounds.max.y - position.y) + Vector2.one * BoundarySkin;
     }
 
     private void UpdateFacingDirection()

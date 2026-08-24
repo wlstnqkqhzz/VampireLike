@@ -58,10 +58,10 @@ namespace VampireLike.Enemies
         private float baseBossHealthMultiplier = 1f;
 
         [SerializeField]
-        private float bossHealthBalanceMultiplier = 2f;
+        private float bossHealthBalanceMultiplier = 1.65f;
 
         [SerializeField]
-        private float healthMultiplierPerBossStage = 1.22f;
+        private float healthMultiplierPerBossStage = 1.18f;
 
         [SerializeField]
         private float healthMultiplierPerAppearance = 1f;
@@ -92,6 +92,15 @@ namespace VampireLike.Enemies
 
         [SerializeField]
         private float bossArenaScreenPadding = 0.25f;
+
+        [SerializeField]
+        private float bossArenaTopHudPadding = 1.25f;
+
+        [SerializeField]
+        private float bossArenaBottomPadding = 0.25f;
+
+        [SerializeField]
+        private float bossArenaPlayerBottomVisualAllowance = 0.9f;
 
         private GameObject activeBoss;
         private EnemyHealth activeBossHealth;
@@ -181,6 +190,9 @@ namespace VampireLike.Enemies
             bossArenaMinWidth = Mathf.Max(6f, bossArenaMinWidth);
             bossArenaMinHeight = Mathf.Max(6f, bossArenaMinHeight);
             bossArenaScreenPadding = Mathf.Max(0f, bossArenaScreenPadding);
+            bossArenaTopHudPadding = Mathf.Max(0f, bossArenaTopHudPadding);
+            bossArenaBottomPadding = Mathf.Max(0f, bossArenaBottomPadding);
+            bossArenaPlayerBottomVisualAllowance = Mathf.Max(0f, bossArenaPlayerBottomVisualAllowance);
 
             if (bossSpawnEntries == null)
                 return;
@@ -281,6 +293,7 @@ namespace VampireLike.Enemies
                 ? cameraBounds
                 : CreateFallbackArenaBounds(baseBounds);
 
+            arenaBounds = ApplyBossArenaBottomVisualAllowance(arenaBounds, baseBounds);
             MapBoundary.OverrideTemporaryBounds(this, arenaBounds);
         }
 
@@ -311,9 +324,48 @@ namespace VampireLike.Enemies
             Vector3 center = mainCamera.transform.position;
             center.z = baseBounds.center.z;
 
+            ApplyScreenSafeBossArenaPadding(ref center, ref arenaSize);
             ClampArenaCenterToBaseBounds(ref center, arenaSize, baseBounds);
             cameraBounds = new Bounds(center, arenaSize);
             return true;
+        }
+
+        private void ApplyScreenSafeBossArenaPadding(ref Vector3 center, ref Vector3 arenaSize)
+        {
+            float topPadding = Mathf.Max(0f, bossArenaTopHudPadding);
+            float bottomPadding = Mathf.Max(0f, bossArenaBottomPadding);
+            float maxPadding = Mathf.Max(0f, arenaSize.y - 1f);
+
+            if (topPadding + bottomPadding > maxPadding)
+            {
+                float paddingScale = maxPadding / Mathf.Max(0.01f, topPadding + bottomPadding);
+                topPadding *= paddingScale;
+                bottomPadding *= paddingScale;
+            }
+
+            arenaSize.y = Mathf.Max(1f, arenaSize.y - topPadding - bottomPadding);
+            center.y += (bottomPadding - topPadding) * 0.5f;
+        }
+
+        private Bounds ApplyBossArenaBottomVisualAllowance(Bounds arenaBounds, Bounds baseBounds)
+        {
+            // 플레이어 기준점이 발밑에 가까우면 아래쪽 경계가 더 좁게 느껴져 보스전에서만 하단 여유를 준다.
+            float allowance = Mathf.Min(
+                bossArenaPlayerBottomVisualAllowance,
+                Mathf.Max(0f, arenaBounds.min.y - baseBounds.min.y));
+
+            if (allowance <= 0f)
+                return arenaBounds;
+
+            float minY = arenaBounds.min.y - allowance;
+            float maxY = arenaBounds.max.y;
+            Vector3 center = arenaBounds.center;
+            Vector3 size = arenaBounds.size;
+
+            center.y = (minY + maxY) * 0.5f;
+            size.y = maxY - minY;
+
+            return new Bounds(center, size);
         }
 
         private static void ClampArenaCenterToBaseBounds(ref Vector3 center, Vector3 arenaSize, Bounds baseBounds)

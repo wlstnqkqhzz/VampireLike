@@ -52,6 +52,9 @@ namespace VampireLike.Enemies
 
         [Header("돌진 경고/충격 연출")]
         [SerializeField]
+        private bool showDashPathIndicator = false;
+
+        [SerializeField]
         private float telegraphWidth = 0.08f;
 
         [SerializeField]
@@ -91,7 +94,9 @@ namespace VampireLike.Enemies
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(0);
             CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.9f, effectivePrepareTime, 1500);
-            BossTelegraph.ShowLine(BossRigidbody.position, dashDirection, GetTelegraphDistance(effectiveDashDuration), telegraphWidth, effectivePrepareTime, telegraphColor, 1480);
+
+            if (showDashPathIndicator)
+                BossTelegraph.ShowLine(BossRigidbody.position, dashDirection, GetTelegraphDistance(effectiveDashDuration), telegraphWidth, effectivePrepareTime, telegraphColor, 1480);
 
             yield return new WaitForSeconds(effectivePrepareTime);
 

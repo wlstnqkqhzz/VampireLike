@@ -14,14 +14,33 @@ namespace VampireLike.Enemies
         private int damage;
         private float damageInterval;
         private float nextDamageTime;
+        private bool centerBindEnabled;
+        private float centerBindRadius;
+        private float centerBindDuration;
+        private bool bindOncePerZone;
+        private bool hasBoundPlayer;
         private global::PlayerController slowedPlayer;
 
-        public void Initialize(float duration, float playerSlowMultiplier, int tickDamage, float tickInterval, float radius)
+        public void Initialize(
+            float duration,
+            float playerSlowMultiplier,
+            int tickDamage,
+            float tickInterval,
+            float radius,
+            bool useCenterBind = false,
+            float bindRadius = 0.35f,
+            float bindDuration = 2f,
+            bool bindOnce = true)
         {
             lifetime = Mathf.Max(0.1f, duration);
             slowMultiplier = Mathf.Clamp(playerSlowMultiplier, 0.25f, 1f);
             damage = Mathf.Max(0, tickDamage);
             damageInterval = Mathf.Max(0.1f, tickInterval);
+            centerBindEnabled = useCenterBind;
+            centerBindRadius = Mathf.Clamp(bindRadius, 0.05f, Mathf.Max(0.05f, radius));
+            centerBindDuration = Mathf.Max(0f, bindDuration);
+            bindOncePerZone = bindOnce;
+            hasBoundPlayer = false;
 
             Collider2D zoneCollider = GetComponent<Collider2D>();
             zoneCollider.isTrigger = true;
@@ -41,11 +60,13 @@ namespace VampireLike.Enemies
         private void OnTriggerEnter2D(Collider2D other)
         {
             TryApplySlow(other);
+            TryApplyCenterBind(other);
         }
 
         private void OnTriggerStay2D(Collider2D other)
         {
             TryApplySlow(other);
+            TryApplyCenterBind(other);
             TryApplyDamage(other);
         }
 
@@ -80,6 +101,28 @@ namespace VampireLike.Enemies
             RemoveSlow();
             slowedPlayer = playerController;
             slowedPlayer.AddMoveSpeedMultiplier(this, slowMultiplier);
+        }
+
+        private void TryApplyCenterBind(Collider2D other)
+        {
+            if (!centerBindEnabled || centerBindDuration <= 0f)
+                return;
+
+            if (bindOncePerZone && hasBoundPlayer)
+                return;
+
+            global::PlayerController playerController = other.GetComponentInParent<global::PlayerController>();
+
+            if (playerController == null)
+                return;
+
+            float distance = Vector2.Distance(playerController.transform.position, transform.position);
+
+            if (distance > centerBindRadius)
+                return;
+
+            playerController.ApplyMovementLock(centerBindDuration);
+            hasBoundPlayer = true;
         }
 
         private void TryApplyDamage(Collider2D other)

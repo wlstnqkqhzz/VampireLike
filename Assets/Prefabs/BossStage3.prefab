@@ -233,6 +233,10 @@ MonoBehaviour:
   slowMultiplier: 0.55
   damagePerTick: 0
   damageInterval: 0.7
+  centerBindEnabled: 1
+  centerBindRadius: 0.4
+  centerBindDuration: 2
+  bindOncePerZone: 1
   spawnNearPlayer: 1
   clearZonesOnBossDeath: 1
   fallbackZoneColor: {r: 0.82, g: 0.82, b: 0.95, a: 0.45}
