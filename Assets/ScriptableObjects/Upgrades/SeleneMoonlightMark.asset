@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: SeleneMoonlightMark
   m_EditorClassIdentifier: 
   upgradeType: 26
-  displayName: 달빛 표식
-  description: 같은 적을 여러 번 맞히면 표식이 터져 추가 피해
+  displayName: 월광 표식
+  description: 적중 시 표식, 중첩 폭발로 주변 피해
   maxLevel: 3
   multiplier: 1
   flatAmount: 0

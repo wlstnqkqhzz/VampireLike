@@ -32,7 +32,20 @@ namespace VampireLike.Audio
         BossZone,
         BossProjectile,
         BossTeleport,
-        BossDeath
+        BossDeath,
+        KaelAttack,
+        KaelHit1,
+        KaelHit2,
+        KaelDeath,
+        SeleneAttack,
+        SeleneHit1,
+        SeleneHit2,
+        SeleneDeath,
+        HanSeorinAttack,
+        HanSeorinHit1,
+        HanSeorinHit2,
+        HanSeorinHit3,
+        HanSeorinDeath
     }
 
     /// <summary>
@@ -70,7 +83,20 @@ namespace VampireLike.Audio
             { SfxType.BossZone, "boss_zone" },
             { SfxType.BossProjectile, "boss_projectile" },
             { SfxType.BossTeleport, "boss_teleport" },
-            { SfxType.BossDeath, "boss_death" }
+            { SfxType.BossDeath, "boss_death" },
+            { SfxType.KaelAttack, "kael_attack" },
+            { SfxType.KaelHit1, "kael_hit_1" },
+            { SfxType.KaelHit2, "kael_hit_2" },
+            { SfxType.KaelDeath, "kael_death" },
+            { SfxType.SeleneAttack, "selene_attack" },
+            { SfxType.SeleneHit1, "selene_hit_1" },
+            { SfxType.SeleneHit2, "selene_hit_2" },
+            { SfxType.SeleneDeath, "selene_death" },
+            { SfxType.HanSeorinAttack, "hanseorin_attack" },
+            { SfxType.HanSeorinHit1, "hanseorin_hit_1" },
+            { SfxType.HanSeorinHit2, "hanseorin_hit_2" },
+            { SfxType.HanSeorinHit3, "hanseorin_hit_3" },
+            { SfxType.HanSeorinDeath, "hanseorin_death" }
         };
 
         private static readonly Dictionary<SfxType, float> MinIntervals = new Dictionary<SfxType, float>
@@ -101,7 +127,20 @@ namespace VampireLike.Audio
             { SfxType.BossZone, 0.2f },
             { SfxType.BossProjectile, 0.12f },
             { SfxType.BossTeleport, 0.2f },
-            { SfxType.BossDeath, 0.5f }
+            { SfxType.BossDeath, 0.5f },
+            { SfxType.KaelAttack, 0.08f },
+            { SfxType.KaelHit1, 0.12f },
+            { SfxType.KaelHit2, 0.12f },
+            { SfxType.KaelDeath, 0.5f },
+            { SfxType.SeleneAttack, 0.06f },
+            { SfxType.SeleneHit1, 0.12f },
+            { SfxType.SeleneHit2, 0.12f },
+            { SfxType.SeleneDeath, 0.5f },
+            { SfxType.HanSeorinAttack, 0.05f },
+            { SfxType.HanSeorinHit1, 0.12f },
+            { SfxType.HanSeorinHit2, 0.12f },
+            { SfxType.HanSeorinHit3, 0.12f },
+            { SfxType.HanSeorinDeath, 0.5f }
         };
 
         private static readonly Dictionary<SfxType, float> Volumes = new Dictionary<SfxType, float>
@@ -132,7 +171,20 @@ namespace VampireLike.Audio
             { SfxType.BossZone, 0.5f },
             { SfxType.BossProjectile, 0.42f },
             { SfxType.BossTeleport, 0.48f },
-            { SfxType.BossDeath, 0.68f }
+            { SfxType.BossDeath, 0.68f },
+            { SfxType.KaelAttack, 0.5f },
+            { SfxType.KaelHit1, 0.58f },
+            { SfxType.KaelHit2, 0.58f },
+            { SfxType.KaelDeath, 0.72f },
+            { SfxType.SeleneAttack, 0.45f },
+            { SfxType.SeleneHit1, 0.56f },
+            { SfxType.SeleneHit2, 0.56f },
+            { SfxType.SeleneDeath, 0.72f },
+            { SfxType.HanSeorinAttack, 0.48f },
+            { SfxType.HanSeorinHit1, 0.56f },
+            { SfxType.HanSeorinHit2, 0.56f },
+            { SfxType.HanSeorinHit3, 0.56f },
+            { SfxType.HanSeorinDeath, 0.72f }
         };
 
         private static readonly Dictionary<SfxType, AudioClip> LoadedClips = new Dictionary<SfxType, AudioClip>();
@@ -160,6 +212,14 @@ namespace VampireLike.Audio
         {
             EnsureInstance();
             instance.PlayInternal(type);
+        }
+
+        public static void PlayRandom(IReadOnlyList<SfxType> types)
+        {
+            if (types == null || types.Count == 0)
+                return;
+
+            Play(types[Random.Range(0, types.Count)]);
         }
 
         private static void EnsureInstance()

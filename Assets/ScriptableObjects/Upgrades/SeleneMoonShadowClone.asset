@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: SeleneMoonShadowClone
   m_EditorClassIdentifier: 
   upgradeType: 23
-  displayName: 월영 분신
-  description: 일정 확률로 잔상 단검을 추가 발사
+  displayName: 별빛 연쇄
+  description: 적중 피해가 주변 적에게 전이
   maxLevel: 3
   multiplier: 1
   flatAmount: 0

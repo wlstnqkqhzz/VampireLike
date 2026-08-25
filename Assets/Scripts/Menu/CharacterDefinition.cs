@@ -25,10 +25,13 @@ namespace VampireLike.Menu
             IReadOnlyDictionary<UpgradeType, int> normalUpgradeMaxLevels,
             string animationResourceFolder,
             bool invertHorizontalFacing,
+            bool invertWalkHorizontalFacing,
             string projectileSpriteResourcePath,
             float projectileVisualScale,
             float projectileColliderRadius,
-            SfxType attackSfxType)
+            SfxType attackSfxType,
+            IReadOnlyList<SfxType> hitSfxTypes,
+            SfxType deathSfxType)
         {
             Id = id;
             DisplayName = displayName;
@@ -43,10 +46,13 @@ namespace VampireLike.Menu
             NormalUpgradeMaxLevels = normalUpgradeMaxLevels;
             AnimationResourceFolder = animationResourceFolder;
             InvertHorizontalFacing = invertHorizontalFacing;
+            InvertWalkHorizontalFacing = invertWalkHorizontalFacing;
             ProjectileSpriteResourcePath = projectileSpriteResourcePath;
             ProjectileVisualScale = projectileVisualScale;
             ProjectileColliderRadius = projectileColliderRadius;
             AttackSfxType = attackSfxType;
+            HitSfxTypes = hitSfxTypes;
+            DeathSfxType = deathSfxType;
         }
 
         public string Id { get; }
@@ -62,10 +68,13 @@ namespace VampireLike.Menu
         public IReadOnlyDictionary<UpgradeType, int> NormalUpgradeMaxLevels { get; }
         public string AnimationResourceFolder { get; }
         public bool InvertHorizontalFacing { get; }
+        public bool InvertWalkHorizontalFacing { get; }
         public string ProjectileSpriteResourcePath { get; }
         public float ProjectileVisualScale { get; }
         public float ProjectileColliderRadius { get; }
         public SfxType AttackSfxType { get; }
+        public IReadOnlyList<SfxType> HitSfxTypes { get; }
+        public SfxType DeathSfxType { get; }
 
         public int GetMaxLevel(UpgradeDefinition definition)
         {
@@ -73,7 +82,8 @@ namespace VampireLike.Menu
                 return 0;
 
             if (definition.IsCharacterExclusiveUpgrade
-                && string.Equals(definition.RequiredCharacterId, "hanseorin", System.StringComparison.OrdinalIgnoreCase))
+                && (string.Equals(definition.RequiredCharacterId, "selene", System.StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(definition.RequiredCharacterId, "hanseorin", System.StringComparison.OrdinalIgnoreCase)))
                 return definition.MaxLevel;
 
             if (definition.Unlimited || definition.IsSpecialUpgrade || definition.IsCharacterExclusiveUpgrade)

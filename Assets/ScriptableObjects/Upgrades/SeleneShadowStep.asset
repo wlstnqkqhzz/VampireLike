@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: SeleneShadowStep
   m_EditorClassIdentifier: 
   upgradeType: 24
-  displayName: 그림자 도약
-  description: 피격 후 무적 시간이 증가
+  displayName: 성운 장판
+  description: 적중 지점에 잠시 남는 달빛 장판 생성
   maxLevel: 3
   multiplier: 1
   flatAmount: 0

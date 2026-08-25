@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: SeleneSilentBlade
   m_EditorClassIdentifier: 
   upgradeType: 27
-  displayName: 침묵의 칼날
-  description: 일정 확률로 가까운 적에게 추가 단검 피해
+  displayName: 만월 강림
+  description: 주기적으로 넓은 범위 달빛 폭발
   maxLevel: 3
   multiplier: 1
   flatAmount: 0

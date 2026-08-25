@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using VampireLike.Audio;
 
 namespace VampireLike.Combat
@@ -71,11 +72,25 @@ namespace VampireLike.Combat
         private Coroutine hitFlashRoutine;
         private Coroutine deathRoutine;
         private global::PlayerSpriteAnimator spriteAnimator;
+        private SfxType[] hitSfxTypes = { SfxType.PlayerHit };
+        private SfxType deathSfxType = SfxType.GameOver;
 
         public bool IsDead => isDead;
         public int MaxHealth => maxHealth;
         public int CurrentHealth => currentHealth;
         public float HealthProgress => maxHealth <= 0 ? 0f : Mathf.Clamp01((float)currentHealth / maxHealth);
+
+        public void SetCharacterSfx(IReadOnlyList<SfxType> characterHitSfxTypes, SfxType characterDeathSfxType)
+        {
+            if (characterHitSfxTypes != null && characterHitSfxTypes.Count > 0)
+            {
+                hitSfxTypes = new SfxType[characterHitSfxTypes.Count];
+                for (int i = 0; i < characterHitSfxTypes.Count; i++)
+                    hitSfxTypes[i] = characterHitSfxTypes[i];
+            }
+
+            deathSfxType = characterDeathSfxType;
+        }
 
         private void Awake()
         {
@@ -184,7 +199,7 @@ namespace VampireLike.Combat
                 specialUpgradeController.NotifyPlayerDamaged();
             }
 
-            GameSfx.Play(SfxType.PlayerHit);
+            GameSfx.PlayRandom(hitSfxTypes);
 
             if (spriteAnimator == null)
                 spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
@@ -481,7 +496,7 @@ namespace VampireLike.Combat
             // 현재는 게임 오버 상태 전환과 이동/공격 정지만 처리한다. UI는 이후 단계에서 연결한다.
             isDead = true;
             currentHealth = 0;
-            GameSfx.Play(SfxType.GameOver);
+            GameSfx.Play(deathSfxType);
 
             if (spriteAnimator == null)
                 spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();

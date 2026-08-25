@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: SeleneTwinMoonFlurry
   m_EditorClassIdentifier: 
   upgradeType: 25
-  displayName: 쌍월 난무
-  description: 일정 공격마다 양옆 단검을 추가 발사
+  displayName: 은월 파동
+  description: 일정 횟수 공격마다 주변/전방에 달빛 파동 발생
   maxLevel: 3
   multiplier: 1
   flatAmount: 0

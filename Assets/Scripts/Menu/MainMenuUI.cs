@@ -460,8 +460,8 @@ namespace VampireLike.Menu
                 new Rect(cardRect.x + 42f, cardRect.y + 218f, cardRect.width - 84f, 122f),
                 ("이동", FormatSpeedRating(character.MoveSpeedMultiplier)),
                 ("공격 속도", FormatAttackSpeedRating(character.AttackIntervalMultiplier)),
-                ("투사체 피해", FormatPowerRating(character.ProjectileDamageMultiplier)),
-                ("투사체 수", FormatBonusRating(character.BonusProjectileCount)),
+                ("공격력", FormatPowerRating(character.ProjectileDamageMultiplier)),
+                ("공격 범위", FormatRangeRating(character)),
                 ("체력", FormatHealthRating(character.BonusMaxHealth)));
         }
 
@@ -554,7 +554,7 @@ namespace VampireLike.Menu
                 return "약함";
 
             if (multiplier > 1.1f)
-                return "좋음";
+                return "높음";
 
             return "보통";
         }
@@ -562,6 +562,17 @@ namespace VampireLike.Menu
         private static string FormatBonusRating(int bonus)
         {
             return bonus > 0 ? "좋음" : "보통";
+        }
+
+        private static string FormatRangeRating(CharacterDefinition character)
+        {
+            if (character.Id == "selene")
+                return "넓음";
+
+            if (character.Id == "hanseorin")
+                return "좁음";
+
+            return character.BonusProjectileCount > 0 ? "넓음" : "보통";
         }
 
         private static string FormatHealthRating(int bonusMaxHealth)
@@ -577,10 +588,10 @@ namespace VampireLike.Menu
 
         private static string GetColoredRatingText(string rating)
         {
-            if (rating == "약함" || rating == "느림")
+            if (rating == "약함" || rating == "느림" || rating == "좁음")
                 return $"<color=#ff6b6b>{rating}</color>";
 
-            if (rating == "좋음" || rating == "빠름")
+            if (rating == "좋음" || rating == "빠름" || rating == "높음" || rating == "넓음")
                 return $"<color=#6ba8ff>{rating}</color>";
 
             return rating;

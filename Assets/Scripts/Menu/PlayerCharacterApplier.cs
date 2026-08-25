@@ -72,6 +72,7 @@ namespace VampireLike.Menu
             {
                 spriteAnimator.SetResourceFolder(character.AnimationResourceFolder);
                 spriteAnimator.SetInvertHorizontalFacing(character.InvertHorizontalFacing);
+                spriteAnimator.SetInvertWalkHorizontalFacing(character.InvertWalkHorizontalFacing);
             }
 
             if (autoAttack != null)
@@ -85,8 +86,13 @@ namespace VampireLike.Menu
                 autoAttack.SetAttackSfx(character.AttackSfxType);
             }
 
-            if (playerHealth != null && character.BonusMaxHealth > 0)
-                playerHealth.IncreaseMaxHealth(character.BonusMaxHealth);
+            if (playerHealth != null)
+            {
+                playerHealth.SetCharacterSfx(character.HitSfxTypes, character.DeathSfxType);
+
+                if (character.BonusMaxHealth > 0)
+                    playerHealth.IncreaseMaxHealth(character.BonusMaxHealth);
+            }
 
         }
     }

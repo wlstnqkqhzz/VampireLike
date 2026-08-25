@@ -22,6 +22,9 @@ public class PlayerSpriteAnimator : MonoBehaviour
     private bool invertHorizontalFacing = true;
 
     [SerializeField]
+    private bool invertWalkHorizontalFacing;
+
+    [SerializeField]
     private float idleFrameRate = 4f;
 
     [SerializeField]
@@ -133,7 +136,13 @@ public class PlayerSpriteAnimator : MonoBehaviour
     public void SetInvertHorizontalFacing(bool shouldInvert)
     {
         invertHorizontalFacing = shouldInvert;
-        SetSprite(spriteRenderer == null ? null : spriteRenderer.sprite);
+        ApplySpriteFacing(spriteRenderer == null ? null : spriteRenderer.sprite);
+    }
+
+    public void SetInvertWalkHorizontalFacing(bool shouldInvert)
+    {
+        invertWalkHorizontalFacing = shouldInvert;
+        ApplySpriteFacing(spriteRenderer == null ? null : spriteRenderer.sprite);
     }
 
     public void PlayAttack()
@@ -170,8 +179,7 @@ public class PlayerSpriteAnimator : MonoBehaviour
         if (Mathf.Abs(moveInput.x) > 0.01f)
             isFacingLeft = moveInput.x < 0f;
 
-        if (spriteRenderer != null)
-            spriteRenderer.flipX = invertHorizontalFacing ? !isFacingLeft : isFacingLeft;
+        ApplySpriteFacing(spriteRenderer == null ? null : spriteRenderer.sprite);
     }
 
     private void UpdateLoop()
@@ -295,7 +303,34 @@ public class PlayerSpriteAnimator : MonoBehaviour
             return;
 
         spriteRenderer.sprite = sprite;
-        spriteRenderer.flipX = invertHorizontalFacing ? !isFacingLeft : isFacingLeft;
+        ApplySpriteFacing(sprite);
+    }
+
+    private void ApplySpriteFacing(Sprite sprite)
+    {
+        if (spriteRenderer == null)
+            return;
+
+        bool shouldInvert = invertHorizontalFacing;
+
+        if (invertWalkHorizontalFacing && IsWalkSprite(sprite))
+            shouldInvert = !shouldInvert;
+
+        spriteRenderer.flipX = shouldInvert ? !isFacingLeft : isFacingLeft;
+    }
+
+    private bool IsWalkSprite(Sprite sprite)
+    {
+        if (sprite == null || walkFrames == null)
+            return false;
+
+        for (int i = 0; i < walkFrames.Length; i++)
+        {
+            if (walkFrames[i] == sprite)
+                return true;
+        }
+
+        return false;
     }
 
     private void LoadAllFrames()
