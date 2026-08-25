@@ -40,6 +40,8 @@ namespace VampireLike.Growth
         private static readonly Color KaelTextColor = new Color(1f, 0.78f, 0.35f, 1f);
         private static readonly Color SeleneButtonColor = new Color(0.08f, 0.2f, 0.32f, 1f);
         private static readonly Color SeleneTextColor = new Color(0.74f, 0.95f, 1f, 1f);
+        private static readonly Color HanSeorinButtonColor = new Color(0.42f, 0.03f, 0.07f, 1f);
+        private static readonly Color HanSeorinTextColor = new Color(1f, 0.78f, 0.74f, 1f);
 
         private void Awake()
         {
@@ -196,6 +198,9 @@ namespace VampireLike.Growth
             if (definition != null && string.Equals(definition.RequiredCharacterId, "selene", System.StringComparison.OrdinalIgnoreCase))
                 return SeleneButtonColor;
 
+            if (definition != null && string.Equals(definition.RequiredCharacterId, "hanseorin", System.StringComparison.OrdinalIgnoreCase))
+                return HanSeorinButtonColor;
+
             return KaelButtonColor;
         }
 
@@ -203,6 +208,9 @@ namespace VampireLike.Growth
         {
             if (definition != null && string.Equals(definition.RequiredCharacterId, "selene", System.StringComparison.OrdinalIgnoreCase))
                 return SeleneTextColor;
+
+            if (definition != null && string.Equals(definition.RequiredCharacterId, "hanseorin", System.StringComparison.OrdinalIgnoreCase))
+                return HanSeorinTextColor;
 
             return KaelTextColor;
         }

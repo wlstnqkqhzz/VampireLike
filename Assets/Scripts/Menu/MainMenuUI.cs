@@ -16,7 +16,7 @@ namespace VampireLike.Menu
     {
         private const float TitlePanelWidth = 720f;
         private const float TitlePanelHeight = 520f;
-        private const float CharacterPanelWidth = 860f;
+        private const float CharacterPanelWidth = 1180f;
         private const float CharacterPanelHeight = 640f;
         private const string GameSceneName = "SampleScene";
         private const string TitleBackgroundPath = "Menu/title_background";
@@ -209,10 +209,12 @@ namespace VampireLike.Menu
             GUI.Label(new Rect(panelRect.x, panelRect.y + 78f, panelRect.width, 30f), "\uD50C\uB808\uC774 \uC2A4\uD0C0\uC77C\uC5D0 \uB9DE\uB294 \uC0DD\uC874\uC790\uB97C \uACE0\uB974\uC138\uC694", subtitleStyle);
 
             CharacterDefinition[] characters = CharacterSelection.Characters;
-            float cardWidth = 340f;
+            float gap = 32f;
+            float availableWidth = panelRect.width - 96f;
+            float cardWidth = Mathf.Min(340f, (availableWidth - gap * (characters.Length - 1)) / characters.Length);
             float cardHeight = 360f;
-            float gap = 48f;
-            float startX = panelRect.center.x - cardWidth - gap * 0.5f;
+            float totalCardsWidth = cardWidth * characters.Length + gap * (characters.Length - 1);
+            float startX = panelRect.center.x - totalCardsWidth * 0.5f;
             float cardY = panelRect.y + 132f;
 
             for (int i = 0; i < characters.Length; i++)
@@ -290,15 +292,18 @@ namespace VampireLike.Menu
             GUI.Label(new Rect(panelRect.x, panelRect.y + 34f, panelRect.width, 52f), "\uAE30\uB85D", titleStyle);
             GUI.Label(new Rect(panelRect.x, panelRect.y + 84f, panelRect.width, 30f), "\uC9C0\uAE08\uAE4C\uC9C0\uC758 \uCD5C\uACE0 \uC0DD\uC874 \uAE30\uB85D\uC785\uB2C8\uB2E4", subtitleStyle);
 
-            float cardWidth = 188f;
+            CharacterDefinition[] characters = CharacterSelection.Characters;
+            int recordCardCount = characters.Length + 1;
+            float gap = 18f;
+            float availableWidth = panelRect.width - 48f;
+            float cardWidth = Mathf.Min(188f, (availableWidth - gap * (recordCardCount - 1)) / recordCardCount);
             float cardHeight = 240f;
-            float gap = 22f;
-            float startX = panelRect.center.x - cardWidth * 1.5f - gap;
+            float totalCardsWidth = cardWidth * recordCardCount + gap * (recordCardCount - 1);
+            float startX = panelRect.center.x - totalCardsWidth * 0.5f;
             float cardY = panelRect.y + 142f;
 
             DrawRecordCard(new Rect(startX, cardY, cardWidth, cardHeight), "\uC804\uCCB4 \uCD5C\uACE0", HighScoreManager.GetOverallRecord());
 
-            CharacterDefinition[] characters = CharacterSelection.Characters;
             for (int i = 0; i < characters.Length; i++)
             {
                 CharacterDefinition character = characters[i];

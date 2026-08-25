@@ -382,6 +382,26 @@ namespace VampireLike.Growth
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddSeleneSilentBladeLevel();
                     break;
+                case UpgradeType.HanSeorinBloodMark:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddHanSeorinBloodMarkLevel();
+                    break;
+                case UpgradeType.HanSeorinShadowDagger:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddHanSeorinShadowDaggerLevel();
+                    break;
+                case UpgradeType.HanSeorinReturningBlade:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddHanSeorinReturningBladeLevel();
+                    break;
+                case UpgradeType.HanSeorinKillingIntent:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddHanSeorinKillingIntentLevel();
+                    break;
+                case UpgradeType.HanSeorinRedExecution:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddHanSeorinRedExecutionLevel();
+                    break;
             }
 
             GameSessionStats.RecordUpgrade(definition.DisplayName);

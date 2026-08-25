@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     private const int DirectionFrameCount = 4;
     private const float MinimumMoveSpeedMultiplier = 0.25f;
     private const float BoundarySkin = 0.02f;
-    private const float BottomBoundaryInset = -0.55f;
+    private const float BottomBoundaryInset = -0.25f;
     private const string PlayerVisualName = "PlayerVisual";
     private const string WalkSpritePath = "Assets/Art/Characters/Vampire/SeparateAnim/Walk.png";
     private static readonly Vector2 PlayerColliderOffset = new Vector2(0f, -0.03f);

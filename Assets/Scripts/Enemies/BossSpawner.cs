@@ -105,7 +105,7 @@ namespace VampireLike.Enemies
         private float bossArenaBottomPadding = 0f;
 
         [SerializeField]
-        private float bossArenaPlayerBottomVisualAllowance = 2f;
+        private float bossArenaPlayerBottomVisualAllowance = 0.45f;
 
         [SerializeField]
         private float bossSpawnPlayerSeparation = 1.4f;

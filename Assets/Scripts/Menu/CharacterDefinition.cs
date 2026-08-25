@@ -72,6 +72,10 @@ namespace VampireLike.Menu
             if (definition == null)
                 return 0;
 
+            if (definition.IsCharacterExclusiveUpgrade
+                && string.Equals(definition.RequiredCharacterId, "hanseorin", System.StringComparison.OrdinalIgnoreCase))
+                return definition.MaxLevel;
+
             if (definition.Unlimited || definition.IsSpecialUpgrade || definition.IsCharacterExclusiveUpgrade)
                 return GetExpandedMaxLevel(definition.MaxLevel);
 

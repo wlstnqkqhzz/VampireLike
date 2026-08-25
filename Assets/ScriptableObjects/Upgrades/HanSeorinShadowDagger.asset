@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4520e01b4faa49f3a8672574ac1b0ab3, type: 3}
+  m_Name: HanSeorinShadowDagger
+  m_EditorClassIdentifier: 
+  upgradeType: 30
+  displayName: "\uADF8\uB9BC\uC790 \uB2E8\uAC80"
+  description: "\uC77C\uC815 \uD655\uB960\uB85C \uBCF8\uCCB4 \uB2E8\uAC80\uC744 \uB530\uB77C\uAC00\uB294 \uADF8\uB9BC\uC790 \uB2E8\uAC80 1\uAC1C \uCD94\uAC00 \uBC1C\uC0AC"
+  maxLevel: 3
+  multiplier: 1
+  flatAmount: 0
+  unlimited: 0
+  requiredCharacterId: hanseorin

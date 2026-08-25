@@ -64,6 +64,33 @@ namespace VampireLike.Menu
                 "Projectiles/SeleneDagger",
                 0.75f,
                 0.09f,
+                SfxType.SeleneDaggerThrow),
+            new CharacterDefinition(
+                "hanseorin",
+                "\uD55C\uC11C\uB9B0",
+                "\uC801\uC6D4\uC758 \uC554\uC0B4\uC790",
+                "\uBD89\uC740 \uB2EC\uBE5B\uCC98\uB7FC \uBE60\uB974\uAC8C \uB2E8\uAC80\uC744 \uB358\uC838 \uB2E8\uC77C \uC801\uC744 \uCC98\uCE58\uD558\uB294 \uC554\uC0B4\uC790\uC785\uB2C8\uB2E4. \uB192\uC740 \uAE30\uB3D9\uC131\uACFC \uB2E8\uC77C \uD3ED\uB51C\uC5D0 \uD2B9\uD654\uB418\uC5B4 \uC788\uC9C0\uB9CC \uCCB4\uB825\uC740 \uB0AE\uC2B5\uB2C8\uB2E4.",
+                1.22f,
+                0.68f,
+                1.1f,
+                0,
+                0,
+                52,
+                new Dictionary<UpgradeType, int>
+                {
+                    { UpgradeType.ProjectileDamage, 6 },
+                    { UpgradeType.AttackInterval, 6 },
+                    { UpgradeType.ProjectileCount, 2 },
+                    { UpgradeType.ProjectilePierce, 3 },
+                    { UpgradeType.MoveSpeed, 6 },
+                    { UpgradeType.MaxHealth, 2 },
+                    { UpgradeType.PickupRadius, 3 }
+                },
+                "PlayerAnimations/HanSeorinProcessed",
+                false,
+                "Projectiles/HanSeorinDagger",
+                0.72f,
+                0.08f,
                 SfxType.SeleneDaggerThrow)
         };
 

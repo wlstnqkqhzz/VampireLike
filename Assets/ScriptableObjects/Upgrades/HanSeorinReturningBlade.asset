@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4520e01b4faa49f3a8672574ac1b0ab3, type: 3}
+  m_Name: HanSeorinReturningBlade
+  m_EditorClassIdentifier: 
+  upgradeType: 31
+  displayName: "\uD68C\uADC0\uC758 \uCE7C\uB0A0"
+  description: "\uD22C\uCC99\uD55C \uB2E8\uAC80\uC774 \uB418\uB3CC\uC544\uC624\uBA70 \uB3CC\uC544\uC624\uB294 \uB3D9\uC548\uC5D0\uB3C4 \uC801\uC5D0\uAC8C \uD53C\uD574"
+  maxLevel: 3
+  multiplier: 1
+  flatAmount: 0
+  unlimited: 0
+  requiredCharacterId: hanseorin

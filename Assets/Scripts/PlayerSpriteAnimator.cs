@@ -7,6 +7,7 @@ public class PlayerSpriteAnimator : MonoBehaviour
 {
     private const string PlayerVisualName = "PlayerVisual";
     private const int DefaultFrameCount = 3;
+    private const float ExpectedFrameHeight = 320f;
 
     [SerializeField]
     private string resourceFolder = "PlayerAnimations/KaelProcessed";
@@ -322,13 +323,14 @@ public class PlayerSpriteAnimator : MonoBehaviour
         frameCount = Mathf.Max(1, frameCount);
         int frameWidth = texture.width / frameCount;
         int frameHeight = texture.height;
+        float effectivePixelsPerUnit = pixelsPerUnit * Mathf.Max(0.01f, frameHeight / ExpectedFrameHeight);
         Sprite[] frames = new Sprite[frameCount];
 
         for (int i = 0; i < frameCount; i++)
         {
             Rect rect = new Rect(frameWidth * i, 0f, frameWidth, frameHeight);
             Vector2 pivot = new Vector2(0.5f, 0.14f);
-            frames[i] = Sprite.Create(texture, rect, pivot, pixelsPerUnit);
+            frames[i] = Sprite.Create(texture, rect, pivot, effectivePixelsPerUnit);
         }
 
         return frames;

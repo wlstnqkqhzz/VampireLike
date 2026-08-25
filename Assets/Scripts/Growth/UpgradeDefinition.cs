@@ -35,7 +35,12 @@ namespace VampireLike.Growth
         SeleneTwinMoonFlurry,
         SeleneMoonlightMark,
         SeleneSilentBlade,
-        SequentialShot
+        SequentialShot,
+        HanSeorinBloodMark,
+        HanSeorinShadowDagger,
+        HanSeorinReturningBlade,
+        HanSeorinKillingIntent,
+        HanSeorinRedExecution
     }
 
     /// <summary>
@@ -107,6 +112,9 @@ namespace VampireLike.Growth
 
                 if (string.Equals(requiredCharacterId, "selene", System.StringComparison.OrdinalIgnoreCase))
                     return "셀레네 전용";
+
+                if (string.Equals(requiredCharacterId, "hanseorin", System.StringComparison.OrdinalIgnoreCase))
+                    return "한서린 전용";
 
                 return "전용 강화";
             }

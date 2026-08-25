@@ -41,6 +41,11 @@ namespace VampireLike.Combat
         private int remainingReflectCount;
         private bool canSplitProjectile;
         private bool isSplitProjectile;
+        private bool canReturnToOwner;
+        private bool isReturningToOwner;
+        private float returnDamageMultiplier = 1f;
+        private int returnBonusPierce;
+        private Transform returnTarget;
         private PlayerSpecialUpgradeController specialUpgradeController;
         private CombatVFXKind vfxKind = CombatVFXKind.ArcaneImpact;
         private bool isDestroying;
@@ -86,6 +91,23 @@ namespace VampireLike.Combat
 
             lifeTimer += Time.deltaTime;
 
+            if (canReturnToOwner && !isReturningToOwner && lifeTimer >= lifeTime * 0.5f)
+            {
+                BeginReturnToOwner();
+                return;
+            }
+
+            if (isReturningToOwner)
+            {
+                UpdateReturnDirection();
+
+                if (returnTarget != null && ((Vector2)returnTarget.position - rb.position).sqrMagnitude <= 0.12f * 0.12f)
+                {
+                    DestroyProjectile(true, 0.2f);
+                    return;
+                }
+            }
+
             if (lifeTimer >= lifeTime)
                 DestroyProjectile(true, 0.28f);
         }
@@ -119,6 +141,12 @@ namespace VampireLike.Combat
 
             if (TryReflectProjectile())
                 return;
+
+            if (canReturnToOwner && !isReturningToOwner)
+            {
+                BeginReturnToOwner();
+                return;
+            }
 
             DestroyProjectile(false, 0f);
         }
@@ -170,6 +198,11 @@ namespace VampireLike.Combat
             effectiveDamage = Mathf.Max(0.1f, damage * Mathf.Max(0.1f, damageMultiplier));
             remainingPierceCount = Mathf.Max(0, pierceCount);
             remainingReflectCount = specialUpgradeController == null ? 0 : specialUpgradeController.GetProjectileReflectCount();
+            canReturnToOwner = specialUpgradeController != null && specialUpgradeController.HasHanSeorinReturningBlade();
+            isReturningToOwner = false;
+            returnTarget = specialUpgradeController == null ? null : specialUpgradeController.transform;
+            returnDamageMultiplier = specialUpgradeController == null ? 1f : specialUpgradeController.GetHanSeorinReturningBladeDamageMultiplier();
+            returnBonusPierce = specialUpgradeController == null ? 0 : specialUpgradeController.GetHanSeorinReturningBladeBonusPierce();
             canSplitProjectile = !isSplitProjectile
                 && specialUpgradeController != null
                 && specialUpgradeController.GetProjectileSplitLevel() > 0;
@@ -193,6 +226,11 @@ namespace VampireLike.Combat
             effectiveDamage = Mathf.Max(0.1f, splitDamage);
             remainingPierceCount = 0;
             remainingReflectCount = 0;
+            canReturnToOwner = false;
+            isReturningToOwner = false;
+            returnTarget = null;
+            returnDamageMultiplier = 1f;
+            returnBonusPierce = 0;
             lifeTimer = 0f;
             hitEnemies.Clear();
 
@@ -234,8 +272,12 @@ namespace VampireLike.Combat
 
         private float GetDamageForEnemy(EnemyHealth enemyHealth)
         {
+            float damageMultiplier = specialUpgradeController == null ? 1f : specialUpgradeController.GetProjectileDamageMultiplierForEnemy(enemyHealth);
+            float baseDamage = isReturningToOwner ? effectiveDamage * returnDamageMultiplier : effectiveDamage;
+            baseDamage *= damageMultiplier;
+
             if (attackGroupId <= 0 || !enemyHealth.IsBoss)
-                return effectiveDamage;
+                return baseDamage;
 
             PruneAttackGroups();
 
@@ -250,9 +292,40 @@ namespace VampireLike.Combat
             hitCounts[enemyHealth] = previousHitCount + 1;
 
             if (previousHitCount == 0)
-                return effectiveDamage;
+                return baseDamage;
 
-            return Mathf.Max(0.1f, effectiveDamage * repeatedSameAttackDamageMultiplier);
+            return Mathf.Max(0.1f, baseDamage * repeatedSameAttackDamageMultiplier);
+        }
+
+        private void BeginReturnToOwner()
+        {
+            if (!canReturnToOwner || isReturningToOwner || returnTarget == null)
+            {
+                DestroyProjectile(true, 0.22f);
+                return;
+            }
+
+            isReturningToOwner = true;
+            canReturnToOwner = false;
+            lifeTimer = Mathf.Min(lifeTimer, lifeTime * 0.55f);
+            remainingPierceCount = Mathf.Max(remainingPierceCount, returnBonusPierce);
+            hitEnemies.Clear();
+            UpdateReturnDirection();
+            CombatVFX.PlayBurst(transform.position, CombatVFXKind.Vampirism, 0.24f, 0.08f);
+        }
+
+        private void UpdateReturnDirection()
+        {
+            if (returnTarget == null)
+                return;
+
+            Vector2 directionToOwner = ((Vector2)returnTarget.position - rb.position).normalized;
+
+            if (directionToOwner.sqrMagnitude <= 0.001f)
+                return;
+
+            moveDirection = directionToOwner;
+            transform.right = moveDirection;
         }
 
         private void PruneAttackGroups()
