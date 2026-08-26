@@ -63,6 +63,12 @@ namespace VampireLike.Enemies
         private float baseBossHealthMultiplier = 1f;
 
         [SerializeField]
+        private int firstBossFixedHealth = 100;
+
+        [SerializeField]
+        private bool pauseNormalEnemySpawnsDuringFirstBoss = true;
+
+        [SerializeField]
         private float bossHealthBalanceMultiplier = 1.05f;
 
         [SerializeField]
@@ -157,6 +163,7 @@ namespace VampireLike.Enemies
             {
                 enemySpawner.WaveChanged -= HandleWaveChanged;
                 SetWaveProgressPaused(false);
+                SetFirstBossEnemySpawningPaused(false);
             }
         }
 
@@ -169,12 +176,14 @@ namespace VampireLike.Enemies
                 activeBossHealth = null;
                 activeBossStage = 0;
                 SetWaveProgressPaused(false);
+                SetFirstBossEnemySpawningPaused(false);
                 MapBoundary.ClearTemporaryBounds(this);
                 RestoreBossPhaseDecorationsIfNeeded();
             }
             else
             {
                 SetWaveProgressPaused(true);
+                SetFirstBossEnemySpawningPaused(activeBossStage == 1);
             }
 
             if (activeBoss != null)
@@ -193,6 +202,7 @@ namespace VampireLike.Enemies
             maxSpawnDistance = Mathf.Max(minSpawnDistance, maxSpawnDistance);
             cameraSafeSpawnPadding = Mathf.Max(0f, cameraSafeSpawnPadding);
             baseBossHealthMultiplier = Mathf.Max(1f, baseBossHealthMultiplier);
+            firstBossFixedHealth = Mathf.Max(1, firstBossFixedHealth);
             bossHealthBalanceMultiplier = Mathf.Max(1f, bossHealthBalanceMultiplier);
             healthMultiplierPerBossStage = Mathf.Max(1f, healthMultiplierPerBossStage);
             healthMultiplierPerAppearance = Mathf.Max(1f, healthMultiplierPerAppearance);
@@ -263,6 +273,7 @@ namespace VampireLike.Enemies
             activeBossHealth = activeBoss.GetComponent<EnemyHealth>();
             activeBossStage = bossStage;
             lastBossSpawnWave = wave;
+            SetFirstBossEnemySpawningPaused(bossStage == 1);
 
             if (activeBossHealth != null)
                 activeBossHealth.Died += HandleActiveBossDied;
@@ -284,6 +295,7 @@ namespace VampireLike.Enemies
             BossDefeated?.Invoke(defeatedStage, defeatedBoss);
             StartCoroutine(AttractFieldExperienceGemsAfterDelay());
             GameBgm.Play(BgmType.Battle);
+            SetFirstBossEnemySpawningPaused(false);
             UnsubscribeActiveBossDeath();
             MapBoundary.ClearTemporaryBounds(this);
             RestoreBossPhaseDecorationsIfNeeded();
@@ -302,6 +314,14 @@ namespace VampireLike.Enemies
 
             hasPausedWaveProgress = paused;
             enemySpawner.SetWaveProgressPaused(this, paused);
+        }
+
+        private void SetFirstBossEnemySpawningPaused(bool paused)
+        {
+            if (!pauseNormalEnemySpawnsDuringFirstBoss || enemySpawner == null)
+                return;
+
+            enemySpawner.SetEnemySpawningPaused(this, paused);
         }
 
         private void ResolveBossPhaseDecorationController()
@@ -521,7 +541,10 @@ namespace VampireLike.Enemies
 
             EnemyHealth enemyHealth = boss.GetComponent<EnemyHealth>();
             if (enemyHealth != null)
-                enemyHealth.SetMaxHealth(Mathf.RoundToInt(enemyHealth.MaxHealth * healthMultiplier));
+            {
+                int scaledHealth = Mathf.RoundToInt(enemyHealth.MaxHealth * healthMultiplier);
+                enemyHealth.SetMaxHealth(bossStage == 1 ? firstBossFixedHealth : scaledHealth);
+            }
 
             EnemyContactDamage contactDamage = boss.GetComponent<EnemyContactDamage>();
             if (contactDamage != null)

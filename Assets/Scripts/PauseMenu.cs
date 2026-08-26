@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
@@ -20,6 +21,7 @@ public class PauseMenu : MonoBehaviour
     private const string PausePanelName = "Pause Panel";
     private const string OptionsPanelName = "Options Panel";
     private const string UpgradeStatusName = "Upgrade Status";
+    private const string UpgradeStatusBackgroundName = "Upgrade Status Background";
 
     [SerializeField]
     private GameObject pauseMenuRoot;
@@ -193,10 +195,10 @@ public class PauseMenu : MonoBehaviour
         Image panelImage = panel.AddComponent<Image>();
         panelImage.color = new Color(0.12f, 0.14f, 0.12f, 0.92f);
 
-        CreateLabel(panel.transform, "\uC77C\uC2DC\uC815\uC9C0", new Vector2(0f, 116f), 32, Color.white);
-        resumeButton = CreateButton(panel.transform, "\uACC4\uC18D\uD558\uAE30", new Vector2(-128f, 54f), new Vector2(220f, 50f));
-        optionsButton = CreateButton(panel.transform, "\uC635\uC158", new Vector2(-128f, -8f), new Vector2(220f, 50f));
-        quitButton = CreateButton(panel.transform, "\uAC8C\uC784 \uC885\uB8CC", new Vector2(-128f, -70f), new Vector2(220f, 50f));
+        CreateLabel(panel.transform, "\uC77C\uC2DC\uC815\uC9C0", new Vector2(0f, 160f), 34, Color.white);
+        resumeButton = CreateButton(panel.transform, "\uACC4\uC18D\uD558\uAE30", new Vector2(-240f, 62f), new Vector2(220f, 52f));
+        optionsButton = CreateButton(panel.transform, "\uC635\uC158", new Vector2(-240f, -8f), new Vector2(220f, 52f));
+        quitButton = CreateButton(panel.transform, "\uAC8C\uC784 \uC885\uB8CC", new Vector2(-240f, -78f), new Vector2(220f, 52f));
         EnsureUpgradeStatusText();
 
         CreateOptionsPanel(root.transform);
@@ -207,17 +209,59 @@ public class PauseMenu : MonoBehaviour
         if (upgradeStatusText != null || pausePanel == null)
             return;
 
+        EnsureUpgradeStatusBackground();
         Transform existing = pausePanel.Find(UpgradeStatusName);
 
         if (existing != null)
         {
             upgradeStatusText = existing.GetComponent<Text>();
+            ConfigureUpgradeStatusText(upgradeStatusText);
             return;
         }
 
-        upgradeStatusText = CreateText(pausePanel, string.Empty, new Vector2(116f, -10f), 15, new Color(0.9f, 0.95f, 0.86f, 1f), new Vector2(220f, 220f));
+        upgradeStatusText = CreateText(pausePanel, string.Empty, new Vector2(186f, -34f), 14, new Color(0.9f, 0.95f, 0.86f, 1f), new Vector2(354f, 270f));
         upgradeStatusText.gameObject.name = UpgradeStatusName;
-        upgradeStatusText.alignment = TextAnchor.UpperLeft;
+        ConfigureUpgradeStatusText(upgradeStatusText);
+    }
+
+    private void EnsureUpgradeStatusBackground()
+    {
+        if (pausePanel == null || pausePanel.Find(UpgradeStatusBackgroundName) != null)
+            return;
+
+        GameObject backgroundObject = new GameObject(UpgradeStatusBackgroundName);
+        backgroundObject.transform.SetParent(pausePanel, false);
+
+        RectTransform backgroundRect = backgroundObject.AddComponent<RectTransform>();
+        backgroundRect.anchorMin = new Vector2(0.5f, 0.5f);
+        backgroundRect.anchorMax = new Vector2(0.5f, 0.5f);
+        backgroundRect.pivot = new Vector2(0.5f, 0.5f);
+        backgroundRect.sizeDelta = new Vector2(382f, 294f);
+        backgroundRect.anchoredPosition = new Vector2(186f, -34f);
+
+        Image backgroundImage = backgroundObject.AddComponent<Image>();
+        backgroundImage.color = new Color(0.045f, 0.06f, 0.055f, 0.78f);
+        backgroundImage.raycastTarget = false;
+    }
+
+    private static void ConfigureUpgradeStatusText(Text text)
+    {
+        if (text == null)
+            return;
+
+        RectTransform rectTransform = text.GetComponent<RectTransform>();
+
+        if (rectTransform != null)
+        {
+            rectTransform.sizeDelta = new Vector2(354f, 270f);
+            rectTransform.anchoredPosition = new Vector2(186f, -34f);
+        }
+
+        text.fontSize = 14;
+        text.alignment = TextAnchor.UpperLeft;
+        text.supportRichText = true;
+        text.lineSpacing = 1.15f;
+        text.color = new Color(0.9f, 0.95f, 0.86f, 1f);
     }
 
     private void RefreshUpgradeStatus()
@@ -229,28 +273,69 @@ public class PauseMenu : MonoBehaviour
 
         if (upgradeController == null)
         {
-            upgradeStatusText.text = "\uD604\uC7AC \uAC15\uD654: -";
+            upgradeStatusText.text = BuildEmptyUpgradeStatusText();
             return;
         }
 
-        System.Collections.Generic.List<string> lines = upgradeController.GetUpgradeStatusLines();
+        Dictionary<string, List<string>> linesByCategory = upgradeController.GetUpgradeStatusLinesByCategory();
 
-        if (lines.Count == 0)
+        if (!HasAnyUpgradeStatus(linesByCategory))
         {
-            upgradeStatusText.text = "\uD604\uC7AC \uAC15\uD654\n-";
+            upgradeStatusText.text = BuildEmptyUpgradeStatusText();
             return;
         }
 
-        int maxLines = Mathf.Min(8, lines.Count);
-        string text = "\uD604\uC7AC \uAC15\uD654";
+        upgradeStatusText.text = BuildUpgradeStatusText(linesByCategory);
+    }
 
-        for (int i = 0; i < maxLines; i++)
-            text += $"\n{lines[i]}";
+    private static bool HasAnyUpgradeStatus(Dictionary<string, List<string>> linesByCategory)
+    {
+        if (linesByCategory == null)
+            return false;
 
-        if (lines.Count > maxLines)
-            text += $"\n... +{lines.Count - maxLines}";
+        foreach (List<string> lines in linesByCategory.Values)
+        {
+            if (lines != null && lines.Count > 0)
+                return true;
+        }
 
-        upgradeStatusText.text = text;
+        return false;
+    }
+
+    private static string BuildUpgradeStatusText(Dictionary<string, List<string>> linesByCategory)
+    {
+        string text = "<size=16><b><color=#F6E5A3>\uD604\uC7AC \uAC15\uD654</color></b></size>";
+        AppendUpgradeCategory(ref text, linesByCategory, "\uC77C\uBC18 \uAC15\uD654", "#BDEB8E", 4);
+        AppendUpgradeCategory(ref text, linesByCategory, "\uD2B9\uC218 \uAC15\uD654", "#8FD8FF", 4);
+        AppendUpgradeCategory(ref text, linesByCategory, "\uC804\uC6A9 \uAC15\uD654", "#FF9B86", 4);
+        return text;
+    }
+
+    private static string BuildEmptyUpgradeStatusText()
+    {
+        return "<size=16><b><color=#F6E5A3>\uD604\uC7AC \uAC15\uD654</color></b></size>\n\n"
+            + "<b><color=#BDEB8E>\uC77C\uBC18 \uAC15\uD654</color></b>\n<color=#A7B09D>-</color>\n\n"
+            + "<b><color=#8FD8FF>\uD2B9\uC218 \uAC15\uD654</color></b>\n<color=#A7B09D>-</color>\n\n"
+            + "<b><color=#FF9B86>\uC804\uC6A9 \uAC15\uD654</color></b>\n<color=#A7B09D>-</color>";
+    }
+
+    private static void AppendUpgradeCategory(ref string text, Dictionary<string, List<string>> linesByCategory, string category, string color, int maxLines)
+    {
+        text += $"\n\n<b><color={color}>{category}</color></b>";
+
+        if (linesByCategory == null || !linesByCategory.TryGetValue(category, out List<string> lines) || lines == null || lines.Count == 0)
+        {
+            text += "\n<color=#A7B09D>-</color>";
+            return;
+        }
+
+        int visibleCount = Mathf.Min(maxLines, lines.Count);
+
+        for (int i = 0; i < visibleCount; i++)
+            text += $"\n<color=#E8F0D8>{lines[i]}</color>";
+
+        if (lines.Count > visibleCount)
+            text += $"\n<color=#A7B09D>... +{lines.Count - visibleCount}</color>";
     }
 
     private static Canvas CreatePauseCanvas()
@@ -438,7 +523,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = isPortrait ? new Vector2(560f, 720f) : new Vector2(560f, 320f);
+        rectTransform.sizeDelta = isPortrait ? new Vector2(640f, 780f) : new Vector2(720f, 400f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 

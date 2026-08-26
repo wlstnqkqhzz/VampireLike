@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VampireLike.Audio;
 using VampireLike.Combat;
 using VampireLike.Growth;
 
@@ -30,6 +31,9 @@ namespace VampireLike.Menu
             if (scene.name == MainMenuSceneName)
                 return;
 
+            if (ShouldWaitForCharacterSelection())
+                return;
+
             GameObject player = GameObject.Find(PlayerObjectName);
 
             if (player == null)
@@ -45,6 +49,9 @@ namespace VampireLike.Menu
 
         private void Start()
         {
+            if (ShouldWaitForCharacterSelection())
+                return;
+
             ApplySelectedCharacter();
         }
 
@@ -56,6 +63,8 @@ namespace VampireLike.Menu
             hasApplied = true;
             CharacterDefinition character = CharacterSelection.SelectedCharacter;
             GameSessionStats.RecordCharacter(character.Id, character.DisplayName, character.Role);
+            GameBgm.SetBattleClipName(character.BattleBgmClipName);
+            GameBgm.Play(BgmType.Battle);
 
             global::PlayerController playerController = GetComponent<global::PlayerController>();
             global::PlayerSpriteAnimator spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
@@ -72,6 +81,7 @@ namespace VampireLike.Menu
             {
                 spriteAnimator.SetResourceFolder(character.AnimationResourceFolder);
                 spriteAnimator.SetInvertHorizontalFacing(character.InvertHorizontalFacing);
+                spriteAnimator.SetInvertIdleHorizontalFacing(character.InvertIdleHorizontalFacing);
                 spriteAnimator.SetInvertWalkHorizontalFacing(character.InvertWalkHorizontalFacing);
             }
 
@@ -94,6 +104,14 @@ namespace VampireLike.Menu
                     playerHealth.IncreaseMaxHealth(character.BonusMaxHealth);
             }
 
+        }
+
+        private static bool ShouldWaitForCharacterSelection()
+        {
+            if (MainMenuUI.IsOpen || GameState.IsMainMenuOpen)
+                return true;
+
+            return FindAnyObjectByType<MainMenuUI>() != null;
         }
     }
 }

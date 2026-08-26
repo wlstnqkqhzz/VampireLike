@@ -450,7 +450,10 @@ namespace VampireLike.Combat
         private int GetContactDamage(GameObject enemyObject)
         {
             EnemyContactDamage enemyContactDamage = enemyObject.GetComponentInParent<EnemyContactDamage>();
-            return enemyContactDamage == null ? contactDamage : enemyContactDamage.ContactDamage;
+            if (enemyContactDamage == null)
+                return contactDamage;
+
+            return enemyContactDamage.enabled ? enemyContactDamage.ContactDamage : 0;
         }
 
         private void SetVisualColors(Color color)

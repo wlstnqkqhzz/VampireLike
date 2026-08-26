@@ -25,13 +25,15 @@ namespace VampireLike.Menu
             IReadOnlyDictionary<UpgradeType, int> normalUpgradeMaxLevels,
             string animationResourceFolder,
             bool invertHorizontalFacing,
+            bool invertIdleHorizontalFacing,
             bool invertWalkHorizontalFacing,
             string projectileSpriteResourcePath,
             float projectileVisualScale,
             float projectileColliderRadius,
             SfxType attackSfxType,
             IReadOnlyList<SfxType> hitSfxTypes,
-            SfxType deathSfxType)
+            SfxType deathSfxType,
+            string battleBgmClipName)
         {
             Id = id;
             DisplayName = displayName;
@@ -46,6 +48,7 @@ namespace VampireLike.Menu
             NormalUpgradeMaxLevels = normalUpgradeMaxLevels;
             AnimationResourceFolder = animationResourceFolder;
             InvertHorizontalFacing = invertHorizontalFacing;
+            InvertIdleHorizontalFacing = invertIdleHorizontalFacing;
             InvertWalkHorizontalFacing = invertWalkHorizontalFacing;
             ProjectileSpriteResourcePath = projectileSpriteResourcePath;
             ProjectileVisualScale = projectileVisualScale;
@@ -53,6 +56,7 @@ namespace VampireLike.Menu
             AttackSfxType = attackSfxType;
             HitSfxTypes = hitSfxTypes;
             DeathSfxType = deathSfxType;
+            BattleBgmClipName = battleBgmClipName;
         }
 
         public string Id { get; }
@@ -68,6 +72,7 @@ namespace VampireLike.Menu
         public IReadOnlyDictionary<UpgradeType, int> NormalUpgradeMaxLevels { get; }
         public string AnimationResourceFolder { get; }
         public bool InvertHorizontalFacing { get; }
+        public bool InvertIdleHorizontalFacing { get; }
         public bool InvertWalkHorizontalFacing { get; }
         public string ProjectileSpriteResourcePath { get; }
         public float ProjectileVisualScale { get; }
@@ -75,6 +80,7 @@ namespace VampireLike.Menu
         public SfxType AttackSfxType { get; }
         public IReadOnlyList<SfxType> HitSfxTypes { get; }
         public SfxType DeathSfxType { get; }
+        public string BattleBgmClipName { get; }
 
         public int GetMaxLevel(UpgradeDefinition definition)
         {

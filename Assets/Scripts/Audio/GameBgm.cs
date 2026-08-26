@@ -16,13 +16,15 @@ namespace VampireLike.Audio
     {
         private const string MusicRoot = "Music/";
         private const string MainMenuClipName = "main_menu_bgm";
-        private const string BattleClipName = "battle_bgm";
+        private const string DefaultBattleClipName = "kael_battle_theme";
         private const string HiddenBossClipName = "hidden_boss_bgm";
         private const string GameOverClipName = "game_over_bgm";
         private const string BossClipPrefix = "boss_stage_";
         private const string BossClipSuffix = "_bgm";
+        private const int MaxBossClipStage = 10;
 
         private static GameBgm instance;
+        private static string battleClipName = DefaultBattleClipName;
 
         [SerializeField]
         private float bgmVolume = 0.55f;
@@ -35,12 +37,27 @@ namespace VampireLike.Audio
         private static void ResetStaticState()
         {
             instance = null;
+            battleClipName = DefaultBattleClipName;
         }
 
         public static void Play(BgmType type)
         {
             EnsureInstance();
             instance.PlayInternal(type, 0);
+        }
+
+        public static void SetBattleClipName(string clipName)
+        {
+            if (string.IsNullOrWhiteSpace(clipName))
+                clipName = DefaultBattleClipName;
+
+            if (battleClipName == clipName)
+                return;
+
+            battleClipName = clipName;
+
+            if (instance != null && instance.currentBgm == BgmType.Battle)
+                instance.PlayInternal(BgmType.Battle, 0, true);
         }
 
         public static void PlayBoss(int bossStage)
@@ -62,9 +79,7 @@ namespace VampireLike.Audio
 
             instance.currentBgm = null;
             instance.currentBossStage = 0;
-
-            if (instance.audioSource != null)
-                instance.audioSource.Stop();
+            instance.StopPlayback();
         }
 
         private static void EnsureInstance()
@@ -81,6 +96,7 @@ namespace VampireLike.Audio
         {
             if (instance != null && instance != this)
             {
+                StopAllAudioSources();
                 Destroy(gameObject);
                 return;
             }
@@ -111,20 +127,31 @@ namespace VampireLike.Audio
 
         private void PlayInternal(BgmType type, int bossStage)
         {
+            PlayInternal(type, bossStage, false);
+        }
+
+        private void PlayInternal(BgmType type, int bossStage, bool forceRestart)
+        {
             EnsureAudioSource();
 
             bossStage = Mathf.Max(0, bossStage);
 
-            if (currentBgm == type && currentBossStage == bossStage && audioSource.isPlaying)
+            if (!forceRestart && currentBgm == type && currentBossStage == bossStage && audioSource.isPlaying)
                 return;
 
             AudioClip clip = LoadClip(type, bossStage);
 
             if (clip == null)
+            {
+                currentBgm = type;
+                currentBossStage = bossStage;
+                StopPlayback();
                 return;
+            }
 
             currentBgm = type;
             currentBossStage = bossStage;
+            StopPlayback();
             audioSource.clip = clip;
             audioSource.loop = true;
             audioSource.volume = GetAppliedVolume();
@@ -143,13 +170,11 @@ namespace VampireLike.Audio
                 case BgmType.MainMenu:
                     return Resources.Load<AudioClip>(MusicRoot + MainMenuClipName);
                 case BgmType.Battle:
-                    return Resources.Load<AudioClip>(MusicRoot + BattleClipName);
+                    return LoadBattleClip();
                 case BgmType.Boss:
-                    AudioClip bossClip = LoadBossClip(bossStage);
-                    return bossClip != null ? bossClip : Resources.Load<AudioClip>(MusicRoot + BattleClipName);
+                    return LoadBossClip(bossStage);
                 case BgmType.HiddenBoss:
-                    AudioClip hiddenBossClip = Resources.Load<AudioClip>(MusicRoot + HiddenBossClipName);
-                    return hiddenBossClip != null ? hiddenBossClip : Resources.Load<AudioClip>(MusicRoot + BattleClipName);
+                    return Resources.Load<AudioClip>(MusicRoot + HiddenBossClipName);
                 case BgmType.GameOver:
                     return Resources.Load<AudioClip>(MusicRoot + GameOverClipName);
                 default:
@@ -163,7 +188,18 @@ namespace VampireLike.Audio
                 return null;
 
             string clipName = $"{BossClipPrefix}{bossStage:00}{BossClipSuffix}";
-            return Resources.Load<AudioClip>(MusicRoot + clipName);
+            AudioClip clip = Resources.Load<AudioClip>(MusicRoot + clipName);
+            if (clip != null || bossStage <= MaxBossClipStage)
+                return clip;
+
+            string fallbackClipName = $"{BossClipPrefix}{MaxBossClipStage:00}{BossClipSuffix}";
+            return Resources.Load<AudioClip>(MusicRoot + fallbackClipName);
+        }
+
+        private static AudioClip LoadBattleClip()
+        {
+            AudioClip clip = Resources.Load<AudioClip>(MusicRoot + battleClipName);
+            return clip != null ? clip : Resources.Load<AudioClip>(MusicRoot + DefaultBattleClipName);
         }
 
         private void EnsureAudioSource()
@@ -175,6 +211,25 @@ namespace VampireLike.Audio
             audioSource.playOnAwake = false;
             audioSource.loop = true;
             audioSource.spatialBlend = 0f;
+        }
+
+        private void StopPlayback()
+        {
+            if (audioSource == null)
+                return;
+
+            audioSource.Stop();
+            audioSource.clip = null;
+        }
+
+        private void StopAllAudioSources()
+        {
+            AudioSource[] sources = GetComponents<AudioSource>();
+            foreach (AudioSource source in sources)
+            {
+                source.Stop();
+                source.clip = null;
+            }
         }
     }
 }

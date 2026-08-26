@@ -22,6 +22,9 @@ public class PlayerSpriteAnimator : MonoBehaviour
     private bool invertHorizontalFacing = true;
 
     [SerializeField]
+    private bool invertIdleHorizontalFacing;
+
+    [SerializeField]
     private bool invertWalkHorizontalFacing;
 
     [SerializeField]
@@ -91,7 +94,7 @@ public class PlayerSpriteAnimator : MonoBehaviour
         if (spriteRenderer == null)
             spriteRenderer = GetOrCreateVisualRenderer();
 
-        if (!isDead)
+        if (!isDead && !isPlayingOneShot)
             UpdateFacing();
 
         if (isPlayingOneShot)
@@ -145,9 +148,30 @@ public class PlayerSpriteAnimator : MonoBehaviour
         ApplySpriteFacing(spriteRenderer == null ? null : spriteRenderer.sprite);
     }
 
+    public void SetInvertIdleHorizontalFacing(bool shouldInvert)
+    {
+        invertIdleHorizontalFacing = shouldInvert;
+        ApplySpriteFacing(spriteRenderer == null ? null : spriteRenderer.sprite);
+    }
+
     public void PlayAttack()
     {
         PlayOneShot(attackFrames, attackFrameRate);
+    }
+
+    public void PlayAttack(Vector2 attackDirection)
+    {
+        FaceDirection(attackDirection);
+        PlayAttack();
+    }
+
+    public void FaceDirection(Vector2 direction)
+    {
+        if (Mathf.Abs(direction.x) <= 0.01f)
+            return;
+
+        isFacingLeft = direction.x < 0f;
+        ApplySpriteFacing(spriteRenderer == null ? null : spriteRenderer.sprite);
     }
 
     public void PlayHit()
@@ -313,10 +337,27 @@ public class PlayerSpriteAnimator : MonoBehaviour
 
         bool shouldInvert = invertHorizontalFacing;
 
+        if (invertIdleHorizontalFacing && IsIdleSprite(sprite))
+            shouldInvert = !shouldInvert;
+
         if (invertWalkHorizontalFacing && IsWalkSprite(sprite))
             shouldInvert = !shouldInvert;
 
         spriteRenderer.flipX = shouldInvert ? !isFacingLeft : isFacingLeft;
+    }
+
+    private bool IsIdleSprite(Sprite sprite)
+    {
+        if (sprite == null || idleFrames == null)
+            return false;
+
+        for (int i = 0; i < idleFrames.Length; i++)
+        {
+            if (idleFrames[i] == sprite)
+                return true;
+        }
+
+        return false;
     }
 
     private bool IsWalkSprite(Sprite sprite)

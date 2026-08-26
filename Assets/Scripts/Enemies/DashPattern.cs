@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using VampireLike.Audio;
+using VampireLike.Combat;
 using VampireLike.Settings;
 using VampireLike.VFX;
 using VampireLike.World;
@@ -75,6 +76,19 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float impactSize = 0.85f;
 
+        [Header("돌진 피격 판정")]
+        [SerializeField]
+        private bool useSweptDashHitbox = true;
+
+        [SerializeField]
+        private bool disableContactDamageDuringDash = true;
+
+        [SerializeField]
+        private float dashHitRadius = 0.26f;
+
+        private EnemyContactDamage contactDamage;
+        private PlayerHealth playerHealth;
+
         protected override bool CanExecutePattern()
         {
             if (Player == null || BossRigidbody == null)
@@ -134,12 +148,19 @@ namespace VampireLike.Enemies
             GameSfx.Play(SfxType.BossDash);
             float elapsedTime = 0f;
             float nextTrailTime = 0f;
+            bool hasHitPlayer = false;
+            CacheHitboxComponents();
+            SetContactDamageEnabled(false);
 
             while (elapsedTime < effectiveDashDuration && !Boss.IsDead)
             {
-                Vector2 nextPosition = BossRigidbody.position + dashDirection * GetEffectiveDashSpeed() * Time.fixedDeltaTime;
+                Vector2 previousPosition = BossRigidbody.position;
+                Vector2 nextPosition = previousPosition + dashDirection * GetEffectiveDashSpeed() * Time.fixedDeltaTime;
                 nextPosition = ClampDashPosition(nextPosition);
                 BossRigidbody.MovePosition(nextPosition);
+
+                if (!hasHitPlayer && TryApplySweptDashDamage(previousPosition, nextPosition, dashDirection))
+                    hasHitPlayer = true;
 
                 if (elapsedTime >= nextTrailTime)
                 {
@@ -152,7 +173,21 @@ namespace VampireLike.Enemies
             }
 
             BossRigidbody.linearVelocity = Vector2.zero;
+            SetContactDamageEnabled(true);
             BossImpact.PlayDashImpact(BossRigidbody.position, dashDirection, impactSize);
+        }
+
+        private bool TryApplySweptDashDamage(Vector2 previousPosition, Vector2 nextPosition, Vector2 dashDirection)
+        {
+            if (!useSweptDashHitbox || playerHealth == null || playerHealth.IsDead)
+                return false;
+
+            if (!playerHealth.IsHitByProjectileSweep(previousPosition, nextPosition, dashHitRadius))
+                return false;
+
+            int damage = contactDamage == null ? 1 : contactDamage.ContactDamage;
+            playerHealth.TakeDamage(damage, dashDirection);
+            return true;
         }
 
         private Vector2 GetDashDirection()
@@ -184,6 +219,17 @@ namespace VampireLike.Enemies
             telegraphWidth = Mathf.Max(0.01f, telegraphWidth);
             telegraphLength = Mathf.Max(0.1f, telegraphLength);
             impactSize = Mathf.Max(0.1f, impactSize);
+            dashHitRadius = Mathf.Max(0.01f, dashHitRadius);
+        }
+
+        private void OnDisable()
+        {
+            SetContactDamageEnabled(true);
+        }
+
+        protected override void OnPatternCancelled()
+        {
+            SetContactDamageEnabled(true);
         }
 
         private float GetEffectivePrepareTime()
@@ -248,6 +294,29 @@ namespace VampireLike.Enemies
         private static bool ShouldUseMobilePortraitTuning()
         {
             return GameOptions.IsMobileDisplayMode && Screen.height > Screen.width;
+        }
+
+        private void CacheHitboxComponents()
+        {
+            if (contactDamage == null)
+                contactDamage = GetComponent<EnemyContactDamage>();
+
+            if (playerHealth == null && Player != null)
+                playerHealth = Player.GetComponentInParent<PlayerHealth>();
+
+            if (playerHealth == null)
+                playerHealth = FindAnyObjectByType<PlayerHealth>();
+        }
+
+        private void SetContactDamageEnabled(bool isEnabled)
+        {
+            if (!disableContactDamageDuringDash)
+                return;
+
+            CacheHitboxComponents();
+
+            if (contactDamage != null)
+                contactDamage.enabled = isEnabled;
         }
     }
 }

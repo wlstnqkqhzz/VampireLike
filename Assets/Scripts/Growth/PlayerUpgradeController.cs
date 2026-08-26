@@ -443,6 +443,46 @@ namespace VampireLike.Growth
             return lines;
         }
 
+        public Dictionary<string, List<string>> GetUpgradeStatusLinesByCategory()
+        {
+            Dictionary<string, List<string>> linesByCategory = new Dictionary<string, List<string>>
+            {
+                { "일반 강화", new List<string>() },
+                { "특수 강화", new List<string>() },
+                { "전용 강화", new List<string>() }
+            };
+
+            if (upgradeDefinitions == null)
+                return linesByCategory;
+
+            HashSet<UpgradeType> addedTypes = new HashSet<UpgradeType>();
+
+            foreach (UpgradeDefinition definition in upgradeDefinitions)
+            {
+                if (definition == null || definition.Unlimited)
+                    continue;
+
+                UpgradeType upgradeType = definition.UpgradeType == UpgradeType.SequentialShot
+                    ? UpgradeType.ProjectileCount
+                    : definition.UpgradeType;
+
+                if (!addedTypes.Add(upgradeType))
+                    continue;
+
+                int level = GetLevel(upgradeType);
+
+                if (level <= 0)
+                    continue;
+
+                string category = definition.IsCharacterExclusiveUpgrade
+                    ? "전용 강화"
+                    : definition.IsSpecialUpgrade ? "특수 강화" : "일반 강화";
+                linesByCategory[category].Add(GetUpgradeStatusLine(definition, level));
+            }
+
+            return linesByCategory;
+        }
+
         private static string GetUpgradeValueText(UpgradeDefinition definition, int level)
         {
             if (definition == null)
@@ -459,6 +499,14 @@ namespace VampireLike.Growth
             }
 
             return string.Empty;
+        }
+
+        private static string GetUpgradeStatusLine(UpgradeDefinition definition, int level)
+        {
+            string valueText = GetUpgradeValueText(definition, level);
+            return string.IsNullOrEmpty(valueText)
+                ? $"{definition.DisplayName} Lv.{level}"
+                : $"{definition.DisplayName} Lv.{level} ({valueText})";
         }
 
         private List<UpgradeDefinition> GetAvailableDefinitions(int playerLevel)
@@ -480,7 +528,7 @@ namespace VampireLike.Growth
                 if (definition == null || !CanApply(definition))
                     continue;
 
-                if (!definition.CanAppearForCharacter(CharacterSelection.SelectedCharacter.Id))
+                if (!definition.CanAppearForCharacter(GetActiveCharacterId()))
                     continue;
 
                 if (definition.UpgradeType == UpgradeType.SequentialShot)
@@ -561,7 +609,28 @@ namespace VampireLike.Growth
 
         private int GetMaxLevel(UpgradeDefinition definition)
         {
-            return CharacterSelection.SelectedCharacter.GetMaxLevel(definition);
+            return GetActiveCharacter().GetMaxLevel(definition);
+        }
+
+        private static CharacterDefinition GetActiveCharacter()
+        {
+            string activeCharacterId = GetActiveCharacterId();
+            CharacterDefinition[] characters = CharacterSelection.Characters;
+
+            for (int i = 0; i < characters.Length; i++)
+            {
+                if (string.Equals(characters[i].Id, activeCharacterId, System.StringComparison.OrdinalIgnoreCase))
+                    return characters[i];
+            }
+
+            return CharacterSelection.SelectedCharacter;
+        }
+
+        private static string GetActiveCharacterId()
+        {
+            return string.IsNullOrWhiteSpace(GameSessionStats.CharacterId)
+                ? CharacterSelection.SelectedCharacter.Id
+                : GameSessionStats.CharacterId;
         }
 
         private void CacheComponents()

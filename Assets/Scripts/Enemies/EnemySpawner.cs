@@ -163,6 +163,7 @@ namespace VampireLike.Enemies
         private int currentWave;
         private bool isWaveProgressPaused;
         private readonly HashSet<object> wavePauseSources = new HashSet<object>();
+        private readonly HashSet<object> spawnPauseSources = new HashSet<object>();
 
         public event Action<int> WaveChanged;
 
@@ -172,6 +173,7 @@ namespace VampireLike.Enemies
         public int AliveEnemyCount => spawnedEnemies.Count;
         public float WaveProgress => waveDuration <= 0f ? 0f : Mathf.Clamp01(waveTimer / waveDuration);
         public bool IsWaveProgressPaused => isWaveProgressPaused || wavePauseSources.Count > 0;
+        public bool IsEnemySpawnPaused => spawnPauseSources.Count > 0;
 
         private void Awake()
         {
@@ -189,6 +191,9 @@ namespace VampireLike.Enemies
 
             UpdateWaveTimer();
             RemoveMissingEnemies();
+
+            if (IsEnemySpawnPaused)
+                return;
 
             if (spawnedEnemies.Count >= CurrentMaxEnemyCount)
                 return;
@@ -323,6 +328,17 @@ namespace VampireLike.Enemies
                 wavePauseSources.Add(source);
             else
                 wavePauseSources.Remove(source);
+        }
+
+        public void SetEnemySpawningPaused(object source, bool paused)
+        {
+            if (source == null)
+                return;
+
+            if (paused)
+                spawnPauseSources.Add(source);
+            else
+                spawnPauseSources.Remove(source);
         }
 
         private void SpawnEnemyBatch()

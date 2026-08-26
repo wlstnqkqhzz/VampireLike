@@ -99,6 +99,8 @@ namespace VampireLike.Menu
         private void StartGame()
         {
             CharacterSelection.Select(selectedIndex);
+            CharacterDefinition selectedCharacter = CharacterSelection.SelectedCharacter;
+            GameSessionStats.RecordCharacter(selectedCharacter.Id, selectedCharacter.DisplayName, selectedCharacter.Role);
             hasStarted = true;
             IsOpen = false;
             GameState.SetMainMenuOpen(false);

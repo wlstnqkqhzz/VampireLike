@@ -54,6 +54,12 @@ namespace VampireLike.Combat
         [SerializeField]
         private SfxType attackSfxType = SfxType.PlayerShoot;
 
+        [SerializeField]
+        private bool targetVisibleEnemiesOnly = true;
+
+        [SerializeField]
+        private float targetViewportPadding = 0.02f;
+
         private Sprite projectileSpriteOverride;
         private float projectileVisualScale = 1f;
         private float projectileColliderRadius = -1f;
@@ -109,6 +115,7 @@ namespace VampireLike.Combat
             sequentialShotCount = Mathf.Max(0, sequentialShotCount);
             sequentialShotDelay = Mathf.Max(0.02f, sequentialShotDelay);
             projectilePierceCount = Mathf.Max(0, projectilePierceCount);
+            targetViewportPadding = Mathf.Clamp(targetViewportPadding, 0f, 0.2f);
         }
 
         private void OnDisable()
@@ -195,6 +202,9 @@ namespace VampireLike.Combat
                 if (enemy == null || enemy.IsDead)
                     continue;
 
+                if (targetVisibleEnemiesOnly && !IsEnemyVisibleToCamera(enemy))
+                    continue;
+
                 float sqrDistance = ((Vector2)enemy.transform.position - origin).sqrMagnitude;
 
                 if (sqrDistance > closestSqrDistance)
@@ -205,6 +215,23 @@ namespace VampireLike.Combat
             }
 
             return closestEnemy;
+        }
+
+        private bool IsEnemyVisibleToCamera(EnemyHealth enemy)
+        {
+            Camera mainCamera = Camera.main;
+
+            if (mainCamera == null || enemy == null)
+                return true;
+
+            Vector3 viewportPosition = mainCamera.WorldToViewportPoint(enemy.transform.position);
+            float padding = targetViewportPadding;
+
+            return viewportPosition.z > 0f
+                && viewportPosition.x >= padding
+                && viewportPosition.x <= 1f - padding
+                && viewportPosition.y >= padding
+                && viewportPosition.y <= 1f - padding;
         }
 
         private IEnumerator FireBurstAt(Transform target)
@@ -226,7 +253,7 @@ namespace VampireLike.Combat
                 spriteAnimator = GetComponent<global::PlayerSpriteAnimator>();
 
             if (spriteAnimator != null && (playerController == null || !playerController.IsMoving))
-                spriteAnimator.PlayAttack();
+                spriteAnimator.PlayAttack(direction);
 
             // 한 번의 자동 공격에서 나온 산탄/다중/연속 발사를 같은 묶음으로 취급해 같은 적 중복 피해를 감쇠한다.
             int attackGroupId = ProjectileController.CreateAttackGroupId();

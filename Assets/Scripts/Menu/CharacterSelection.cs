@@ -35,12 +35,14 @@ namespace VampireLike.Menu
                 "PlayerAnimations/KaelProcessed",
                 true,
                 false,
+                false,
                 "Projectiles/KaelSwordWave",
                 1.28f,
                 0.2f,
                 SfxType.KaelAttack,
                 new[] { SfxType.KaelHit1, SfxType.KaelHit2 },
-                SfxType.KaelDeath),
+                SfxType.KaelDeath,
+                "kael_battle_theme"),
             new CharacterDefinition(
                 "selene",
                 "\uC140\uB808\uB124",
@@ -63,14 +65,16 @@ namespace VampireLike.Menu
                     { UpgradeType.PickupRadius, 5 }
                 },
                 "PlayerAnimations/SeleneProcessed",
+                false,
                 true,
-                true,
+                false,
                 "Projectiles/SeleneMoonOrb",
                 0.58f,
                 0.1f,
                 SfxType.SeleneAttack,
                 new[] { SfxType.SeleneHit1, SfxType.SeleneHit2 },
-                SfxType.SeleneDeath),
+                SfxType.SeleneDeath,
+                "selene_battle_theme"),
             new CharacterDefinition(
                 "hanseorin",
                 "\uD55C\uC11C\uB9B0",
@@ -95,12 +99,14 @@ namespace VampireLike.Menu
                 "PlayerAnimations/HanSeorinProcessed",
                 false,
                 false,
+                false,
                 "Projectiles/HanSeorinDagger",
                 0.72f,
                 0.08f,
                 SfxType.HanSeorinAttack,
                 new[] { SfxType.HanSeorinHit1, SfxType.HanSeorinHit2, SfxType.HanSeorinHit3 },
-                SfxType.HanSeorinDeath)
+                SfxType.HanSeorinDeath,
+                "hanseorin_battle_theme")
         };
 
         private static int selectedIndex;
