@@ -131,6 +131,11 @@ namespace VampireLike.VFX
 
         public static GameObject PlayBossCastAura(Transform target, CombatVFXKind kind, float size, float duration = 0.45f, int sortingOrder = 1500)
         {
+            return PlayBossCastAura(target, Vector2.zero, kind, size, duration, sortingOrder);
+        }
+
+        public static GameObject PlayBossCastAura(Transform target, Vector2 offset, CombatVFXKind kind, float size, float duration = 0.45f, int sortingOrder = 1500)
+        {
             if (target == null)
                 return null;
 
@@ -139,7 +144,7 @@ namespace VampireLike.VFX
             sortingOrder += SortingOffset;
 
             GameObject root = new GameObject($"VFX Boss {kind} Cast Aura");
-            root.transform.position = target.position;
+            root.transform.position = target.position + (Vector3)offset;
 
             Color main = GetMainColor(kind);
             Color secondary = GetSecondaryColor(kind);
@@ -154,7 +159,7 @@ namespace VampireLike.VFX
             sparks.transform.localScale = Vector3.one * size * 0.78f;
 
             CombatVFXFollow follow = root.AddComponent<CombatVFXFollow>();
-            follow.Configure(target);
+            follow.Configure(target, offset);
 
             CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
             effect.Play(duration, 0.78f, 1.15f, 115f, true);
@@ -502,10 +507,17 @@ namespace VampireLike.VFX
     public class CombatVFXFollow : MonoBehaviour
     {
         private Transform target;
+        private Vector2 offset;
 
         public void Configure(Transform followTarget)
         {
+            Configure(followTarget, Vector2.zero);
+        }
+
+        public void Configure(Transform followTarget, Vector2 followOffset)
+        {
             target = followTarget;
+            offset = followOffset;
         }
 
         private void LateUpdate()
@@ -513,7 +525,7 @@ namespace VampireLike.VFX
             if (target == null)
                 return;
 
-            transform.position = target.position;
+            transform.position = target.position + (Vector3)offset;
         }
     }
 

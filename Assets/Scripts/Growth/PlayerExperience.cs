@@ -34,7 +34,7 @@ namespace VampireLike.Growth
 
         // 레벨업할 때마다 다음 필요 경험치를 얼마나 완만하게 늘릴지 정한다.
         [SerializeField]
-        private float nextLevelExperienceMultiplier = 1.18f;
+        private float nextLevelExperienceMultiplier = 1.12f;
 
         // 순수 곱연산만 쓰면 후반 요구량이 급격히 튀므로, 작은 고정 증가로 곡선을 안정화한다.
         [SerializeField]
@@ -42,7 +42,7 @@ namespace VampireLike.Growth
 
         // 레벨업 요구량이 과하게 커져 성장 체감이 끊기지 않도록 상한을 둔다.
         [SerializeField]
-        private int maxExperienceToNextLevel = 120;
+        private int maxExperienceToNextLevel = 100;
 
         // 경험치 보석을 흡수하기 시작하는 반경이다. 자석 강화로 증가한다.
         [SerializeField]

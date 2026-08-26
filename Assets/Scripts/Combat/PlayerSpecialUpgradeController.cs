@@ -992,11 +992,13 @@ namespace VampireLike.Combat
             if (stacks < GetHanSeorinBloodMarkRequiredStacks())
             {
                 hanSeorinBloodMarkStacks[enemy] = stacks;
-                CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.22f, 0.08f);
+                SetHanSeorinBloodMarkVfx(enemy, stacks);
+                CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.18f + 0.03f * stacks, 0.08f);
                 return;
             }
 
             hanSeorinBloodMarkStacks.Remove(enemy);
+            ClearHanSeorinBloodMarkVfx(enemy);
             float damage = projectileDamage * GetHanSeorinBloodMarkDamageRatio();
             enemy.TakeDamage(damage);
 
@@ -1018,9 +1020,12 @@ namespace VampireLike.Combat
             }
             else
             {
+                ClearHanSeorinKillingIntentVfx(hanSeorinKillingIntentTarget);
                 hanSeorinKillingIntentTarget = enemy;
                 hanSeorinKillingIntentStacks = 1;
             }
+
+            SetHanSeorinKillingIntentVfx(enemy);
         }
 
         private void TryHanSeorinRedExecution(EnemyHealth enemy)
@@ -1062,6 +1067,55 @@ namespace VampireLike.Combat
         private float GetHanSeorinKillingIntentMaxBonus()
         {
             return 0.15f * Mathf.Clamp(hanSeorinKillingIntentLevel, 1, 3);
+        }
+
+        private void SetHanSeorinBloodMarkVfx(EnemyHealth enemy, int stacks)
+        {
+            HanSeorinMarkVFX marker = GetHanSeorinMarkVfx(enemy);
+
+            if (marker != null)
+                marker.SetBloodMark(stacks, GetHanSeorinBloodMarkRequiredStacks());
+        }
+
+        private void ClearHanSeorinBloodMarkVfx(EnemyHealth enemy)
+        {
+            HanSeorinMarkVFX marker = enemy == null ? null : enemy.GetComponent<HanSeorinMarkVFX>();
+
+            if (marker != null)
+                marker.ClearBloodMark();
+        }
+
+        private void SetHanSeorinKillingIntentVfx(EnemyHealth enemy)
+        {
+            HanSeorinMarkVFX marker = GetHanSeorinMarkVfx(enemy);
+
+            if (marker == null)
+                return;
+
+            float currentBonus = hanSeorinKillingIntentStacks * hanSeorinKillingIntentBonusPerHit;
+            float maxBonus = Mathf.Max(0.01f, GetHanSeorinKillingIntentMaxBonus());
+            marker.SetKillingIntent(Mathf.Clamp01(currentBonus / maxBonus));
+        }
+
+        private static void ClearHanSeorinKillingIntentVfx(EnemyHealth enemy)
+        {
+            HanSeorinMarkVFX marker = enemy == null ? null : enemy.GetComponent<HanSeorinMarkVFX>();
+
+            if (marker != null)
+                marker.ClearKillingIntent();
+        }
+
+        private static HanSeorinMarkVFX GetHanSeorinMarkVfx(EnemyHealth enemy)
+        {
+            if (enemy == null || enemy.IsDead)
+                return null;
+
+            HanSeorinMarkVFX marker = enemy.GetComponent<HanSeorinMarkVFX>();
+
+            if (marker == null)
+                marker = enemy.gameObject.AddComponent<HanSeorinMarkVFX>();
+
+            return marker;
         }
 
         private void TryVampirismHeal()

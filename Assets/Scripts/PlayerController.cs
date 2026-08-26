@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VampireLike.Growth;
 using VampireLike.Mobile;
 using VampireLike.VFX;
 using VampireLike.World;
@@ -105,6 +106,9 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = Vector2.zero;
 
+        if (IsGameplayInputBlocked())
+            return;
+
         if (movementLockTimer > 0f)
             movementLockTimer = Mathf.Max(0f, movementLockTimer - Time.deltaTime);
 
@@ -147,7 +151,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (IsMovementLocked)
+        if (IsGameplayInputBlocked() || IsMovementLocked)
             return;
 
         // Transform 직접 변경 대신 Rigidbody2D.MovePosition으로 이동해 충돌과 함께 동작하게 한다.
@@ -211,6 +215,11 @@ public class PlayerController : MonoBehaviour
             currentMoveSpeedMultiplier *= multiplier;
 
         currentMoveSpeedMultiplier = Mathf.Max(MinimumMoveSpeedMultiplier, currentMoveSpeedMultiplier);
+    }
+
+    private static bool IsGameplayInputBlocked()
+    {
+        return Time.timeScale <= 0f || LevelUpChoiceUI.IsAnyShowing;
     }
 
     private void ConfigureSpriteRenderer()

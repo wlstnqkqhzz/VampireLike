@@ -84,10 +84,11 @@ namespace VampireLike.Enemies
         private bool disableContactDamageDuringDash = true;
 
         [SerializeField]
-        private float dashHitRadius = 0.26f;
+        private float dashHitRadius = 0.48f;
 
         private EnemyContactDamage contactDamage;
         private PlayerHealth playerHealth;
+        private Collider2D bossCollider;
 
         protected override bool CanExecutePattern()
         {
@@ -182,7 +183,7 @@ namespace VampireLike.Enemies
             if (!useSweptDashHitbox || playerHealth == null || playerHealth.IsDead)
                 return false;
 
-            if (!playerHealth.IsHitByProjectileSweep(previousPosition, nextPosition, dashHitRadius))
+            if (!playerHealth.IsHitByDashSweep(previousPosition, nextPosition, GetEffectiveDashHitRadius()))
                 return false;
 
             int damage = contactDamage == null ? 1 : contactDamage.ContactDamage;
@@ -301,11 +302,28 @@ namespace VampireLike.Enemies
             if (contactDamage == null)
                 contactDamage = GetComponent<EnemyContactDamage>();
 
+            if (bossCollider == null)
+                bossCollider = GetComponent<Collider2D>();
+
             if (playerHealth == null && Player != null)
                 playerHealth = Player.GetComponentInParent<PlayerHealth>();
 
             if (playerHealth == null)
                 playerHealth = FindAnyObjectByType<PlayerHealth>();
+        }
+
+        private float GetEffectiveDashHitRadius()
+        {
+            float radius = dashHitRadius;
+
+            if (bossCollider != null)
+            {
+                Bounds bounds = bossCollider.bounds;
+                float bodyRadius = Mathf.Max(bounds.extents.x, bounds.extents.y) * 0.55f;
+                radius = Mathf.Max(radius, bodyRadius);
+            }
+
+            return radius;
         }
 
         private void SetContactDamageEnabled(bool isEnabled)

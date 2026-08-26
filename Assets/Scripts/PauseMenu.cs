@@ -88,7 +88,9 @@ public class PauseMenu : MonoBehaviour
     {
         Keyboard keyboard = Keyboard.current;
 
-        if (VampireLike.Combat.GameState.IsGameOver || VampireLike.Combat.GameState.IsMainMenuOpen)
+        if (VampireLike.Combat.GameState.IsGameOver
+            || VampireLike.Combat.GameState.IsMainMenuOpen
+            || LevelUpChoiceUI.IsAnyShowing)
         {
             UpdateMobilePauseButton();
             return;
@@ -123,6 +125,12 @@ public class PauseMenu : MonoBehaviour
 
     public void TogglePause()
     {
+        if (!isPaused && LevelUpChoiceUI.IsAnyShowing)
+        {
+            UpdateMobilePauseButton();
+            return;
+        }
+
         GameSfx.Play(SfxType.UpgradeSelect);
         SetPaused(!isPaused);
     }
@@ -196,9 +204,9 @@ public class PauseMenu : MonoBehaviour
         panelImage.color = new Color(0.12f, 0.14f, 0.12f, 0.92f);
 
         CreateLabel(panel.transform, "\uC77C\uC2DC\uC815\uC9C0", new Vector2(0f, 160f), 34, Color.white);
-        resumeButton = CreateButton(panel.transform, "\uACC4\uC18D\uD558\uAE30", new Vector2(-240f, 62f), new Vector2(220f, 52f));
-        optionsButton = CreateButton(panel.transform, "\uC635\uC158", new Vector2(-240f, -8f), new Vector2(220f, 52f));
-        quitButton = CreateButton(panel.transform, "\uAC8C\uC784 \uC885\uB8CC", new Vector2(-240f, -78f), new Vector2(220f, 52f));
+        resumeButton = CreateButton(panel.transform, "\uACC4\uC18D\uD558\uAE30", new Vector2(-212f, 62f), new Vector2(220f, 52f));
+        optionsButton = CreateButton(panel.transform, "\uC635\uC158", new Vector2(-212f, -8f), new Vector2(220f, 52f));
+        quitButton = CreateButton(panel.transform, "\uAC8C\uC784 \uC885\uB8CC", new Vector2(-212f, -78f), new Vector2(220f, 52f));
         EnsureUpgradeStatusText();
 
         CreateOptionsPanel(root.transform);
@@ -219,7 +227,7 @@ public class PauseMenu : MonoBehaviour
             return;
         }
 
-        upgradeStatusText = CreateText(pausePanel, string.Empty, new Vector2(186f, -34f), 14, new Color(0.9f, 0.95f, 0.86f, 1f), new Vector2(354f, 270f));
+        upgradeStatusText = CreateText(pausePanel, string.Empty, new Vector2(174f, -34f), 14, new Color(0.9f, 0.95f, 0.86f, 1f), new Vector2(354f, 270f));
         upgradeStatusText.gameObject.name = UpgradeStatusName;
         ConfigureUpgradeStatusText(upgradeStatusText);
     }
@@ -237,7 +245,7 @@ public class PauseMenu : MonoBehaviour
         backgroundRect.anchorMax = new Vector2(0.5f, 0.5f);
         backgroundRect.pivot = new Vector2(0.5f, 0.5f);
         backgroundRect.sizeDelta = new Vector2(382f, 294f);
-        backgroundRect.anchoredPosition = new Vector2(186f, -34f);
+        backgroundRect.anchoredPosition = new Vector2(174f, -34f);
 
         Image backgroundImage = backgroundObject.AddComponent<Image>();
         backgroundImage.color = new Color(0.045f, 0.06f, 0.055f, 0.78f);
@@ -254,7 +262,7 @@ public class PauseMenu : MonoBehaviour
         if (rectTransform != null)
         {
             rectTransform.sizeDelta = new Vector2(354f, 270f);
-            rectTransform.anchoredPosition = new Vector2(186f, -34f);
+            rectTransform.anchoredPosition = new Vector2(174f, -34f);
         }
 
         text.fontSize = 14;
@@ -431,6 +439,7 @@ public class PauseMenu : MonoBehaviour
         bool canShow = !isPaused
             && !VampireLike.Combat.GameState.IsGameOver
             && !VampireLike.Combat.GameState.IsMainMenuOpen
+            && !LevelUpChoiceUI.IsAnyShowing
             && (GameOptions.IsMobileDisplayMode || Application.isMobilePlatform || Touchscreen.current != null);
 
         mobilePauseButton.gameObject.SetActive(canShow);
@@ -523,7 +532,7 @@ public class PauseMenu : MonoBehaviour
         rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
         rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
         rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        rectTransform.sizeDelta = isPortrait ? new Vector2(640f, 780f) : new Vector2(720f, 400f);
+        rectTransform.sizeDelta = isPortrait ? new Vector2(640f, 780f) : new Vector2(760f, 400f);
         rectTransform.anchoredPosition = Vector2.zero;
     }
 

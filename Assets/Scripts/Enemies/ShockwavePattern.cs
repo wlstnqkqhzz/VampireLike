@@ -41,6 +41,13 @@ namespace VampireLike.Enemies
         [SerializeField]
         private LayerMask playerLayerMask = ~0;
 
+        [Header("중심 보정")]
+        [SerializeField]
+        private bool useColliderCenter = true;
+
+        [SerializeField]
+        private Vector2 shockwaveCenterOffset = new Vector2(0f, -0.18f);
+
         [Header("경고/충격 연출")]
         [SerializeField]
         private Color telegraphColor = new Color(0.65f, 0.9f, 1f, 0.36f);
@@ -53,13 +60,15 @@ namespace VampireLike.Enemies
 
         private readonly Collider2D[] hitResults = new Collider2D[4];
         private readonly HashSet<global::PlayerController> slowedPlayers = new HashSet<global::PlayerController>();
+        private Collider2D bossCollider;
 
         protected override IEnumerator ExecutePattern()
         {
             float targetRadius = GetTargetRadius();
+            Vector2 center = GetShockwaveCenter();
             Boss.SetState(BossState.Preparing, false);
-            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.Shockwave, 0.9f, prepareTime, 1500);
-            BossTelegraph.ShowCircle(transform.position, targetRadius, prepareTime, telegraphColor, telegraphSortingOrder);
+            CombatVFX.PlayBossCastAura(transform, center - (Vector2)transform.position, CombatVFXKind.Shockwave, 0.9f, prepareTime, 1500);
+            BossTelegraph.ShowCircle(center, targetRadius, prepareTime, telegraphColor, telegraphSortingOrder);
 
             if (prepareTime > 0f)
                 yield return new WaitForSeconds(prepareTime);
@@ -69,7 +78,7 @@ namespace VampireLike.Enemies
 
         private IEnumerator ExpandShockwave()
         {
-            Vector2 center = transform.position;
+            Vector2 center = GetShockwaveCenter();
             float targetRadius = GetTargetRadius();
             float elapsedTime = 0f;
             bool hasHitPlayer = false;
@@ -134,6 +143,22 @@ namespace VampireLike.Enemies
             return maxRadius + Mathf.Max(0, Boss.CurrentPhase - 1) * phaseBonusRadius;
         }
 
+        private Vector2 GetShockwaveCenter()
+        {
+            Vector2 center = transform.position;
+
+            if (useColliderCenter)
+            {
+                if (bossCollider == null)
+                    bossCollider = GetComponent<Collider2D>();
+
+                if (bossCollider != null)
+                    center = bossCollider.bounds.center;
+            }
+
+            return center + (Vector2)transform.TransformVector(shockwaveCenterOffset);
+        }
+
         private IEnumerator ApplySlow(global::PlayerController playerController)
         {
             slowedPlayers.Add(playerController);
@@ -169,6 +194,8 @@ namespace VampireLike.Enemies
             damage = Mathf.Max(1, damage);
             slowMultiplier = Mathf.Clamp(slowMultiplier, 0.25f, 1f);
             slowDuration = Mathf.Max(0f, slowDuration);
+            shockwaveCenterOffset.x = Mathf.Clamp(shockwaveCenterOffset.x, -1f, 1f);
+            shockwaveCenterOffset.y = Mathf.Clamp(shockwaveCenterOffset.y, -1f, 1f);
             telegraphSortingOrder = Mathf.Max(0, telegraphSortingOrder);
             impactSizeMultiplier = Mathf.Max(0.1f, impactSizeMultiplier);
         }

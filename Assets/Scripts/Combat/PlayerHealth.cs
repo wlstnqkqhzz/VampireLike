@@ -46,6 +46,10 @@ namespace VampireLike.Combat
         [SerializeField]
         private Vector2 hurtboxSize = new Vector2(0.42f, 0.58f);
 
+        // 보스 대쉬는 시각상 몸통 중심에 맞도록 일반 접촉 판정보다 살짝 위로 보정한다.
+        [SerializeField]
+        private Vector2 dashHurtboxOffset = new Vector2(0f, 0.12f);
+
         // Collider를 찾지 못했을 때만 사용하는 예비 접촉 검사 반경이다.
         [SerializeField]
         private float contactCheckRadius = 0.35f;
@@ -169,6 +173,10 @@ namespace VampireLike.Combat
             Gizmos.color = new Color(1f, 0.2f, 0.15f, 0.55f);
             Vector3 center = transform.position + (Vector3)hurtboxOffset;
             Gizmos.DrawWireCube(center, new Vector3(hurtboxSize.x, hurtboxSize.y, 0f));
+
+            Gizmos.color = new Color(1f, 0.75f, 0.05f, 0.55f);
+            Vector3 dashCenter = center + (Vector3)dashHurtboxOffset;
+            Gizmos.DrawWireCube(dashCenter, new Vector3(hurtboxSize.x, hurtboxSize.y, 0f));
         }
 
         public void TakeDamage(int damage)
@@ -251,8 +259,19 @@ namespace VampireLike.Combat
 
         public bool IsHitByProjectileSweep(Vector2 startPosition, Vector2 endPosition, float projectileRadius)
         {
+            return IsHitBySweepBounds(startPosition, endPosition, projectileRadius, GetHurtboxBounds());
+        }
+
+        public bool IsHitByDashSweep(Vector2 startPosition, Vector2 endPosition, float dashRadius)
+        {
             Bounds hurtboxBounds = GetHurtboxBounds();
-            float radius = Mathf.Max(0f, projectileRadius);
+            hurtboxBounds.center += (Vector3)dashHurtboxOffset;
+            return IsHitBySweepBounds(startPosition, endPosition, dashRadius, hurtboxBounds);
+        }
+
+        private static bool IsHitBySweepBounds(Vector2 startPosition, Vector2 endPosition, float sweepRadius, Bounds hurtboxBounds)
+        {
+            float radius = Mathf.Max(0f, sweepRadius);
             Rect expandedBounds = new Rect(
                 hurtboxBounds.min.x - radius,
                 hurtboxBounds.min.y - radius,

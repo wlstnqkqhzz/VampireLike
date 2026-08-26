@@ -528,7 +528,7 @@ namespace VampireLike.Growth
                 if (definition == null || !CanApply(definition))
                     continue;
 
-                if (!definition.CanAppearForCharacter(GetActiveCharacterId()))
+                if (!CanAppearForActiveCharacter(definition))
                     continue;
 
                 if (definition.UpgradeType == UpgradeType.SequentialShot)
@@ -576,6 +576,9 @@ namespace VampireLike.Growth
         private bool CanApply(UpgradeDefinition definition)
         {
             if (definition == null)
+                return false;
+
+            if (!CanAppearForActiveCharacter(definition))
                 return false;
 
             if (definition.Unlimited)
@@ -628,9 +631,12 @@ namespace VampireLike.Growth
 
         private static string GetActiveCharacterId()
         {
-            return string.IsNullOrWhiteSpace(GameSessionStats.CharacterId)
-                ? CharacterSelection.SelectedCharacter.Id
-                : GameSessionStats.CharacterId;
+            return CharacterSelection.SelectedCharacter.Id;
+        }
+
+        private static bool CanAppearForActiveCharacter(UpgradeDefinition definition)
+        {
+            return definition != null && definition.CanAppearForCharacter(GetActiveCharacterId());
         }
 
         private void CacheComponents()

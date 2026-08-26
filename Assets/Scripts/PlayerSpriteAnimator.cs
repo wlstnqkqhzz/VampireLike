@@ -1,4 +1,5 @@
 using UnityEngine;
+using VampireLike.Growth;
 
 /// <summary>
 /// 플레이어용 3프레임 스프라이트 시트를 런타임에 잘라 Idle, Walk, Attack, Hit, Death, Cast 모션으로 재생합니다.
@@ -93,6 +94,12 @@ public class PlayerSpriteAnimator : MonoBehaviour
     {
         if (spriteRenderer == null)
             spriteRenderer = GetOrCreateVisualRenderer();
+
+        if (IsGameplayAnimationBlocked())
+        {
+            ShowPausedIdleFrame();
+            return;
+        }
 
         if (!isDead && !isPlayingOneShot)
             UpdateFacing();
@@ -319,6 +326,30 @@ public class PlayerSpriteAnimator : MonoBehaviour
         oneShotTimer = 0f;
         isPlayingOneShot = true;
         SetSprite(oneShotFrames[0]);
+    }
+
+    private void ShowPausedIdleFrame()
+    {
+        if (isDead)
+            return;
+
+        isPlayingOneShot = false;
+        oneShotFrames = null;
+        oneShotFrameIndex = 0;
+        oneShotTimer = 0f;
+        currentLoopFrames = idleFrames;
+        currentLoopFrameRate = idleFrameRate;
+        loopFrameIndex = 0;
+        loopFrameStep = 1;
+        loopTimer = 0f;
+
+        if (idleFrames != null && idleFrames.Length > 0)
+            SetSprite(idleFrames[0]);
+    }
+
+    private static bool IsGameplayAnimationBlocked()
+    {
+        return Time.timeScale <= 0f || LevelUpChoiceUI.IsAnyShowing;
     }
 
     private void SetSprite(Sprite sprite)

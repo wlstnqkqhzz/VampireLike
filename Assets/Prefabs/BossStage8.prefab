@@ -227,6 +227,8 @@ MonoBehaviour:
   playerLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  useColliderCenter: 1
+  shockwaveCenterOffset: {x: 0, y: -0.18}
 --- !u!114 &100011
 MonoBehaviour:
   m_ObjectHideFlags: 0

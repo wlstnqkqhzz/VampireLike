@@ -43490,10 +43490,10 @@ MonoBehaviour:
   currentExperience: 0
   currentLevel: 1
   maxLevel: 50
-  experienceToNextLevel: 6
-  nextLevelExperienceMultiplier: 1.18
+  experienceToNextLevel: 5
+  nextLevelExperienceMultiplier: 1.12
   nextLevelFlatIncrease: 1
-  maxExperienceToNextLevel: 120
+  maxExperienceToNextLevel: 100
   pickupRadius: 0.45
   pickupLayerMask:
     serializedVersion: 2

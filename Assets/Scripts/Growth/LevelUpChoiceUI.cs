@@ -31,6 +31,9 @@ namespace VampireLike.Growth
         private bool isShowing;
         private PlayerUpgradeController upgradeController;
         private List<PlayerUpgradeController.UpgradeChoice> currentChoices = new List<PlayerUpgradeController.UpgradeChoice>();
+        private static int visibleChoiceUiCount;
+
+        public static bool IsAnyShowing => visibleChoiceUiCount > 0;
 
         private static readonly Color NormalButtonColor = new Color(0.72f, 0.9f, 0.95f, 1f);
         private static readonly Color NormalTextColor = new Color(0.06f, 0.1f, 0.12f, 1f);
@@ -98,7 +101,7 @@ namespace VampireLike.Growth
                 choiceButtons[i].onClick.AddListener(() => SelectChoice(choiceIndex));
             }
 
-            isShowing = true;
+            SetShowing(true);
             Time.timeScale = 0f;
 
             if (choiceRoot != null)
@@ -109,10 +112,15 @@ namespace VampireLike.Growth
 
         private void Hide()
         {
-            isShowing = false;
+            SetShowing(false);
 
             if (choiceRoot != null)
                 choiceRoot.SetActive(false);
+        }
+
+        private void OnDestroy()
+        {
+            SetShowing(false);
         }
 
         private void SelectChoice(int choiceIndex)
@@ -124,6 +132,16 @@ namespace VampireLike.Growth
             upgradeController.ApplyUpgrade(currentChoices[choiceIndex].Definition);
             Hide();
             Time.timeScale = 1f;
+        }
+
+        private void SetShowing(bool showing)
+        {
+            if (isShowing == showing)
+                return;
+
+            isShowing = showing;
+            visibleChoiceUiCount += showing ? 1 : -1;
+            visibleChoiceUiCount = Mathf.Max(0, visibleChoiceUiCount);
         }
 
         private void EnsureUI()
