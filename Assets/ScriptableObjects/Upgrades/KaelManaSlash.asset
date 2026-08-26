@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 20
   displayName: 마력 참격
   description: 일정 적중마다 큰 마력 참격 피해
-  maxLevel: 3
+  maxLevel: 5
   multiplier: 1
   flatAmount: 0
   unlimited: 0

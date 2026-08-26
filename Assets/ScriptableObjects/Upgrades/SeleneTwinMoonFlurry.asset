@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 25
   displayName: 은월 파동
   description: 일정 횟수 공격마다 주변/전방에 달빛 파동 발생
-  maxLevel: 3
+  maxLevel: 5
   multiplier: 1
   flatAmount: 0
   unlimited: 0

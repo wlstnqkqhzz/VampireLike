@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 22
   displayName: 처형의 검
   description: 체력이 낮은 적에게 추가 피해
-  maxLevel: 3
+  maxLevel: 5
   multiplier: 1
   flatAmount: 0
   unlimited: 0

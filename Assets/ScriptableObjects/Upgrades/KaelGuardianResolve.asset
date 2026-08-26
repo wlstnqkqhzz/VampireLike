@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 19
   displayName: 수호자의 결의
   description: 체력이 낮을 때 일정 확률로 피해 무효
-  maxLevel: 3
+  maxLevel: 5
   multiplier: 1
   flatAmount: 0
   unlimited: 0

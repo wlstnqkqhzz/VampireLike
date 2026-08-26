@@ -43489,11 +43489,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Growth.PlayerExperience
   currentExperience: 0
   currentLevel: 1
-  maxLevel: 50
+  maxLevel: 99
   experienceToNextLevel: 5
-  nextLevelExperienceMultiplier: 1.12
+  nextLevelExperienceMultiplier: 1.09
   nextLevelFlatIncrease: 1
-  maxExperienceToNextLevel: 100
+  maxExperienceToNextLevel: 200
   pickupRadius: 0.45
   pickupLayerMask:
     serializedVersion: 2

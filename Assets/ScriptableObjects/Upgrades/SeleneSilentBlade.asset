@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 27
   displayName: 만월 강림
   description: 주기적으로 넓은 범위 달빛 폭발
-  maxLevel: 3
+  maxLevel: 5
   multiplier: 1
   flatAmount: 0
   unlimited: 0

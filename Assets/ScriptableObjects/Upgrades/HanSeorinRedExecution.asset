@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 33
   displayName: "\uBD89\uC740 \uCC98\uD615"
   description: "\uCCB4\uB825\uC774 \uB0AE\uC740 \uC801\uC5D0\uAC8C \uB2E8\uAC80 \uD53C\uD574 \uC99D\uAC00, \uCD5C\uC885 \uB808\uBCA8\uC5D0\uC11C \uC57D\uD55C \uC801 \uC989\uC0AC"
-  maxLevel: 3
+  maxLevel: 5
   multiplier: 1
   flatAmount: 0
   unlimited: 0

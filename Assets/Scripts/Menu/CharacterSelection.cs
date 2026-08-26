@@ -21,16 +21,16 @@ namespace VampireLike.Menu
                 1.55f,
                 0,
                 20,
-                44,
+                99,
                 new Dictionary<UpgradeType, int>
                 {
-                    { UpgradeType.ProjectileDamage, 6 },
-                    { UpgradeType.AttackInterval, 3 },
-                    { UpgradeType.ProjectileCount, 1 },
-                    { UpgradeType.ProjectilePierce, 3 },
-                    { UpgradeType.MoveSpeed, 3 },
-                    { UpgradeType.MaxHealth, 6 },
-                    { UpgradeType.PickupRadius, 3 }
+                    { UpgradeType.ProjectileDamage, 12 },
+                    { UpgradeType.AttackInterval, 5 },
+                    { UpgradeType.ProjectileCount, 2 },
+                    { UpgradeType.ProjectilePierce, 7 },
+                    { UpgradeType.MoveSpeed, 5 },
+                    { UpgradeType.MaxHealth, 12 },
+                    { UpgradeType.PickupRadius, 5 }
                 },
                 "PlayerAnimations/KaelProcessed",
                 true,
@@ -53,16 +53,16 @@ namespace VampireLike.Menu
                 1f,
                 1,
                 0,
-                55,
+                99,
                 new Dictionary<UpgradeType, int>
                 {
-                    { UpgradeType.ProjectileDamage, 3 },
-                    { UpgradeType.AttackInterval, 6 },
-                    { UpgradeType.ProjectileCount, 4 },
-                    { UpgradeType.ProjectilePierce, 2 },
-                    { UpgradeType.MoveSpeed, 6 },
-                    { UpgradeType.MaxHealth, 3 },
-                    { UpgradeType.PickupRadius, 5 }
+                    { UpgradeType.ProjectileDamage, 7 },
+                    { UpgradeType.AttackInterval, 9 },
+                    { UpgradeType.ProjectileCount, 6 },
+                    { UpgradeType.ProjectilePierce, 4 },
+                    { UpgradeType.MoveSpeed, 7 },
+                    { UpgradeType.MaxHealth, 4 },
+                    { UpgradeType.PickupRadius, 9 }
                 },
                 "PlayerAnimations/SeleneProcessed",
                 false,
@@ -85,16 +85,16 @@ namespace VampireLike.Menu
                 1.1f,
                 0,
                 0,
-                52,
+                99,
                 new Dictionary<UpgradeType, int>
                 {
-                    { UpgradeType.ProjectileDamage, 6 },
-                    { UpgradeType.AttackInterval, 6 },
-                    { UpgradeType.ProjectileCount, 2 },
-                    { UpgradeType.ProjectilePierce, 3 },
-                    { UpgradeType.MoveSpeed, 6 },
-                    { UpgradeType.MaxHealth, 2 },
-                    { UpgradeType.PickupRadius, 3 }
+                    { UpgradeType.ProjectileDamage, 10 },
+                    { UpgradeType.AttackInterval, 12 },
+                    { UpgradeType.ProjectileCount, 4 },
+                    { UpgradeType.ProjectilePierce, 6 },
+                    { UpgradeType.MoveSpeed, 12 },
+                    { UpgradeType.MaxHealth, 4 },
+                    { UpgradeType.PickupRadius, 5 }
                 },
                 "PlayerAnimations/HanSeorinProcessed",
                 false,

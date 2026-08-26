@@ -554,7 +554,7 @@ namespace VampireLike.Combat
 
         public int GetProjectileReflectCount()
         {
-            return 0;
+            return Mathf.Clamp(projectileReflectLevel, 0, 6);
         }
 
         public Vector2[] GetProjectileDirections(Vector2 baseDirection)
@@ -600,12 +600,17 @@ namespace VampireLike.Combat
 
         public int GetHanSeorinReturningBladeBonusPierce()
         {
+            if (hanSeorinReturningBladeLevel >= 5)
+                return 2;
+
             return hanSeorinReturningBladeLevel >= 3 ? 1 : 0;
         }
 
         public float GetHanSeorinReturningBladeDamageMultiplier()
         {
-            return hanSeorinReturningBladeLevel >= 2 ? hanSeorinReturningBladeLevelTwoDamageMultiplier : 1f;
+            return hanSeorinReturningBladeLevel >= 2
+                ? hanSeorinReturningBladeLevelTwoDamageMultiplier + 0.15f * Mathf.Max(0, hanSeorinReturningBladeLevel - 2)
+                : 1f;
         }
 
         public float GetProjectileDamageMultiplierForEnemy(EnemyHealth enemy)
@@ -786,7 +791,7 @@ namespace VampireLike.Combat
                 return;
 
             kaelManaSlashHitCount = 0;
-            ApplyAreaDamage(hitPosition, kaelManaSlashRadius, projectileDamage * kaelManaSlashDamageRatio, null);
+            ApplyAreaDamage(hitPosition, kaelManaSlashRadius, projectileDamage * GetKaelManaSlashDamageRatio(), null);
             GameSfx.Play(SfxType.SkillShockwave);
             CombatVFX.PlayBurst(hitPosition, CombatVFXKind.Shockwave, kaelManaSlashRadius, 0.28f);
         }
@@ -794,6 +799,11 @@ namespace VampireLike.Combat
         private int GetKaelManaSlashInterval()
         {
             return Mathf.Max(3, kaelManaSlashBaseHitInterval - Mathf.Max(0, kaelManaSlashLevel - 1));
+        }
+
+        private float GetKaelManaSlashDamageRatio()
+        {
+            return kaelManaSlashDamageRatio * (1f + 0.18f * Mathf.Max(0, kaelManaSlashLevel - 1));
         }
 
         private void TryKaelExecutionBlade(EnemyHealth enemy, float projectileDamage)
@@ -823,7 +833,7 @@ namespace VampireLike.Combat
             }
 
             moonlightMarkStacks.Remove(enemy);
-            float damage = projectileDamage * seleneMoonlightMarkDamageRatio;
+            float damage = projectileDamage * GetSeleneMoonlightMarkDamageRatio();
             ApplyAreaDamage(enemy.transform.position, GetSeleneMoonlightMarkExplosionRadius(), damage, null);
 
             if (seleneMoonlightMarkLevel >= 3)
@@ -835,13 +845,13 @@ namespace VampireLike.Combat
 
         private void TrySeleneStarChain(EnemyHealth firstEnemy, float projectileDamage, Vector2 startPosition)
         {
-            float chance = seleneMoonShadowCloneLevel >= 2 ? seleneStarChainChanceLevelTwo : seleneStarChainChanceLevelOne;
+            float chance = GetSeleneStarChainChance();
 
             if (Random.value > chance)
                 return;
 
             float damage = projectileDamage * GetSeleneStarChainDamageRatio();
-            int maxTargets = seleneMoonShadowCloneLevel >= 3 ? 4 : 2;
+            int maxTargets = GetSeleneStarChainMaxTargets();
             int chainedTargets = ChainSeleneStarDamage(startPosition, firstEnemy, damage, maxTargets);
 
             if (chainedTargets <= 0)
@@ -852,14 +862,24 @@ namespace VampireLike.Combat
 
         private int GetSeleneMoonlightMarkRequiredStacks()
         {
-            return seleneMoonlightMarkLevel >= 2
-                ? Mathf.Max(2, seleneMoonlightMarkBaseRequiredStacks - 1)
-                : seleneMoonlightMarkBaseRequiredStacks;
+            int reduction = seleneMoonlightMarkLevel >= 2 ? 1 : 0;
+
+            if (seleneMoonlightMarkLevel >= 5)
+                reduction++;
+
+            return Mathf.Max(2, seleneMoonlightMarkBaseRequiredStacks - reduction);
+        }
+
+        private float GetSeleneMoonlightMarkDamageRatio()
+        {
+            return seleneMoonlightMarkDamageRatio * (1f + 0.12f * Mathf.Max(0, seleneMoonlightMarkLevel - 1));
         }
 
         private float GetSeleneMoonlightMarkExplosionRadius()
         {
-            return seleneMoonlightMarkExplosionRadius + (seleneMoonlightMarkLevel >= 3 ? 0.35f : 0f);
+            float bonusRadius = seleneMoonlightMarkLevel >= 3 ? 0.35f : 0f;
+            bonusRadius += 0.12f * Mathf.Max(0, seleneMoonlightMarkLevel - 3);
+            return seleneMoonlightMarkExplosionRadius + bonusRadius;
         }
 
         private void SpreadSeleneMoonlightMark(Vector2 center, EnemyHealth excludedEnemy)
@@ -900,21 +920,35 @@ namespace VampireLike.Combat
         {
             seleneSilverMoonWavePending = false;
             Vector2 center = (Vector2)GetEffectCenterPosition() + seleneSilverMoonWaveDirection * 0.75f;
-            float damage = Mathf.Max(0.1f, projectileDamage * seleneSilverMoonWaveDamageRatio);
-            ApplyAreaDamage(center, seleneSilverMoonWaveRadius, damage, null);
+            float radius = GetSeleneSilverMoonWaveRadius();
+            float damage = Mathf.Max(0.1f, projectileDamage * GetSeleneSilverMoonWaveDamageRatio());
+            ApplyAreaDamage(center, radius, damage, null);
 
             if (seleneTwinMoonFlurryLevel >= 3)
-                ApplyAreaSlow(center, seleneSilverMoonWaveRadius, seleneSilverMoonWaveSlowMultiplier, frostDuration);
+                ApplyAreaSlow(center, radius, seleneSilverMoonWaveSlowMultiplier, frostDuration);
 
             GameSfx.Play(SfxType.SkillShockwave);
-            CombatVFX.PlayBurst(center, CombatVFXKind.Frost, seleneSilverMoonWaveRadius, 0.22f);
+            CombatVFX.PlayBurst(center, CombatVFXKind.Frost, radius, 0.22f);
         }
 
         private int GetSeleneSilverMoonWaveInterval()
         {
-            return seleneTwinMoonFlurryLevel >= 2
-                ? Mathf.Max(2, seleneSilverMoonWaveBaseInterval - 1)
-                : seleneSilverMoonWaveBaseInterval;
+            int reduction = seleneTwinMoonFlurryLevel >= 2 ? 1 : 0;
+
+            if (seleneTwinMoonFlurryLevel >= 4)
+                reduction++;
+
+            return Mathf.Max(2, seleneSilverMoonWaveBaseInterval - reduction);
+        }
+
+        private float GetSeleneSilverMoonWaveRadius()
+        {
+            return seleneSilverMoonWaveRadius + 0.12f * Mathf.Max(0, seleneTwinMoonFlurryLevel - 1);
+        }
+
+        private float GetSeleneSilverMoonWaveDamageRatio()
+        {
+            return seleneSilverMoonWaveDamageRatio * (1f + 0.12f * Mathf.Max(0, seleneTwinMoonFlurryLevel - 1));
         }
 
         private void CreateSeleneNebulaZone(Vector2 position, float projectileDamage)
@@ -949,7 +983,7 @@ namespace VampireLike.Combat
         private float GetSeleneNebulaZoneDamageRatio()
         {
             return seleneShadowStepLevel >= 3
-                ? seleneNebulaZoneDamageRatio * seleneNebulaZoneLevelThreeDamageMultiplier
+                ? seleneNebulaZoneDamageRatio * seleneNebulaZoneLevelThreeDamageMultiplier * (1f + 0.08f * Mathf.Max(0, seleneShadowStepLevel - 3))
                 : seleneNebulaZoneDamageRatio;
         }
 
@@ -979,7 +1013,25 @@ namespace VampireLike.Combat
 
         private float GetSeleneStarChainDamageRatio()
         {
-            return seleneMoonShadowCloneLevel >= 3 ? seleneStarChainLevelThreeDamageRatio : seleneStarChainDamageRatio;
+            return seleneMoonShadowCloneLevel >= 3
+                ? seleneStarChainLevelThreeDamageRatio + 0.08f * Mathf.Max(0, seleneMoonShadowCloneLevel - 3)
+                : seleneStarChainDamageRatio;
+        }
+
+        private float GetSeleneStarChainChance()
+        {
+            if (seleneMoonShadowCloneLevel >= 3)
+                return Mathf.Clamp01(seleneStarChainChanceLevelTwo + 0.08f * Mathf.Max(0, seleneMoonShadowCloneLevel - 2));
+
+            return seleneMoonShadowCloneLevel >= 2 ? seleneStarChainChanceLevelTwo : seleneStarChainChanceLevelOne;
+        }
+
+        private int GetSeleneStarChainMaxTargets()
+        {
+            if (seleneMoonShadowCloneLevel < 3)
+                return 2;
+
+            return Mathf.Min(6, 4 + Mathf.Max(0, seleneMoonShadowCloneLevel - 3));
         }
 
         private void ApplyHanSeorinBloodMark(EnemyHealth enemy, float projectileDamage)
@@ -1003,10 +1055,10 @@ namespace VampireLike.Combat
             enemy.TakeDamage(damage);
 
             if (hanSeorinBloodMarkLevel >= 3)
-                ApplyAreaDamage(enemy.transform.position, hanSeorinBloodMarkSplashRadius, damage * hanSeorinBloodMarkSplashDamageRatio, enemy);
+                ApplyAreaDamage(enemy.transform.position, GetHanSeorinBloodMarkSplashRadius(), damage * GetHanSeorinBloodMarkSplashDamageRatio(), enemy);
 
             GameSfx.Play(SfxType.SkillExplosion);
-            CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Explosion, hanSeorinBloodMarkLevel >= 3 ? hanSeorinBloodMarkSplashRadius : 0.42f, 0.18f);
+            CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Explosion, hanSeorinBloodMarkLevel >= 3 ? GetHanSeorinBloodMarkSplashRadius() : 0.42f, 0.18f);
         }
 
         private void CountHanSeorinKillingIntent(EnemyHealth enemy)
@@ -1043,20 +1095,35 @@ namespace VampireLike.Combat
 
         private int GetHanSeorinBloodMarkRequiredStacks()
         {
-            return hanSeorinBloodMarkLevel >= 2
-                ? Mathf.Max(2, hanSeorinBloodMarkBaseRequiredStacks - 1)
-                : hanSeorinBloodMarkBaseRequiredStacks;
+            int reduction = hanSeorinBloodMarkLevel >= 2 ? 1 : 0;
+
+            if (hanSeorinBloodMarkLevel >= 5)
+                reduction++;
+
+            return Mathf.Max(2, hanSeorinBloodMarkBaseRequiredStacks - reduction);
         }
 
         private float GetHanSeorinBloodMarkDamageRatio()
         {
-            return hanSeorinBloodMarkLevel >= 3 ? hanSeorinBloodMarkLevelThreeDamageRatio : hanSeorinBloodMarkDamageRatio;
+            return hanSeorinBloodMarkLevel >= 3
+                ? hanSeorinBloodMarkLevelThreeDamageRatio + 0.15f * Mathf.Max(0, hanSeorinBloodMarkLevel - 3)
+                : hanSeorinBloodMarkDamageRatio;
+        }
+
+        private float GetHanSeorinBloodMarkSplashRadius()
+        {
+            return hanSeorinBloodMarkSplashRadius + 0.12f * Mathf.Max(0, hanSeorinBloodMarkLevel - 3);
+        }
+
+        private float GetHanSeorinBloodMarkSplashDamageRatio()
+        {
+            return Mathf.Clamp01(hanSeorinBloodMarkSplashDamageRatio + 0.08f * Mathf.Max(0, hanSeorinBloodMarkLevel - 3));
         }
 
         private float GetHanSeorinShadowDaggerChance()
         {
             if (hanSeorinShadowDaggerLevel >= 3)
-                return hanSeorinShadowDaggerChanceLevelThree;
+                return Mathf.Clamp01(hanSeorinShadowDaggerChanceLevelThree + 0.08f * Mathf.Max(0, hanSeorinShadowDaggerLevel - 3));
 
             if (hanSeorinShadowDaggerLevel == 2)
                 return hanSeorinShadowDaggerChanceLevelTwo;
@@ -1066,7 +1133,7 @@ namespace VampireLike.Combat
 
         private float GetHanSeorinKillingIntentMaxBonus()
         {
-            return 0.15f * Mathf.Clamp(hanSeorinKillingIntentLevel, 1, 3);
+            return 0.15f * Mathf.Clamp(hanSeorinKillingIntentLevel, 1, 5);
         }
 
         private void SetHanSeorinBloodMarkVfx(EnemyHealth enemy, int stacks)
@@ -1141,7 +1208,7 @@ namespace VampireLike.Combat
             EnemyHealth currentEnemy = firstEnemy;
             Vector2 currentPosition = startPosition;
             float damage = Mathf.Max(0.1f, projectileDamage * chainRicochetDamageRatio);
-            int maxChains = Mathf.Clamp(chainRicochetLevel, 1, 3);
+            int maxChains = Mathf.Clamp(chainRicochetLevel, 1, 6);
 
             for (int i = 0; i < maxChains; i++)
             {
@@ -1367,18 +1434,27 @@ namespace VampireLike.Combat
 
             Vector2 position = target.transform.position;
             float damage = Mathf.Max(0.1f, seleneFullMoonDamageRatio * Mathf.Max(1, seleneSilentBladeLevel));
-            ApplyAreaDamage(position, seleneFullMoonRadius, damage, null);
+            float radius = GetSeleneFullMoonRadius();
+            ApplyAreaDamage(position, radius, damage, null);
 
             if (seleneSilentBladeLevel >= 3)
                 CreateSeleneNebulaZone(position, damage);
 
             GameSfx.Play(SfxType.SkillShockwave);
-            CombatVFX.PlayBurst(position, CombatVFXKind.Frost, seleneFullMoonRadius, 0.32f);
+            CombatVFX.PlayBurst(position, CombatVFXKind.Frost, radius, 0.32f);
         }
 
         private float GetSeleneFullMoonCooldown()
         {
-            return seleneSilentBladeLevel >= 2 ? seleneFullMoonLevelTwoCooldown : seleneFullMoonBaseCooldown;
+            if (seleneSilentBladeLevel <= 1)
+                return seleneFullMoonBaseCooldown;
+
+            return Mathf.Max(7f, seleneFullMoonLevelTwoCooldown - 0.45f * Mathf.Max(0, seleneSilentBladeLevel - 2));
+        }
+
+        private float GetSeleneFullMoonRadius()
+        {
+            return seleneFullMoonRadius + 0.15f * Mathf.Max(0, seleneSilentBladeLevel - 1);
         }
 
         private void ApplyAreaSlow(Vector2 center, float radius, float moveSpeedMultiplier, float duration)
@@ -1568,7 +1644,7 @@ namespace VampireLike.Combat
 
         private void RefreshOrbitingBlades()
         {
-            int desiredCount = Mathf.Clamp(orbitingBladeLevel, 1, 3);
+            int desiredCount = Mathf.Clamp(orbitingBladeLevel, 1, 6);
 
             while (orbitingBlades.Count < desiredCount)
             {

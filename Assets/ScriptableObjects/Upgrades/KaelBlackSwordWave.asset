@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 18
   displayName: 흑검 파동
   description: 검기 적중 시 주변 적에게 암흑 파동 피해
-  maxLevel: 3
+  maxLevel: 5
   multiplier: 1
   flatAmount: 0
   unlimited: 0

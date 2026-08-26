@@ -15,7 +15,7 @@ MonoBehaviour:
   upgradeType: 21
   displayName: 흑철 방벽
   description: 일정 시간마다 다음 피해를 1회 무효
-  maxLevel: 3
+  maxLevel: 5
   multiplier: 1
   flatAmount: 0
   unlimited: 0
