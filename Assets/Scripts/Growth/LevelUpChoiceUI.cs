@@ -166,13 +166,13 @@ namespace VampireLike.Growth
             panelRect.anchorMin = new Vector2(0.5f, 0.5f);
             panelRect.anchorMax = new Vector2(0.5f, 0.5f);
             panelRect.pivot = new Vector2(0.5f, 0.5f);
-            panelRect.sizeDelta = new Vector2(680f, 430f);
+            panelRect.sizeDelta = new Vector2(700f, 460f);
             panelRect.anchoredPosition = Vector2.zero;
 
             Image panelImage = panel.AddComponent<Image>();
             panelImage.color = new Color(0.1f, 0.13f, 0.15f, 0.96f);
 
-            CreateLabel(panel.transform, "레벨 업", new Vector2(0f, 158f), 38, Color.white, new Vector2(560f, 56f));
+            CreateLabel(panel.transform, "레벨 업", new Vector2(0f, 174f), 38, Color.white, new Vector2(580f, 56f));
 
             choiceButtons = new Button[ChoiceCount];
             choiceButtonImages = new Image[ChoiceCount];
@@ -180,7 +180,7 @@ namespace VampireLike.Growth
 
             for (int i = 0; i < ChoiceCount; i++)
             {
-                Button button = CreateButton(panel.transform, new Vector2(0f, 72f - i * 92f), out Text buttonText, out Image buttonImage);
+                Button button = CreateButton(panel.transform, new Vector2(0f, 82f - i * 104f), out Text buttonText, out Image buttonImage);
                 choiceButtons[i] = button;
                 choiceButtonImages[i] = buttonImage;
                 choiceTexts[i] = buttonText;
@@ -288,6 +288,8 @@ namespace VampireLike.Growth
             label.alignment = TextAnchor.MiddleCenter;
             label.color = color;
             label.raycastTarget = false;
+            label.horizontalOverflow = HorizontalWrapMode.Wrap;
+            label.verticalOverflow = VerticalWrapMode.Overflow;
             return label;
         }
 
@@ -300,14 +302,14 @@ namespace VampireLike.Growth
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            rectTransform.sizeDelta = new Vector2(560f, 74f);
+            rectTransform.sizeDelta = new Vector2(590f, 88f);
             rectTransform.anchoredPosition = position;
 
             image = buttonObject.AddComponent<Image>();
             image.color = new Color(0.72f, 0.9f, 0.95f, 1f);
 
             Button button = buttonObject.AddComponent<Button>();
-            buttonText = CreateLabel(buttonObject.transform, string.Empty, Vector2.zero, 22, new Color(0.06f, 0.1f, 0.12f, 1f), new Vector2(520f, 66f));
+            buttonText = CreateLabel(buttonObject.transform, string.Empty, Vector2.zero, 20, new Color(0.06f, 0.1f, 0.12f, 1f), new Vector2(550f, 80f));
             return button;
         }
     }

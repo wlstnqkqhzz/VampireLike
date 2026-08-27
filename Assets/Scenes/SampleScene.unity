@@ -53937,8 +53937,8 @@ MonoBehaviour:
   baseBossHealthMultiplier: 1
   healthMultiplierPerAppearance: 1
   contactDamageMultiplierPerAppearance: 1
-  moveSpeedMultiplierPerAppearance: 1
-  maxBossMoveSpeed: 1.8
+  moveSpeedMultiplierPerAppearance: 1.03
+  maxBossMoveSpeed: 2.15
 --- !u!114 &2200000004
 MonoBehaviour:
   m_ObjectHideFlags: 0

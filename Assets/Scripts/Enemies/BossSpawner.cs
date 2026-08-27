@@ -87,10 +87,10 @@ namespace VampireLike.Enemies
         private float patternDamageMultiplierPerBossStage = 1.12f;
 
         [SerializeField]
-        private float moveSpeedMultiplierPerAppearance = 1f;
+        private float moveSpeedMultiplierPerAppearance = 1.03f;
 
         [SerializeField]
-        private float maxBossMoveSpeed = 1.8f;
+        private float maxBossMoveSpeed = 2.15f;
 
         [SerializeField]
         private float bossArenaBoundsScale = 0.5f;
@@ -543,7 +543,7 @@ namespace VampireLike.Enemies
             if (enemyHealth != null)
             {
                 int scaledHealth = Mathf.RoundToInt(enemyHealth.MaxHealth * healthMultiplier);
-                enemyHealth.SetMaxHealth(bossStage == 1 ? firstBossFixedHealth : scaledHealth);
+                enemyHealth.SetMaxHealth(bossStage == 1 ? firstBossFixedHealth : Mathf.Max(1, Mathf.RoundToInt(scaledHealth * 0.5f)));
             }
 
             EnemyContactDamage contactDamage = boss.GetComponent<EnemyContactDamage>();

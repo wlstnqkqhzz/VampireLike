@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemyController
   target: {fileID: 0}
-  moveSpeed: 0.85
+  moveSpeed: 0.96
   stoppingDistance: 0
   separationRadius: 0.8
   separationWeight: 0.55
@@ -182,7 +182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93e141dff8a24208aafb6af38198631f, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.BossDistanceMovement
-  moveSpeed: 1.1
+  moveSpeed: 1.24
   minDistance: 2.7
   maxDistance: 4.2
   strafeWeight: 0.45

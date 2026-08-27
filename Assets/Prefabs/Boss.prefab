@@ -151,7 +151,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemyController
   target: {fileID: 0}
-  moveSpeed: 0.8
+  moveSpeed: 0.9
   stoppingDistance: 0
   separationRadius: 0.8
   separationWeight: 0.55

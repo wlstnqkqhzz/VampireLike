@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 100010}
   - component: {fileID: 100011}
   - component: {fileID: 100012}
+  - component: {fileID: 100013}
   - component: {fileID: 190009}
   m_Layer: 7
   m_Name: Dragon
@@ -117,7 +118,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemyController
   target: {fileID: 0}
-  moveSpeed: 0.9
+  moveSpeed: 1.02
   stoppingDistance: 0
   separationRadius: 0.8
   separationWeight: 0.55
@@ -291,6 +292,36 @@ MonoBehaviour:
   projectileLifetime: 5.5
   startAngle: 0
   prepareTime: 0.45
+--- !u!114 &100013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f8b6e3e6c2a48d5aa7d099eb2f8f9b1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.TripleFlameBurstPattern
+  cooldown: 4.4
+  initialDelay: 1.2
+  priority: 9
+  minimumPhase: 1
+  maximumPhase: 3
+  allowMovementDuringPattern: 0
+  prepareTime: 0.42
+  burstCount: 3
+  burstInterval: 0.18
+  range: 2.85
+  angle: 42
+  damage: 2
+  playerLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  warningLifetime: 0.14
+  impactLifetime: 0.22
+  effectCameraPadding: 0.7
 --- !u!114 &190009
 MonoBehaviour:
   m_ObjectHideFlags: 0

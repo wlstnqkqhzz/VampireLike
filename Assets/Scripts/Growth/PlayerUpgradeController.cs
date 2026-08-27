@@ -184,7 +184,7 @@ namespace VampireLike.Growth
                 else
                     hasNormalChoice = true;
 
-                choices.Add(new UpgradeChoice(definition, GetLevel(definition.UpgradeType), GetMaxLevel(definition)));
+                choices.Add(new UpgradeChoice(definition, GetCurrentLevel(definition), GetMaxLevel(definition)));
             }
 
             return choices;
@@ -429,7 +429,7 @@ namespace VampireLike.Growth
                 if (!addedTypes.Add(upgradeType))
                     continue;
 
-                int level = GetLevel(upgradeType);
+                int level = GetCurrentLevel(definition);
 
                 if (level <= 0)
                     continue;
@@ -469,7 +469,7 @@ namespace VampireLike.Growth
                 if (!addedTypes.Add(upgradeType))
                     continue;
 
-                int level = GetLevel(upgradeType);
+                int level = GetCurrentLevel(definition);
 
                 if (level <= 0)
                     continue;
@@ -589,7 +589,7 @@ namespace VampireLike.Growth
             if (maxLevel <= 0)
                 return false;
 
-            return GetLevel(definition.UpgradeType) < maxLevel;
+            return GetCurrentLevel(definition) < maxLevel;
         }
 
         private bool TryReserveUpgradeLevel(UpgradeDefinition definition)
@@ -601,8 +601,25 @@ namespace VampireLike.Growth
                 return true;
 
             int maxLevel = GetMaxLevel(definition);
-            upgradeLevels[definition.UpgradeType] = Mathf.Min(GetLevel(definition.UpgradeType) + 1, maxLevel);
+            upgradeLevels[definition.UpgradeType] = Mathf.Min(GetCurrentLevel(definition) + 1, maxLevel);
             return true;
+        }
+
+        private int GetCurrentLevel(UpgradeDefinition definition)
+        {
+            if (definition == null)
+                return 0;
+
+            int trackedLevel = GetLevel(definition.UpgradeType);
+
+            if (definition.IsSpecialUpgrade || definition.IsCharacterExclusiveUpgrade)
+            {
+                CacheComponents();
+                if (specialUpgradeController != null)
+                    trackedLevel = Mathf.Max(trackedLevel, specialUpgradeController.GetAppliedUpgradeLevel(definition.UpgradeType));
+            }
+
+            return trackedLevel;
         }
 
         private int GetLevel(UpgradeType upgradeType)

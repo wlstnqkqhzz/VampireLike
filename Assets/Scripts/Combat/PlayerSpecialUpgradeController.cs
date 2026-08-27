@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VampireLike.Enemies;
+using VampireLike.Growth;
 using VampireLike.Audio;
 using VampireLike.VFX;
 
@@ -552,6 +553,65 @@ namespace VampireLike.Combat
             hanSeorinRedExecutionLevel++;
         }
 
+        public int GetAppliedUpgradeLevel(UpgradeType upgradeType)
+        {
+            switch (upgradeType)
+            {
+                case UpgradeType.ExplosiveShot:
+                    return explosiveShotLevel;
+                case UpgradeType.FrostShot:
+                    return frostShotLevel;
+                case UpgradeType.Vampirism:
+                    return vampirismLevel;
+                case UpgradeType.Shockwave:
+                    return shockwaveLevel;
+                case UpgradeType.ScatterShot:
+                    return scatterShotLevel;
+                case UpgradeType.Shield:
+                    return shieldLevel;
+                case UpgradeType.OrbitingBlade:
+                    return orbitingBladeLevel;
+                case UpgradeType.ChainRicochet:
+                    return chainRicochetLevel;
+                case UpgradeType.EclipseAura:
+                    return eclipseAuraLevel;
+                case UpgradeType.ProjectileReflect:
+                    return projectileReflectLevel;
+                case UpgradeType.KaelBlackSwordWave:
+                    return kaelBlackSwordWaveLevel;
+                case UpgradeType.KaelGuardianResolve:
+                    return kaelGuardianResolveLevel;
+                case UpgradeType.KaelManaSlash:
+                    return kaelManaSlashLevel;
+                case UpgradeType.KaelBlackIronBarrier:
+                    return kaelBlackIronBarrierLevel;
+                case UpgradeType.KaelExecutionBlade:
+                    return kaelExecutionBladeLevel;
+                case UpgradeType.SeleneMoonShadowClone:
+                    return seleneMoonShadowCloneLevel;
+                case UpgradeType.SeleneShadowStep:
+                    return seleneShadowStepLevel;
+                case UpgradeType.SeleneTwinMoonFlurry:
+                    return seleneTwinMoonFlurryLevel;
+                case UpgradeType.SeleneMoonlightMark:
+                    return seleneMoonlightMarkLevel;
+                case UpgradeType.SeleneSilentBlade:
+                    return seleneSilentBladeLevel;
+                case UpgradeType.HanSeorinBloodMark:
+                    return hanSeorinBloodMarkLevel;
+                case UpgradeType.HanSeorinShadowDagger:
+                    return hanSeorinShadowDaggerLevel;
+                case UpgradeType.HanSeorinReturningBlade:
+                    return hanSeorinReturningBladeLevel;
+                case UpgradeType.HanSeorinKillingIntent:
+                    return hanSeorinKillingIntentLevel;
+                case UpgradeType.HanSeorinRedExecution:
+                    return hanSeorinRedExecutionLevel;
+                default:
+                    return 0;
+            }
+        }
+
         public int GetProjectileReflectCount()
         {
             return Mathf.Clamp(projectileReflectLevel, 0, 6);
@@ -561,17 +621,17 @@ namespace VampireLike.Combat
         {
             List<Vector2> directions = new List<Vector2>();
 
-            if (scatterShotLevel <= 0)
-            {
-                directions.Add(baseDirection);
-            }
-            else
-            {
-                int sideCount = Mathf.Clamp(scatterShotLevel, 1, scatterMaxSideCount);
+            directions.Add(baseDirection);
 
-                for (int i = -sideCount; i <= sideCount; i++)
+            if (scatterShotLevel > 0)
+            {
+                int additionalCount = Mathf.Clamp(scatterShotLevel, 1, scatterMaxSideCount);
+
+                for (int i = 0; i < additionalCount; i++)
                 {
-                    float angle = i * scatterAnglePerLevel;
+                    float side = i % 2 == 0 ? 1f : -1f;
+                    float step = i / 2 + 1f;
+                    float angle = side * step * scatterAnglePerLevel;
                     directions.Add(Rotate(baseDirection, angle).normalized);
                 }
             }

@@ -9,6 +9,8 @@ namespace VampireLike.Combat
     /// </summary>
     public class PlayerAutoAttack : MonoBehaviour
     {
+        private const float TargetTieEpsilon = 0.0001f;
+
         // 발사할 투사체 프리팹이다.
         [SerializeField]
         private ProjectileController projectilePrefab;
@@ -59,6 +61,13 @@ namespace VampireLike.Combat
 
         [SerializeField]
         private float targetViewportPadding = 0.02f;
+
+        [SerializeField]
+        [Range(0.1f, 1f)]
+        private float bossTargetPriorityScoreMultiplier = 0.58f;
+
+        [SerializeField]
+        private float bossFightNormalEnemyOverrideDistance = 1.25f;
 
         private Sprite projectileSpriteOverride;
         private float projectileVisualScale = 1f;
@@ -116,6 +125,8 @@ namespace VampireLike.Combat
             sequentialShotDelay = Mathf.Max(0.02f, sequentialShotDelay);
             projectilePierceCount = Mathf.Max(0, projectilePierceCount);
             targetViewportPadding = Mathf.Clamp(targetViewportPadding, 0f, 0.2f);
+            bossTargetPriorityScoreMultiplier = Mathf.Clamp(bossTargetPriorityScoreMultiplier, 0.1f, 1f);
+            bossFightNormalEnemyOverrideDistance = Mathf.Max(0f, bossFightNormalEnemyOverrideDistance);
         }
 
         private void OnDisable()
@@ -194,7 +205,12 @@ namespace VampireLike.Combat
         {
             // EnemyHealth.ActiveEnemies를 순회해 매 프레임 FindObject 계열 호출을 피한다.
             EnemyHealth closestEnemy = null;
-            float closestSqrDistance = attackRange * attackRange;
+            EnemyHealth closestBoss = null;
+            float closestScore = attackRange * attackRange;
+            float closestBossSqrDistance = attackRange * attackRange;
+            float closestNormalSqrDistance = attackRange * attackRange;
+            float attackRangeSqr = attackRange * attackRange;
+            float normalOverrideSqrDistance = bossFightNormalEnemyOverrideDistance * bossFightNormalEnemyOverrideDistance;
             Vector2 origin = GetFirePosition();
 
             foreach (EnemyHealth enemy in EnemyHealth.ActiveEnemies)
@@ -207,14 +223,39 @@ namespace VampireLike.Combat
 
                 float sqrDistance = ((Vector2)enemy.transform.position - origin).sqrMagnitude;
 
-                if (sqrDistance > closestSqrDistance)
+                if (sqrDistance > attackRangeSqr)
+                    continue;
+
+                if (enemy.IsBoss && (closestBoss == null || sqrDistance < closestBossSqrDistance - TargetTieEpsilon))
+                {
+                    closestBoss = enemy;
+                    closestBossSqrDistance = sqrDistance;
+                }
+                else if (!enemy.IsBoss && sqrDistance < closestNormalSqrDistance - TargetTieEpsilon)
+                {
+                    closestNormalSqrDistance = sqrDistance;
+                }
+
+                float targetScore = GetTargetPriorityScore(enemy, sqrDistance);
+
+                if (closestEnemy != null && targetScore >= closestScore - TargetTieEpsilon)
                     continue;
 
                 closestEnemy = enemy;
-                closestSqrDistance = sqrDistance;
+                closestScore = targetScore;
             }
 
+            if (closestBoss != null && closestNormalSqrDistance > normalOverrideSqrDistance)
+                return closestBoss;
+
             return closestEnemy;
+        }
+
+        private float GetTargetPriorityScore(EnemyHealth enemy, float sqrDistance)
+        {
+            return enemy != null && enemy.IsBoss
+                ? sqrDistance * bossTargetPriorityScoreMultiplier
+                : sqrDistance;
         }
 
         private bool IsEnemyVisibleToCamera(EnemyHealth enemy)
@@ -258,21 +299,24 @@ namespace VampireLike.Combat
             // 한 번의 자동 공격에서 나온 산탄/다중/연속 발사를 같은 묶음으로 취급해 같은 적 중복 피해를 감쇠한다.
             int attackGroupId = ProjectileController.CreateAttackGroupId();
             int shotCount = Mathf.Max(1, projectileCount);
+
+            Vector2[] openingDirections = specialUpgradeController == null
+                ? new[] { direction }
+                : specialUpgradeController.GetProjectileDirections(direction);
+
+            if (openingDirections.Length > 1)
+                GameSfx.Play(SfxType.SkillScatter);
+
+            float openingDamageMultiplier = specialUpgradeController == null
+                ? 1f
+                : specialUpgradeController.GetProjectileDamageMultiplierForDirections(openingDirections.Length);
+
             for (int i = 0; i < shotCount; i++)
             {
                 firePosition = GetFirePosition();
                 GameSfx.Play(attackSfxType);
-
-                Vector2[] directions = specialUpgradeController == null
-                    ? new[] { direction }
-                    : specialUpgradeController.GetProjectileDirections(direction);
-
-                if (directions.Length > 1)
-                    GameSfx.Play(SfxType.SkillScatter);
-
-                float scatterDamageMultiplier = specialUpgradeController == null
-                    ? 1f
-                    : specialUpgradeController.GetProjectileDamageMultiplierForDirections(directions.Length);
+                Vector2[] directions = i == 0 ? openingDirections : new[] { direction };
+                float scatterDamageMultiplier = i == 0 ? openingDamageMultiplier : 1f;
 
                 foreach (Vector2 shotDirection in directions)
                 {

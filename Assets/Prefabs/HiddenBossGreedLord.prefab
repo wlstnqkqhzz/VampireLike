@@ -122,7 +122,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Enemies.EnemyController
   target: {fileID: 0}
-  moveSpeed: 1
+  moveSpeed: 1.12
   stoppingDistance: 0
   separationRadius: 0.8
   separationWeight: 0.55
@@ -141,7 +141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e49223c768843d1b10e75211e2971a3, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::VampireLike.Combat.EnemyHealth
-  maxHealth: 6500
+  maxHealth: 3250
   hitFlashDuration: 0.08
   experienceGemPrefab: {fileID: 400005, guid: 11ed6501a06941049f1bff2dc0b4e971, type: 3}
   experienceRewardOverride: 150

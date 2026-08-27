@@ -6,23 +6,18 @@ namespace VampireLike.VFX
     public class HanSeorinMarkVFX : MonoBehaviour
     {
         private const int MaxBloodMarks = 5;
-        private const int SortingOrder = 1320;
+        private const int SortingOrder = 1450;
 
         private readonly SpriteRenderer[] bloodMarks = new SpriteRenderer[MaxBloodMarks];
         private Transform bloodRoot;
-        private SpriteRenderer bloodSealRing;
-        private SpriteRenderer bloodSealCore;
-        private SpriteRenderer intentRing;
-        private SpriteRenderer intentCore;
         private Collider2D targetCollider;
         private EnemyHealth enemyHealth;
         private int bloodStacks;
         private int bloodRequiredStacks;
         private float intentProgress;
 
-        private static readonly Color BloodFilledColor = new Color(1f, 0.02f, 0.07f, 0.92f);
-        private static readonly Color BloodEmptyColor = new Color(0.55f, 0.02f, 0.04f, 0.24f);
-        private static readonly Color IntentRingColor = new Color(1f, 0.02f, 0.08f, 0.42f);
+        private static readonly Color BloodFilledColor = new Color(1f, 0.02f, 0.05f, 1f);
+        private static readonly Color BloodEmptyColor = new Color(0.9f, 0.02f, 0.04f, 0.42f);
 
         public void SetBloodMark(int stacks, int requiredStacks)
         {
@@ -81,12 +76,6 @@ namespace VampireLike.VFX
                 bloodRoot = root.transform;
             }
 
-            if (bloodSealRing == null)
-                bloodSealRing = CreateRenderer("Blood Seal Ring", VFXSprites.WarningRing, SortingOrder + 8);
-
-            if (bloodSealCore == null)
-                bloodSealCore = CreateRenderer("Blood Seal Core", VFXSprites.SoftDisc, SortingOrder + 7);
-
             for (int i = 0; i < bloodMarks.Length; i++)
             {
                 if (bloodMarks[i] != null)
@@ -100,14 +89,6 @@ namespace VampireLike.VFX
                 bloodMarks[i] = mark;
             }
 
-            if (intentRing == null)
-                intentRing = CreateRenderer("HanSeorin Killing Intent Ring", VFXSprites.WarningRing, SortingOrder - 2);
-
-            if (intentCore == null)
-                intentCore = CreateRenderer("HanSeorin Killing Intent Core", VFXSprites.SoftDisc, SortingOrder - 3);
-
-            if (intentCore != null)
-                intentCore.enabled = false;
         }
 
         private SpriteRenderer CreateRenderer(string objectName, Sprite sprite, int sortingOrder)
@@ -125,14 +106,6 @@ namespace VampireLike.VFX
             bool sealVisible = bloodStacks > 0;
             float progress = bloodRequiredStacks <= 0 ? 0f : Mathf.Clamp01((float)bloodStacks / bloodRequiredStacks);
 
-            if (bloodSealRing != null)
-            {
-                bloodSealRing.enabled = false;
-            }
-
-            if (bloodSealCore != null)
-                bloodSealCore.enabled = false;
-
             for (int i = 0; i < bloodMarks.Length; i++)
             {
                 SpriteRenderer mark = bloodMarks[i];
@@ -148,30 +121,16 @@ namespace VampireLike.VFX
 
                 bool filled = i < bloodStacks;
                 mark.color = filled ? BloodFilledColor : BloodEmptyColor;
-                mark.transform.localScale = Vector3.one * (filled ? 0.034f : 0.025f);
+                mark.transform.localScale = Vector3.one * (filled ? 0.058f : 0.042f);
             }
         }
 
         private void RefreshKillingIntent()
         {
-            bool visible = intentProgress > 0.01f;
-
-            if (intentRing != null)
-                intentRing.enabled = visible;
-
-            if (intentCore != null)
-                intentCore.enabled = false;
         }
 
         private void RefreshKillingIntentPulse()
         {
-            if (intentProgress <= 0.01f || intentRing == null)
-                return;
-
-            float pulse = 1f + Mathf.Sin(Time.time * 8f) * 0.025f;
-            float scale = Mathf.Lerp(0.2f, 0.32f, intentProgress) * pulse;
-            intentRing.transform.localScale = Vector3.one * scale;
-            intentRing.color = new Color(IntentRingColor.r, IntentRingColor.g, IntentRingColor.b, Mathf.Lerp(0.24f, 0.48f, intentProgress));
         }
 
         private void UpdateVisualPositions()
@@ -181,38 +140,21 @@ namespace VampireLike.VFX
 
             if (bloodRoot != null)
             {
-                bloodRoot.position = new Vector3(center.x, bounds.max.y + 0.035f, center.z);
-
-                if (bloodSealRing != null)
-                {
-                    bloodSealRing.enabled = false;
-                }
-
-                if (bloodSealCore != null)
-                {
-                    bloodSealCore.enabled = false;
-                }
+                bloodRoot.position = new Vector3(center.x, bounds.max.y + 0.02f, center.z);
 
                 for (int i = 0; i < bloodMarks.Length; i++)
                 {
                     if (bloodMarks[i] == null)
                         continue;
 
-                    float spacing = 0.028f;
+                    float spacing = 0.036f;
                     float startX = -spacing * (bloodRequiredStacks - 1) * 0.5f;
                     Vector3 basePosition = new Vector3(startX + spacing * i, 0f, 0f);
-                    bloodMarks[i].transform.localPosition = basePosition + new Vector3(0f, Mathf.Sin((Time.time * 7f) + i) * 0.002f, 0f);
+                    bloodMarks[i].transform.localPosition = basePosition + new Vector3(0f, Mathf.Sin((Time.time * 7f) + i) * 0.0015f, 0f);
                     bloodMarks[i].transform.localRotation = Quaternion.identity;
                 }
             }
 
-            Vector3 intentPosition = new Vector3(center.x, center.y, center.z);
-
-            if (intentRing != null)
-                intentRing.transform.position = intentPosition;
-
-            if (intentCore != null)
-                intentCore.transform.position = intentPosition;
         }
 
         private Bounds GetTargetBounds()
@@ -236,18 +178,6 @@ namespace VampireLike.VFX
         {
             if (bloodRoot != null)
                 Destroy(bloodRoot.gameObject);
-
-            if (bloodSealRing != null)
-                Destroy(bloodSealRing.gameObject);
-
-            if (bloodSealCore != null)
-                Destroy(bloodSealCore.gameObject);
-
-            if (intentRing != null)
-                Destroy(intentRing.gameObject);
-
-            if (intentCore != null)
-                Destroy(intentCore.gameObject);
         }
     }
 }

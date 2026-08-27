@@ -84,7 +84,7 @@ namespace VampireLike.Enemies
         private bool disableContactDamageDuringDash = true;
 
         [SerializeField]
-        private float dashHitRadius = 0.48f;
+        private float dashHitRadius = 0.58f;
 
         private EnemyContactDamage contactDamage;
         private PlayerHealth playerHealth;
@@ -151,6 +151,7 @@ namespace VampireLike.Enemies
             float nextTrailTime = 0f;
             bool hasHitPlayer = false;
             CacheHitboxComponents();
+            Vector2 dashHitboxCenterOffset = GetDashHitboxCenterOffset();
             SetContactDamageEnabled(false);
 
             while (elapsedTime < effectiveDashDuration && !Boss.IsDead)
@@ -160,7 +161,7 @@ namespace VampireLike.Enemies
                 nextPosition = ClampDashPosition(nextPosition);
                 BossRigidbody.MovePosition(nextPosition);
 
-                if (!hasHitPlayer && TryApplySweptDashDamage(previousPosition, nextPosition, dashDirection))
+                if (!hasHitPlayer && TryApplySweptDashDamage(previousPosition + dashHitboxCenterOffset, nextPosition + dashHitboxCenterOffset, dashDirection))
                     hasHitPlayer = true;
 
                 if (elapsedTime >= nextTrailTime)
@@ -319,11 +320,19 @@ namespace VampireLike.Enemies
             if (bossCollider != null)
             {
                 Bounds bounds = bossCollider.bounds;
-                float bodyRadius = Mathf.Max(bounds.extents.x, bounds.extents.y) * 0.55f;
+                float bodyRadius = Mathf.Max(bounds.extents.x, bounds.extents.y) * 0.72f;
                 radius = Mathf.Max(radius, bodyRadius);
             }
 
             return radius;
+        }
+
+        private Vector2 GetDashHitboxCenterOffset()
+        {
+            if (bossCollider == null || BossRigidbody == null)
+                return Vector2.zero;
+
+            return (Vector2)bossCollider.bounds.center - BossRigidbody.position;
         }
 
         private void SetContactDamageEnabled(bool isEnabled)

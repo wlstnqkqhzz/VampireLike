@@ -48,7 +48,7 @@ namespace VampireLike.Combat
 
         // 보스 대쉬는 시각상 몸통 중심에 맞도록 일반 접촉 판정보다 살짝 위로 보정한다.
         [SerializeField]
-        private Vector2 dashHurtboxOffset = new Vector2(0f, 0.12f);
+        private Vector2 dashHurtboxOffset = new Vector2(0f, 0.04f);
 
         // Collider를 찾지 못했을 때만 사용하는 예비 접촉 검사 반경이다.
         [SerializeField]
