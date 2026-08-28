@@ -362,6 +362,10 @@ namespace VampireLike.Growth
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddKaelExecutionBladeLevel();
                     break;
+                case UpgradeType.KaelBlackIronRegen:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddKaelBlackIronRegenLevel();
+                    break;
                 case UpgradeType.SeleneMoonShadowClone:
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddSeleneMoonShadowCloneLevel();
@@ -382,6 +386,10 @@ namespace VampireLike.Growth
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddSeleneSilentBladeLevel();
                     break;
+                case UpgradeType.SeleneEclipseResonance:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddSeleneEclipseResonanceLevel();
+                    break;
                 case UpgradeType.HanSeorinBloodMark:
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddHanSeorinBloodMarkLevel();
@@ -401,6 +409,10 @@ namespace VampireLike.Growth
                 case UpgradeType.HanSeorinRedExecution:
                     if (specialUpgradeController != null)
                         specialUpgradeController.AddHanSeorinRedExecutionLevel();
+                    break;
+                case UpgradeType.HanSeorinBloodFang:
+                    if (specialUpgradeController != null)
+                        specialUpgradeController.AddHanSeorinBloodFangLevel();
                     break;
             }
 
@@ -487,6 +499,40 @@ namespace VampireLike.Growth
         {
             if (definition == null)
                 return string.Empty;
+
+            switch (definition.UpgradeType)
+            {
+                case UpgradeType.KaelBlackIronRegen:
+                    if (level >= 5)
+                        return "6초마다 3%, 저체력 2배";
+                    if (level >= 4)
+                        return "6초마다 2%";
+                    if (level >= 3)
+                        return "8초마다 2%";
+                    if (level >= 2)
+                        return "8초마다 1%";
+                    return "10초마다 1%";
+                case UpgradeType.SeleneEclipseResonance:
+                    if (level >= 5)
+                        return "2회 공명";
+                    if (level >= 4)
+                        return "3회 공명, 피해 증가";
+                    if (level >= 3)
+                        return "3회 공명, 범위 증가";
+                    if (level >= 2)
+                        return "3회 공명";
+                    return "4회 공명";
+                case UpgradeType.HanSeorinBloodFang:
+                    if (level >= 5)
+                        return "출혈 대상 피해 +15%";
+                    if (level >= 4)
+                        return "매초 30%";
+                    if (level >= 3)
+                        return "4초 지속";
+                    if (level >= 2)
+                        return "매초 22%";
+                    return "매초 15%";
+            }
 
             if (definition.FlatAmount > 0)
                 return $"+{definition.FlatAmount * level}";

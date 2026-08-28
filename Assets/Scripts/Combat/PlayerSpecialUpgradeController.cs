@@ -139,6 +139,21 @@ namespace VampireLike.Combat
         [SerializeField]
         private float kaelExecutionDamageRatioPerLevel = 0.32f;
 
+        [SerializeField]
+        private float kaelBlackIronRegenBaseInterval = 10f;
+
+        [SerializeField]
+        private float kaelBlackIronRegenLevelTwoInterval = 8f;
+
+        [SerializeField]
+        private float kaelBlackIronRegenLevelFourInterval = 6f;
+
+        [SerializeField]
+        private float kaelBlackIronRegenBaseRatio = 0.01f;
+
+        [SerializeField]
+        private float kaelBlackIronRegenLowHealthThreshold = 0.3f;
+
         [Header("Character Exclusive - Selene")]
         [SerializeField]
         private int seleneMoonlightMarkBaseRequiredStacks = 4;
@@ -206,6 +221,15 @@ namespace VampireLike.Combat
         [SerializeField]
         private string seleneShadowStepEnemyLayerName = "Enemy";
 
+        [SerializeField]
+        private int seleneEclipseResonanceBaseRequiredHits = 4;
+
+        [SerializeField]
+        private float seleneEclipseResonanceRadius = 1.15f;
+
+        [SerializeField]
+        private float seleneEclipseResonanceDamageRatio = 0.35f;
+
         [Header("Character Exclusive - Han Seorin")]
         [SerializeField]
         private int hanSeorinBloodMarkBaseRequiredStacks = 5;
@@ -252,10 +276,33 @@ namespace VampireLike.Combat
         [SerializeField]
         private float hanSeorinRedExecutionInstantKillThreshold = 0.1f;
 
+        [SerializeField]
+        private float hanSeorinBloodFangDuration = 3f;
+
+        [SerializeField]
+        private float hanSeorinBloodFangLevelThreeDuration = 4f;
+
+        [SerializeField]
+        private float hanSeorinBloodFangTickInterval = 1f;
+
+        [SerializeField]
+        private float hanSeorinBloodFangLevelOneDamageRatio = 0.15f;
+
+        [SerializeField]
+        private float hanSeorinBloodFangLevelTwoDamageRatio = 0.22f;
+
+        [SerializeField]
+        private float hanSeorinBloodFangLevelFourDamageRatio = 0.3f;
+
+        [SerializeField]
+        private float hanSeorinBloodFangBleedingTargetBonus = 0.15f;
+
         private readonly Collider2D[] areaResults = new Collider2D[64];
         private readonly List<OrbitingBlade> orbitingBlades = new List<OrbitingBlade>();
         private readonly List<SeleneNebulaZone> seleneNebulaZones = new List<SeleneNebulaZone>();
+        private readonly List<HanSeorinBleed> hanSeorinBleeds = new List<HanSeorinBleed>();
         private readonly Dictionary<EnemyHealth, int> moonlightMarkStacks = new Dictionary<EnemyHealth, int>();
+        private readonly Dictionary<EnemyHealth, int> seleneEclipseResonanceStacks = new Dictionary<EnemyHealth, int>();
         private readonly Dictionary<EnemyHealth, int> hanSeorinBloodMarkStacks = new Dictionary<EnemyHealth, int>();
         private int explosiveShotLevel;
         private int frostShotLevel;
@@ -272,16 +319,19 @@ namespace VampireLike.Combat
         private int kaelManaSlashLevel;
         private int kaelBlackIronBarrierLevel;
         private int kaelExecutionBladeLevel;
+        private int kaelBlackIronRegenLevel;
         private int seleneMoonShadowCloneLevel;
         private int seleneShadowStepLevel;
         private int seleneTwinMoonFlurryLevel;
         private int seleneMoonlightMarkLevel;
         private int seleneSilentBladeLevel;
+        private int seleneEclipseResonanceLevel;
         private int hanSeorinBloodMarkLevel;
         private int hanSeorinShadowDaggerLevel;
         private int hanSeorinReturningBladeLevel;
         private int hanSeorinKillingIntentLevel;
         private int hanSeorinRedExecutionLevel;
+        private int hanSeorinBloodFangLevel;
         private int projectileHitCount;
         private int kaelManaSlashHitCount;
         private int seleneSilverMoonWaveAttackCount;
@@ -292,6 +342,7 @@ namespace VampireLike.Combat
         private float shieldTimer;
         private float eclipseAuraTimer;
         private float kaelBlackIronBarrierTimer;
+        private float kaelBlackIronRegenTimer;
         private float seleneFullMoonTimer;
         private bool shieldReady;
         private PlayerHealth playerHealth;
@@ -311,6 +362,14 @@ namespace VampireLike.Combat
             public float TickTimer;
             public float Radius;
             public float Damage;
+        }
+
+        private sealed class HanSeorinBleed
+        {
+            public EnemyHealth Enemy;
+            public float RemainingTime;
+            public float TickTimer;
+            public float DamagePerTick;
         }
 
         private void Awake()
@@ -361,6 +420,11 @@ namespace VampireLike.Combat
             kaelBlackIronBarrierCooldownReductionPerLevel = Mathf.Max(0f, kaelBlackIronBarrierCooldownReductionPerLevel);
             kaelExecutionHealthThreshold = Mathf.Clamp01(kaelExecutionHealthThreshold);
             kaelExecutionDamageRatioPerLevel = Mathf.Max(0.01f, kaelExecutionDamageRatioPerLevel);
+            kaelBlackIronRegenBaseInterval = Mathf.Max(1f, kaelBlackIronRegenBaseInterval);
+            kaelBlackIronRegenLevelTwoInterval = Mathf.Max(1f, kaelBlackIronRegenLevelTwoInterval);
+            kaelBlackIronRegenLevelFourInterval = Mathf.Max(1f, kaelBlackIronRegenLevelFourInterval);
+            kaelBlackIronRegenBaseRatio = Mathf.Clamp01(kaelBlackIronRegenBaseRatio);
+            kaelBlackIronRegenLowHealthThreshold = Mathf.Clamp01(kaelBlackIronRegenLowHealthThreshold);
             seleneMoonlightMarkBaseRequiredStacks = Mathf.Max(2, seleneMoonlightMarkBaseRequiredStacks);
             seleneMoonlightMarkDamageRatio = Mathf.Max(0.1f, seleneMoonlightMarkDamageRatio);
             seleneMoonlightMarkExplosionRadius = Mathf.Max(0.2f, seleneMoonlightMarkExplosionRadius);
@@ -382,6 +446,9 @@ namespace VampireLike.Combat
             seleneFullMoonLevelTwoCooldown = Mathf.Max(1f, seleneFullMoonLevelTwoCooldown);
             seleneFullMoonRadius = Mathf.Max(0.3f, seleneFullMoonRadius);
             seleneFullMoonDamageRatio = Mathf.Max(0.1f, seleneFullMoonDamageRatio);
+            seleneEclipseResonanceBaseRequiredHits = Mathf.Max(2, seleneEclipseResonanceBaseRequiredHits);
+            seleneEclipseResonanceRadius = Mathf.Max(0.2f, seleneEclipseResonanceRadius);
+            seleneEclipseResonanceDamageRatio = Mathf.Max(0.01f, seleneEclipseResonanceDamageRatio);
             hanSeorinBloodMarkBaseRequiredStacks = Mathf.Max(2, hanSeorinBloodMarkBaseRequiredStacks);
             hanSeorinBloodMarkDamageRatio = Mathf.Max(0.1f, hanSeorinBloodMarkDamageRatio);
             hanSeorinBloodMarkLevelThreeDamageRatio = Mathf.Max(hanSeorinBloodMarkDamageRatio, hanSeorinBloodMarkLevelThreeDamageRatio);
@@ -397,6 +464,13 @@ namespace VampireLike.Combat
             hanSeorinRedExecutionHealthThreshold = Mathf.Clamp01(hanSeorinRedExecutionHealthThreshold);
             hanSeorinRedExecutionBonusPerLevel = Mathf.Max(0.01f, hanSeorinRedExecutionBonusPerLevel);
             hanSeorinRedExecutionInstantKillThreshold = Mathf.Clamp01(hanSeorinRedExecutionInstantKillThreshold);
+            hanSeorinBloodFangDuration = Mathf.Max(0.2f, hanSeorinBloodFangDuration);
+            hanSeorinBloodFangLevelThreeDuration = Mathf.Max(hanSeorinBloodFangDuration, hanSeorinBloodFangLevelThreeDuration);
+            hanSeorinBloodFangTickInterval = Mathf.Max(0.1f, hanSeorinBloodFangTickInterval);
+            hanSeorinBloodFangLevelOneDamageRatio = Mathf.Max(0.01f, hanSeorinBloodFangLevelOneDamageRatio);
+            hanSeorinBloodFangLevelTwoDamageRatio = Mathf.Max(hanSeorinBloodFangLevelOneDamageRatio, hanSeorinBloodFangLevelTwoDamageRatio);
+            hanSeorinBloodFangLevelFourDamageRatio = Mathf.Max(hanSeorinBloodFangLevelTwoDamageRatio, hanSeorinBloodFangLevelFourDamageRatio);
+            hanSeorinBloodFangBleedingTargetBonus = Mathf.Max(0f, hanSeorinBloodFangBleedingTargetBonus);
         }
 
         private void Update()
@@ -406,6 +480,7 @@ namespace VampireLike.Combat
             UpdateEclipseAura();
             UpdateSeleneNebulaZones();
             UpdateSeleneFullMoon();
+            UpdateHanSeorinBleeds();
             UpdateCharacterExclusiveTimers();
             UpdateShadowStepCollisionPhase();
         }
@@ -502,6 +577,12 @@ namespace VampireLike.Combat
             kaelExecutionBladeLevel++;
         }
 
+        public void AddKaelBlackIronRegenLevel()
+        {
+            kaelBlackIronRegenLevel++;
+            kaelBlackIronRegenTimer = Mathf.Min(kaelBlackIronRegenTimer, GetKaelBlackIronRegenInterval());
+        }
+
         public void AddSeleneMoonShadowCloneLevel()
         {
             seleneMoonShadowCloneLevel++;
@@ -528,6 +609,11 @@ namespace VampireLike.Combat
             seleneFullMoonTimer = Mathf.Min(seleneFullMoonTimer, 0.25f);
         }
 
+        public void AddSeleneEclipseResonanceLevel()
+        {
+            seleneEclipseResonanceLevel++;
+        }
+
         public void AddHanSeorinBloodMarkLevel()
         {
             hanSeorinBloodMarkLevel++;
@@ -551,6 +637,11 @@ namespace VampireLike.Combat
         public void AddHanSeorinRedExecutionLevel()
         {
             hanSeorinRedExecutionLevel++;
+        }
+
+        public void AddHanSeorinBloodFangLevel()
+        {
+            hanSeorinBloodFangLevel++;
         }
 
         public int GetAppliedUpgradeLevel(UpgradeType upgradeType)
@@ -587,6 +678,8 @@ namespace VampireLike.Combat
                     return kaelBlackIronBarrierLevel;
                 case UpgradeType.KaelExecutionBlade:
                     return kaelExecutionBladeLevel;
+                case UpgradeType.KaelBlackIronRegen:
+                    return kaelBlackIronRegenLevel;
                 case UpgradeType.SeleneMoonShadowClone:
                     return seleneMoonShadowCloneLevel;
                 case UpgradeType.SeleneShadowStep:
@@ -597,6 +690,8 @@ namespace VampireLike.Combat
                     return seleneMoonlightMarkLevel;
                 case UpgradeType.SeleneSilentBlade:
                     return seleneSilentBladeLevel;
+                case UpgradeType.SeleneEclipseResonance:
+                    return seleneEclipseResonanceLevel;
                 case UpgradeType.HanSeorinBloodMark:
                     return hanSeorinBloodMarkLevel;
                 case UpgradeType.HanSeorinShadowDagger:
@@ -607,6 +702,8 @@ namespace VampireLike.Combat
                     return hanSeorinKillingIntentLevel;
                 case UpgradeType.HanSeorinRedExecution:
                     return hanSeorinRedExecutionLevel;
+                case UpgradeType.HanSeorinBloodFang:
+                    return hanSeorinBloodFangLevel;
                 default:
                     return 0;
             }
@@ -683,6 +780,9 @@ namespace VampireLike.Combat
             if (enemy != null && hanSeorinRedExecutionLevel > 0 && enemy.HealthProgress <= hanSeorinRedExecutionHealthThreshold)
                 multiplier *= 1f + hanSeorinRedExecutionBonusPerLevel * hanSeorinRedExecutionLevel;
 
+            if (enemy != null && hanSeorinBloodFangLevel >= 5 && IsHanSeorinBleeding(enemy))
+                multiplier *= 1f + hanSeorinBloodFangBleedingTargetBonus;
+
             return multiplier;
         }
 
@@ -756,6 +856,9 @@ namespace VampireLike.Combat
             if (hanSeorinBloodMarkLevel > 0 && !enemy.IsDead)
                 ApplyHanSeorinBloodMark(enemy, projectileDamage);
 
+            if (hanSeorinBloodFangLevel > 0 && !enemy.IsDead)
+                ApplyHanSeorinBloodFang(enemy, projectileDamage);
+
             if (hanSeorinKillingIntentLevel > 0 && !enemy.IsDead)
                 CountHanSeorinKillingIntent(enemy);
 
@@ -815,7 +918,7 @@ namespace VampireLike.Combat
             CombatVFX.PlayBurst(killPosition, CombatVFXKind.Explosion, explosionRadius, 0.32f);
         }
 
-        private void ApplyAreaDamage(Vector2 center, float radius, float damage, EnemyHealth excludedEnemy)
+        private void ApplyAreaDamage(Vector2 center, float radius, float damage, EnemyHealth excludedEnemy, bool allowSeleneResonance = true)
         {
             int hitCount = Physics2D.OverlapCircleNonAlloc(center, radius, areaResults, enemyLayerMask);
 
@@ -832,6 +935,9 @@ namespace VampireLike.Combat
                     continue;
 
                 enemy.TakeDamage(damage);
+
+                if (allowSeleneResonance && seleneEclipseResonanceLevel > 0 && !enemy.IsDead)
+                    CountSeleneEclipseResonance(enemy, damage);
             }
         }
 
@@ -918,6 +1024,52 @@ namespace VampireLike.Combat
                 return;
 
             GameSfx.Play(SfxType.SeleneDaggerThrow);
+        }
+
+        private void CountSeleneEclipseResonance(EnemyHealth enemy, float areaDamage)
+        {
+            if (enemy == null || enemy.IsDead)
+                return;
+
+            int stacks = seleneEclipseResonanceStacks.TryGetValue(enemy, out int currentStacks) ? currentStacks : 0;
+            stacks++;
+
+            if (stacks < GetSeleneEclipseResonanceRequiredHits())
+            {
+                seleneEclipseResonanceStacks[enemy] = stacks;
+                return;
+            }
+
+            seleneEclipseResonanceStacks.Remove(enemy);
+            float damage = Mathf.Max(0.1f, areaDamage * GetSeleneEclipseResonanceDamageRatio());
+            float radius = GetSeleneEclipseResonanceRadius();
+            ApplyAreaDamage(enemy.transform.position, radius, damage, enemy, false);
+            enemy.TakeDamage(damage);
+            GameSfx.Play(SfxType.SkillRicochet);
+            CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Frost, radius, 0.16f);
+        }
+
+        private int GetSeleneEclipseResonanceRequiredHits()
+        {
+            int reduction = seleneEclipseResonanceLevel >= 2 ? 1 : 0;
+
+            if (seleneEclipseResonanceLevel >= 5)
+                reduction++;
+
+            return Mathf.Max(2, seleneEclipseResonanceBaseRequiredHits - reduction);
+        }
+
+        private float GetSeleneEclipseResonanceDamageRatio()
+        {
+            float bonus = 0.12f * Mathf.Max(0, seleneEclipseResonanceLevel - 1);
+            return seleneEclipseResonanceDamageRatio + bonus;
+        }
+
+        private float GetSeleneEclipseResonanceRadius()
+        {
+            float bonus = seleneEclipseResonanceLevel >= 3 ? 0.28f : 0f;
+            bonus += 0.08f * Mathf.Max(0, seleneEclipseResonanceLevel - 3);
+            return seleneEclipseResonanceRadius + bonus;
         }
 
         private int GetSeleneMoonlightMarkRequiredStacks()
@@ -1151,6 +1303,61 @@ namespace VampireLike.Combat
             enemy.TakeDamage(enemy.MaxHealth);
             GameSfx.Play(SfxType.SkillVampirism);
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.52f, 0.16f);
+        }
+
+        private void ApplyHanSeorinBloodFang(EnemyHealth enemy, float projectileDamage)
+        {
+            if (enemy == null || enemy.IsDead)
+                return;
+
+            HanSeorinBleed bleed = GetHanSeorinBleed(enemy);
+            float damagePerTick = Mathf.Max(0.1f, projectileDamage * GetHanSeorinBloodFangDamageRatio());
+
+            if (bleed == null)
+            {
+                bleed = new HanSeorinBleed { Enemy = enemy };
+                hanSeorinBleeds.Add(bleed);
+            }
+
+            bleed.RemainingTime = GetHanSeorinBloodFangDuration();
+            bleed.TickTimer = Mathf.Min(bleed.TickTimer, hanSeorinBloodFangTickInterval);
+            bleed.DamagePerTick = Mathf.Max(bleed.DamagePerTick, damagePerTick);
+            CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.16f, 0.06f);
+        }
+
+        private HanSeorinBleed GetHanSeorinBleed(EnemyHealth enemy)
+        {
+            for (int i = 0; i < hanSeorinBleeds.Count; i++)
+            {
+                HanSeorinBleed bleed = hanSeorinBleeds[i];
+
+                if (bleed.Enemy == enemy)
+                    return bleed;
+            }
+
+            return null;
+        }
+
+        private bool IsHanSeorinBleeding(EnemyHealth enemy)
+        {
+            HanSeorinBleed bleed = GetHanSeorinBleed(enemy);
+            return bleed != null && bleed.RemainingTime > 0f;
+        }
+
+        private float GetHanSeorinBloodFangDuration()
+        {
+            return hanSeorinBloodFangLevel >= 3 ? hanSeorinBloodFangLevelThreeDuration : hanSeorinBloodFangDuration;
+        }
+
+        private float GetHanSeorinBloodFangDamageRatio()
+        {
+            if (hanSeorinBloodFangLevel >= 4)
+                return hanSeorinBloodFangLevelFourDamageRatio + 0.04f * Mathf.Max(0, hanSeorinBloodFangLevel - 4);
+
+            if (hanSeorinBloodFangLevel >= 2)
+                return hanSeorinBloodFangLevelTwoDamageRatio;
+
+            return hanSeorinBloodFangLevelOneDamageRatio;
         }
 
         private int GetHanSeorinBloodMarkRequiredStacks()
@@ -1551,10 +1758,94 @@ namespace VampireLike.Combat
 
         private void UpdateCharacterExclusiveTimers()
         {
-            if (kaelBlackIronBarrierTimer <= 0f || GameState.IsGameOver || Time.timeScale <= 0f)
+            if (GameState.IsGameOver || Time.timeScale <= 0f)
                 return;
 
-            kaelBlackIronBarrierTimer -= Time.deltaTime;
+            if (kaelBlackIronBarrierTimer > 0f)
+                kaelBlackIronBarrierTimer -= Time.deltaTime;
+
+            UpdateKaelBlackIronRegen();
+        }
+
+        private void UpdateKaelBlackIronRegen()
+        {
+            if (kaelBlackIronRegenLevel <= 0)
+                return;
+
+            if (playerHealth == null)
+                playerHealth = GetComponent<PlayerHealth>();
+
+            if (playerHealth == null || playerHealth.IsDead || playerHealth.CurrentHealth >= playerHealth.MaxHealth)
+                return;
+
+            kaelBlackIronRegenTimer -= Time.deltaTime;
+
+            if (kaelBlackIronRegenTimer > 0f)
+                return;
+
+            kaelBlackIronRegenTimer = GetKaelBlackIronRegenInterval();
+            int healAmount = Mathf.Max(1, Mathf.CeilToInt(playerHealth.MaxHealth * GetKaelBlackIronRegenRatio()));
+
+            if (kaelBlackIronRegenLevel >= 5 && playerHealth.HealthProgress <= kaelBlackIronRegenLowHealthThreshold)
+                healAmount *= 2;
+
+            playerHealth.Heal(healAmount);
+            CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.Vampirism, 0.46f, 0.16f);
+        }
+
+        private float GetKaelBlackIronRegenInterval()
+        {
+            if (kaelBlackIronRegenLevel >= 4)
+                return kaelBlackIronRegenLevelFourInterval;
+
+            if (kaelBlackIronRegenLevel >= 2)
+                return kaelBlackIronRegenLevelTwoInterval;
+
+            return kaelBlackIronRegenBaseInterval;
+        }
+
+        private float GetKaelBlackIronRegenRatio()
+        {
+            if (kaelBlackIronRegenLevel >= 5)
+                return kaelBlackIronRegenBaseRatio * 3f;
+
+            if (kaelBlackIronRegenLevel >= 3)
+                return kaelBlackIronRegenBaseRatio * 2f;
+
+            return kaelBlackIronRegenBaseRatio;
+        }
+
+        private void UpdateHanSeorinBleeds()
+        {
+            if (hanSeorinBleeds.Count == 0 || GameState.IsGameOver || Time.timeScale <= 0f)
+                return;
+
+            for (int i = hanSeorinBleeds.Count - 1; i >= 0; i--)
+            {
+                HanSeorinBleed bleed = hanSeorinBleeds[i];
+
+                if (bleed.Enemy == null || bleed.Enemy.IsDead)
+                {
+                    hanSeorinBleeds.RemoveAt(i);
+                    continue;
+                }
+
+                bleed.RemainingTime -= Time.deltaTime;
+                bleed.TickTimer -= Time.deltaTime;
+
+                if (bleed.RemainingTime <= 0f)
+                {
+                    hanSeorinBleeds.RemoveAt(i);
+                    continue;
+                }
+
+                if (bleed.TickTimer > 0f)
+                    continue;
+
+                bleed.TickTimer = hanSeorinBloodFangTickInterval;
+                bleed.Enemy.TakeDamage(bleed.DamagePerTick);
+                CombatVFX.PlayBurst(bleed.Enemy.transform.position, CombatVFXKind.Vampirism, 0.18f, 0.08f);
+            }
         }
 
         private void StartShadowStepCollisionPhase(float duration)

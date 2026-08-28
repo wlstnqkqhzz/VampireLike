@@ -40,7 +40,10 @@ namespace VampireLike.Growth
         HanSeorinShadowDagger,
         HanSeorinReturningBlade,
         HanSeorinKillingIntent,
-        HanSeorinRedExecution
+        HanSeorinRedExecution,
+        KaelBlackIronRegen,
+        SeleneEclipseResonance,
+        HanSeorinBloodFang
     }
 
     /// <summary>
