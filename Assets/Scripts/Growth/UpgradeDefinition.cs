@@ -91,7 +91,6 @@ namespace VampireLike.Growth
         public bool IsCharacterExclusiveUpgrade => !string.IsNullOrWhiteSpace(requiredCharacterId);
         public bool IsSpecialUpgrade => upgradeType == UpgradeType.ExplosiveShot
             || upgradeType == UpgradeType.FrostShot
-            || upgradeType == UpgradeType.Vampirism
             || upgradeType == UpgradeType.Shockwave
             || upgradeType == UpgradeType.ScatterShot
             || upgradeType == UpgradeType.Shield

@@ -31,6 +31,19 @@ namespace VampireLike.Combat
         [SerializeField]
         private int experienceRewardOverride;
 
+        [Header("Health Pack Drop")]
+        [SerializeField]
+        private float smallHealthPackDropChance = 0.05f;
+
+        [SerializeField]
+        private int smallHealthPackHealAmount = 5;
+
+        [SerializeField]
+        private float largeHealthPackDropChance = 0.008f;
+
+        [SerializeField]
+        private float largeHealthPackHealRatio = 0.5f;
+
         private float currentHealth;
         private SpriteRenderer spriteRenderer;
         private BossSpriteAnimator bossSpriteAnimator;
@@ -74,6 +87,10 @@ namespace VampireLike.Combat
             maxHealth = Mathf.Max(1, maxHealth);
             hitFlashDuration = Mathf.Max(0f, hitFlashDuration);
             experienceRewardOverride = Mathf.Max(0, experienceRewardOverride);
+            smallHealthPackDropChance = Mathf.Clamp01(smallHealthPackDropChance);
+            smallHealthPackHealAmount = Mathf.Max(1, smallHealthPackHealAmount);
+            largeHealthPackDropChance = Mathf.Clamp01(largeHealthPackDropChance);
+            largeHealthPackHealRatio = Mathf.Clamp01(largeHealthPackHealRatio);
         }
 
         public void TakeDamage(int damage)
@@ -159,6 +176,7 @@ namespace VampireLike.Combat
             GameSessionStats.RecordKill(isBoss);
             Died?.Invoke(this);
             DropExperienceGem();
+            TryDropHealthPack(isBoss);
 
             float deathDuration = bossSpriteAnimator == null ? 0f : bossSpriteAnimator.PlayDeath();
 
@@ -219,6 +237,23 @@ namespace VampireLike.Combat
 
             if (experienceRewardOverride > 0)
                 gem.SetExperienceAmount(experienceRewardOverride);
+        }
+
+        private void TryDropHealthPack(bool isBoss)
+        {
+            if (isBoss)
+                return;
+
+            float roll = UnityEngine.Random.value;
+
+            if (largeHealthPackDropChance > 0f && roll < largeHealthPackDropChance)
+            {
+                HealthPackPickup.DropLarge(transform.position, largeHealthPackHealRatio);
+                return;
+            }
+
+            if (smallHealthPackDropChance > 0f && roll < largeHealthPackDropChance + smallHealthPackDropChance)
+                HealthPackPickup.DropSmall(transform.position, smallHealthPackHealAmount);
         }
     }
 }

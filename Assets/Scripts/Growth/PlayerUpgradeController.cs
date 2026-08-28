@@ -531,7 +531,7 @@ namespace VampireLike.Growth
                 if (!CanAppearForActiveCharacter(definition))
                     continue;
 
-                if (definition.UpgradeType == UpgradeType.SequentialShot)
+                if (definition.UpgradeType == UpgradeType.SequentialShot || definition.UpgradeType == UpgradeType.Vampirism)
                     continue;
 
                 if (bossRewardOnly && !definition.IsSpecialUpgrade && !definition.IsCharacterExclusiveUpgrade)
