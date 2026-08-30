@@ -67,9 +67,16 @@ namespace VampireLike.Enemies
         private bool clearZonesOnBossDeath = true;
 
         [SerializeField]
+        private float warningDuration = 1f;
+
+        [SerializeField]
+        private Color warningColor = new Color(0.86f, 0.92f, 1f, 0.42f);
+
+        [SerializeField]
         private Color fallbackZoneColor = new Color(0.82f, 0.82f, 0.95f, 0.45f);
 
         private readonly List<GameObject> activeZones = new List<GameObject>();
+        private readonly List<GameObject> activeWarnings = new List<GameObject>();
 
         protected override bool CanExecutePattern()
         {
@@ -87,13 +94,27 @@ namespace VampireLike.Enemies
             int availableSlots = GetMaxActiveZones() - activeZones.Count;
             int count = Mathf.Min(availableSlots, zonesPerCast + Mathf.Max(0, Boss.CurrentPhase - 1) * phaseBonusZonesPerCast);
 
+            Vector2[] positions = new Vector2[count];
+
             for (int i = 0; i < count && !Boss.IsDead; i++)
             {
-                GameObject zone = CreateZone(GetZonePosition());
-                activeZones.Add(zone);
+                positions[i] = GetZonePosition();
+                GameObject warning = CreateZoneWarning(positions[i], vfxKind);
+
+                if (warning != null)
+                    activeWarnings.Add(warning);
             }
 
-            yield break;
+            if (warningDuration > 0f && activeWarnings.Count > 0)
+                yield return new WaitForSeconds(warningDuration);
+
+            DestroyActiveWarnings();
+
+            for (int i = 0; i < count && !Boss.IsDead; i++)
+            {
+                GameObject zone = CreateZone(positions[i]);
+                activeZones.Add(zone);
+            }
         }
 
         private void Update()
@@ -104,12 +125,16 @@ namespace VampireLike.Enemies
 
         private void OnDisable()
         {
+            DestroyActiveWarnings();
+
             if (clearZonesOnBossDeath)
                 ClearZones();
         }
 
         protected override void OnPatternCancelled()
         {
+            DestroyActiveWarnings();
+
             if (clearZonesOnBossDeath)
                 ClearZones();
         }
@@ -136,6 +161,57 @@ namespace VampireLike.Enemies
             CombatVFX.PlayExpandingRing(position, vfxKind, radius * 0.35f, radius * 2f, 0.28f, 620);
             CombatVFX.CreateZoneVisual(zone.transform, vfxKind, radius, fallbackZoneColor);
             return zone;
+        }
+
+        private GameObject CreateZoneWarning(Vector2 position, CombatVFXKind vfxKind)
+        {
+            GameObject warning = new GameObject("Boss Area Zone Warning");
+            warning.transform.position = position;
+
+            GameObject fill = new GameObject("Warning Fill");
+            fill.transform.SetParent(warning.transform, false);
+            fill.transform.localScale = Vector3.one * radius * 2f;
+
+            SpriteRenderer fillRenderer = fill.AddComponent<SpriteRenderer>();
+            fillRenderer.sprite = SpecialUpgradePulse.GetFilledCircleSprite();
+            fillRenderer.color = new Color(warningColor.r, warningColor.g, warningColor.b, warningColor.a * 0.32f);
+            fillRenderer.sortingOrder = 612;
+
+            GameObject detail = new GameObject("Warning Detail");
+            detail.transform.SetParent(warning.transform, false);
+            detail.transform.localScale = Vector3.one * radius * 2f;
+
+            SpriteRenderer detailRenderer = detail.AddComponent<SpriteRenderer>();
+            detailRenderer.sprite = GetWarningDetailSprite(vfxKind);
+            detailRenderer.color = warningColor;
+            detailRenderer.sortingOrder = 613;
+
+            LineRenderer lineRenderer = warning.AddComponent<LineRenderer>();
+            lineRenderer.useWorldSpace = false;
+            lineRenderer.loop = true;
+            lineRenderer.positionCount = 48;
+            lineRenderer.startWidth = 0.035f;
+            lineRenderer.endWidth = 0.035f;
+            lineRenderer.sortingOrder = 614;
+            lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            lineRenderer.startColor = new Color(warningColor.r, warningColor.g, warningColor.b, warningColor.a * 1.35f);
+            lineRenderer.endColor = lineRenderer.startColor;
+
+            for (int i = 0; i < lineRenderer.positionCount; i++)
+            {
+                float angle = Mathf.PI * 2f * i / lineRenderer.positionCount;
+                lineRenderer.SetPosition(i, new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0f));
+            }
+
+            CombatVFX.PlayExpandingRing(position, vfxKind, radius * 0.45f, radius * 2f, Mathf.Max(0.18f, warningDuration), 615);
+            return warning;
+        }
+
+        private static Sprite GetWarningDetailSprite(CombatVFXKind vfxKind)
+        {
+            return vfxKind == CombatVFXKind.WebZone
+                ? SpecialUpgradePulse.GetWebSprite()
+                : SpecialUpgradePulse.GetCircleSprite();
         }
 
         private void ScaleZoneVisual(GameObject zone)
@@ -202,6 +278,8 @@ namespace VampireLike.Enemies
 
         private void ClearZones()
         {
+            DestroyActiveWarnings();
+
             for (int i = activeZones.Count - 1; i >= 0; i--)
             {
                 if (activeZones[i] != null)
@@ -209,6 +287,26 @@ namespace VampireLike.Enemies
             }
 
             activeZones.Clear();
+        }
+
+        private void DestroyActiveWarnings()
+        {
+            for (int i = activeWarnings.Count - 1; i >= 0; i--)
+            {
+                GameObject warning = activeWarnings[i];
+
+                if (warning == null)
+                    continue;
+
+                LineRenderer lineRenderer = warning.GetComponent<LineRenderer>();
+
+                if (lineRenderer != null && lineRenderer.material != null)
+                    Destroy(lineRenderer.material);
+
+                Destroy(warning);
+            }
+
+            activeWarnings.Clear();
         }
 
         public void ScaleBossDamage(float multiplier)
@@ -234,6 +332,7 @@ namespace VampireLike.Enemies
             damageInterval = Mathf.Max(0.1f, damageInterval);
             centerBindRadius = Mathf.Clamp(centerBindRadius, 0.05f, radius);
             centerBindDuration = Mathf.Max(0f, centerBindDuration);
+            warningDuration = Mathf.Max(0f, warningDuration);
         }
     }
 }

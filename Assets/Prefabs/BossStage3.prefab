@@ -239,6 +239,8 @@ MonoBehaviour:
   bindOncePerZone: 1
   spawnNearPlayer: 1
   clearZonesOnBossDeath: 1
+  warningDuration: 1.05
+  warningColor: {r: 0.78, g: 0.88, b: 1, a: 0.52}
   fallbackZoneColor: {r: 0.82, g: 0.82, b: 0.95, a: 0.45}
 --- !u!114 &100010
 MonoBehaviour:
