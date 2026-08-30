@@ -48,7 +48,7 @@ namespace VampireLike.Combat
 
         // 보스 대쉬는 시각상 몸통 중심에 맞도록 일반 접촉 판정보다 살짝 위로 보정한다.
         [SerializeField]
-        private Vector2 dashHurtboxOffset = new Vector2(0f, 0.04f);
+        private Vector2 dashHurtboxOffset = Vector2.zero;
 
         // Collider를 찾지 못했을 때만 사용하는 예비 접촉 검사 반경이다.
         [SerializeField]
@@ -250,11 +250,16 @@ namespace VampireLike.Combat
         /// </summary>
         public void Heal(int amount)
         {
+            Heal(amount, SfxType.Heal);
+        }
+
+        public void Heal(int amount, SfxType healSfxType)
+        {
             if (amount <= 0 || isDead)
                 return;
 
             currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
-            GameSfx.Play(SfxType.Heal);
+            GameSfx.Play(healSfxType);
         }
 
         public bool IsHitByProjectileSweep(Vector2 startPosition, Vector2 endPosition, float projectileRadius)
@@ -267,6 +272,13 @@ namespace VampireLike.Combat
             Bounds hurtboxBounds = GetHurtboxBounds();
             hurtboxBounds.center += (Vector3)dashHurtboxOffset;
             return IsHitBySweepBounds(startPosition, endPosition, dashRadius, hurtboxBounds);
+        }
+
+        public bool IsHitByDashSweep(Vector2 startPosition, Vector2 endPosition, float forwardPadding, float perpendicularPadding)
+        {
+            Bounds hurtboxBounds = GetHurtboxBounds();
+            hurtboxBounds.center += (Vector3)dashHurtboxOffset;
+            return IsHitByOrientedSweepBounds(startPosition, endPosition, forwardPadding, perpendicularPadding, hurtboxBounds);
         }
 
         private static bool IsHitBySweepBounds(Vector2 startPosition, Vector2 endPosition, float sweepRadius, Bounds hurtboxBounds)
@@ -282,6 +294,63 @@ namespace VampireLike.Combat
                 return true;
 
             return SegmentIntersectsRect(startPosition, endPosition, expandedBounds);
+        }
+
+        private static bool IsHitByOrientedSweepBounds(
+            Vector2 startPosition,
+            Vector2 endPosition,
+            float forwardPadding,
+            float perpendicularPadding,
+            Bounds hurtboxBounds)
+        {
+            Vector2 delta = endPosition - startPosition;
+            float length = delta.magnitude;
+
+            if (length <= 0.0001f)
+                return IsPointInsideExpandedBounds(startPosition, hurtboxBounds, Mathf.Max(forwardPadding, perpendicularPadding));
+
+            Vector2 forward = delta / length;
+            Vector2 perpendicular = new Vector2(-forward.y, forward.x);
+            float minForward = float.PositiveInfinity;
+            float maxForward = float.NegativeInfinity;
+            float minPerpendicular = float.PositiveInfinity;
+            float maxPerpendicular = float.NegativeInfinity;
+
+            Vector2 center = hurtboxBounds.center;
+            Vector2 extents = hurtboxBounds.extents;
+
+            for (int y = -1; y <= 1; y += 2)
+            {
+                for (int x = -1; x <= 1; x += 2)
+                {
+                    Vector2 corner = center + new Vector2(extents.x * x, extents.y * y);
+                    Vector2 fromStart = corner - startPosition;
+                    float forwardDistance = Vector2.Dot(fromStart, forward);
+                    float perpendicularDistance = Vector2.Dot(fromStart, perpendicular);
+
+                    minForward = Mathf.Min(minForward, forwardDistance);
+                    maxForward = Mathf.Max(maxForward, forwardDistance);
+                    minPerpendicular = Mathf.Min(minPerpendicular, perpendicularDistance);
+                    maxPerpendicular = Mathf.Max(maxPerpendicular, perpendicularDistance);
+                }
+            }
+
+            float safeForwardPadding = Mathf.Max(0f, forwardPadding);
+            float safePerpendicularPadding = Mathf.Max(0f, perpendicularPadding);
+            bool overlapsForward = maxForward >= -safeForwardPadding && minForward <= length + safeForwardPadding;
+            bool overlapsPerpendicular = maxPerpendicular >= -safePerpendicularPadding && minPerpendicular <= safePerpendicularPadding;
+            return overlapsForward && overlapsPerpendicular;
+        }
+
+        private static bool IsPointInsideExpandedBounds(Vector2 point, Bounds bounds, float padding)
+        {
+            Rect expandedBounds = new Rect(
+                bounds.min.x - padding,
+                bounds.min.y - padding,
+                bounds.size.x + padding * 2f,
+                bounds.size.y + padding * 2f);
+
+            return expandedBounds.Contains(point);
         }
 
         private void CacheSpriteRenderer()

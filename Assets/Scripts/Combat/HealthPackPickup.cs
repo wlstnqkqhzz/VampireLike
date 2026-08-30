@@ -1,4 +1,5 @@
 using UnityEngine;
+using VampireLike.Audio;
 
 namespace VampireLike.Combat
 {
@@ -15,6 +16,9 @@ namespace VampireLike.Combat
 
         [SerializeField]
         private float maxHealthHealRatio;
+
+        [SerializeField]
+        private SfxType pickupSfxType = SfxType.SmallHealthPackPickup;
 
         [SerializeField]
         private float lifetime = 18f;
@@ -57,6 +61,9 @@ namespace VampireLike.Combat
             HealthPackPickup pickup = pickupObject.AddComponent<HealthPackPickup>();
             pickup.flatHealAmount = Mathf.Max(0, flatHealAmount);
             pickup.maxHealthHealRatio = Mathf.Clamp01(maxHealthHealRatio);
+            pickup.pickupSfxType = maxHealthHealRatio > 0f
+                ? SfxType.LargeHealthPackPickup
+                : SfxType.SmallHealthPackPickup;
             return pickup;
         }
 
@@ -105,7 +112,7 @@ namespace VampireLike.Combat
                 : Mathf.CeilToInt(playerHealth.MaxHealth * maxHealthHealRatio);
             int healAmount = Mathf.Max(flatHealAmount, ratioHealAmount);
 
-            playerHealth.Heal(healAmount);
+            playerHealth.Heal(healAmount, pickupSfxType);
             Destroy(gameObject);
         }
 

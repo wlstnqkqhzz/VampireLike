@@ -240,6 +240,11 @@ MonoBehaviour:
   telegraphLength: 5.5
   telegraphColor: {r: 1, g: 0.56, b: 0.18, a: 0.34}
   impactSize: 0.85
+  useSweptDashHitbox: 1
+  disableContactDamageDuringDash: 1
+  dashHitRadius: 0.58
+  dashHitForwardPadding: 0.36
+  dashHitPerpendicularPadding: 0.26
 --- !u!114 &100010
 MonoBehaviour:
   m_ObjectHideFlags: 0

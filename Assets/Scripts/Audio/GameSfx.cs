@@ -45,7 +45,9 @@ namespace VampireLike.Audio
         HanSeorinHit1,
         HanSeorinHit2,
         HanSeorinHit3,
-        HanSeorinDeath
+        HanSeorinDeath,
+        SmallHealthPackPickup,
+        LargeHealthPackPickup
     }
 
     /// <summary>
@@ -96,7 +98,9 @@ namespace VampireLike.Audio
             { SfxType.HanSeorinHit1, "hanseorin_hit_1" },
             { SfxType.HanSeorinHit2, "hanseorin_hit_2" },
             { SfxType.HanSeorinHit3, "hanseorin_hit_3" },
-            { SfxType.HanSeorinDeath, "hanseorin_death" }
+            { SfxType.HanSeorinDeath, "hanseorin_death" },
+            { SfxType.SmallHealthPackPickup, "health_pack_small_pickup" },
+            { SfxType.LargeHealthPackPickup, "health_pack_large_pickup" }
         };
 
         private static readonly Dictionary<SfxType, float> MinIntervals = new Dictionary<SfxType, float>
@@ -140,7 +144,9 @@ namespace VampireLike.Audio
             { SfxType.HanSeorinHit1, 0.12f },
             { SfxType.HanSeorinHit2, 0.12f },
             { SfxType.HanSeorinHit3, 0.12f },
-            { SfxType.HanSeorinDeath, 0.5f }
+            { SfxType.HanSeorinDeath, 0.5f },
+            { SfxType.SmallHealthPackPickup, 0.08f },
+            { SfxType.LargeHealthPackPickup, 0.12f }
         };
 
         private static readonly Dictionary<SfxType, float> Volumes = new Dictionary<SfxType, float>
@@ -184,7 +190,9 @@ namespace VampireLike.Audio
             { SfxType.HanSeorinHit1, 0.56f },
             { SfxType.HanSeorinHit2, 0.56f },
             { SfxType.HanSeorinHit3, 0.56f },
-            { SfxType.HanSeorinDeath, 0.72f }
+            { SfxType.HanSeorinDeath, 0.72f },
+            { SfxType.SmallHealthPackPickup, 0.5f },
+            { SfxType.LargeHealthPackPickup, 0.62f }
         };
 
         private static readonly Dictionary<SfxType, AudioClip> LoadedClips = new Dictionary<SfxType, AudioClip>();

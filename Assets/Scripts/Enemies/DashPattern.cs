@@ -86,6 +86,12 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float dashHitRadius = 0.58f;
 
+        [SerializeField]
+        private float dashHitForwardPadding = 0.36f;
+
+        [SerializeField]
+        private float dashHitPerpendicularPadding = 0.26f;
+
         private EnemyContactDamage contactDamage;
         private PlayerHealth playerHealth;
         private Collider2D bossCollider;
@@ -184,7 +190,11 @@ namespace VampireLike.Enemies
             if (!useSweptDashHitbox || playerHealth == null || playerHealth.IsDead)
                 return false;
 
-            if (!playerHealth.IsHitByDashSweep(previousPosition, nextPosition, GetEffectiveDashHitRadius()))
+            if (!playerHealth.IsHitByDashSweep(
+                previousPosition,
+                nextPosition,
+                GetEffectiveDashHitForwardPadding(),
+                GetEffectiveDashHitPerpendicularPadding()))
                 return false;
 
             int damage = contactDamage == null ? 1 : contactDamage.ContactDamage;
@@ -222,6 +232,8 @@ namespace VampireLike.Enemies
             telegraphLength = Mathf.Max(0.1f, telegraphLength);
             impactSize = Mathf.Max(0.1f, impactSize);
             dashHitRadius = Mathf.Max(0.01f, dashHitRadius);
+            dashHitForwardPadding = Mathf.Max(0.01f, dashHitForwardPadding);
+            dashHitPerpendicularPadding = Mathf.Max(0.01f, dashHitPerpendicularPadding);
         }
 
         private void OnDisable()
@@ -325,6 +337,22 @@ namespace VampireLike.Enemies
             }
 
             return radius;
+        }
+
+        private float GetEffectiveDashHitForwardPadding()
+        {
+            if (dashHitForwardPadding > 0f)
+                return dashHitForwardPadding;
+
+            return GetEffectiveDashHitRadius();
+        }
+
+        private float GetEffectiveDashHitPerpendicularPadding()
+        {
+            if (dashHitPerpendicularPadding > 0f)
+                return dashHitPerpendicularPadding;
+
+            return GetEffectiveDashHitRadius();
         }
 
         private Vector2 GetDashHitboxCenterOffset()

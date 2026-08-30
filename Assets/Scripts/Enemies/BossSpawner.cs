@@ -119,6 +119,9 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float bossDeathGemAttractDelay = 0.45f;
 
+        [SerializeField]
+        private int finalBossStage = 10;
+
         private GameObject activeBoss;
         private EnemyHealth activeBossHealth;
         private int activeBossStage;
@@ -220,6 +223,7 @@ namespace VampireLike.Enemies
             bossArenaPlayerBottomVisualAllowance = Mathf.Max(0f, bossArenaPlayerBottomVisualAllowance);
             bossSpawnPlayerSeparation = Mathf.Max(0f, bossSpawnPlayerSeparation);
             bossDeathGemAttractDelay = Mathf.Max(0f, bossDeathGemAttractDelay);
+            finalBossStage = Mathf.Max(1, finalBossStage);
 
             if (bossSpawnEntries == null)
                 return;
@@ -293,7 +297,10 @@ namespace VampireLike.Enemies
         {
             int defeatedStage = activeBossStage;
             BossDefeated?.Invoke(defeatedStage, defeatedBoss);
-            StartCoroutine(AttractFieldExperienceGemsAfterDelay());
+
+            if (defeatedStage != finalBossStage)
+                StartCoroutine(AttractFieldExperienceGemsAfterDelay());
+
             GameBgm.Play(BgmType.Battle);
             SetFirstBossEnemySpawningPaused(false);
             UnsubscribeActiveBossDeath();

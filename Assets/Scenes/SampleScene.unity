@@ -43448,8 +43448,13 @@ MonoBehaviour:
   maxHealth: 10
   contactDamage: 1
   invincibleDuration: 1
+  shieldBlockInvincibleDuration: 0.35
   hitFlashDuration: 0.6
   hitFlashInterval: 0.08
+  useCustomHurtbox: 1
+  hurtboxOffset: {x: 0, y: 0}
+  hurtboxSize: {x: 0.42, y: 0.58}
+  dashHurtboxOffset: {x: 0, y: 0}
   contactCheckRadius: 0.35
   enemyLayerMask:
     serializedVersion: 2
@@ -53942,6 +53947,16 @@ MonoBehaviour:
   contactDamageMultiplierPerAppearance: 1
   moveSpeedMultiplierPerAppearance: 1.03
   maxBossMoveSpeed: 2.15
+  bossArenaBoundsScale: 0.5
+  bossArenaMinWidth: 18
+  bossArenaMinHeight: 12
+  bossArenaScreenPadding: 0.25
+  bossArenaTopHudPadding: 1.25
+  bossArenaBottomPadding: 0
+  bossArenaPlayerBottomVisualAllowance: 0.45
+  bossSpawnPlayerSeparation: 1.4
+  bossDeathGemAttractDelay: 0.45
+  finalBossStage: 10
 --- !u!114 &2200000004
 MonoBehaviour:
   m_ObjectHideFlags: 0
