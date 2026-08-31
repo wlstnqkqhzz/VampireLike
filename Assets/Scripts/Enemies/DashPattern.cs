@@ -193,13 +193,12 @@ namespace VampireLike.Enemies
             if (!playerHealth.IsHitByDashSweep(
                 previousPosition,
                 nextPosition,
-                GetEffectiveDashHitForwardPadding(),
-                GetEffectiveDashHitPerpendicularPadding()))
+                GetEffectiveDashHitForwardPadding(dashDirection),
+                GetEffectiveDashHitPerpendicularPadding(dashDirection)))
                 return false;
 
             int damage = contactDamage == null ? 1 : contactDamage.ContactDamage;
-            playerHealth.TakeDamage(damage, dashDirection);
-            return true;
+            return playerHealth.TakeDashDamage(damage, dashDirection);
         }
 
         private Vector2 GetDashDirection()
@@ -339,20 +338,27 @@ namespace VampireLike.Enemies
             return radius;
         }
 
-        private float GetEffectiveDashHitForwardPadding()
+        private float GetEffectiveDashHitForwardPadding(Vector2 dashDirection)
         {
-            if (dashHitForwardPadding > 0f)
-                return dashHitForwardPadding;
-
-            return GetEffectiveDashHitRadius();
+            Vector2 direction = dashDirection.sqrMagnitude <= 0.001f ? Vector2.right : dashDirection.normalized;
+            return Mathf.Max(0f, dashHitForwardPadding) + GetBossColliderExtentAlong(direction);
         }
 
-        private float GetEffectiveDashHitPerpendicularPadding()
+        private float GetEffectiveDashHitPerpendicularPadding(Vector2 dashDirection)
         {
-            if (dashHitPerpendicularPadding > 0f)
-                return dashHitPerpendicularPadding;
+            Vector2 direction = dashDirection.sqrMagnitude <= 0.001f ? Vector2.right : dashDirection.normalized;
+            Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+            return Mathf.Max(0f, dashHitPerpendicularPadding) + GetBossColliderExtentAlong(perpendicular);
+        }
 
-            return GetEffectiveDashHitRadius();
+        private float GetBossColliderExtentAlong(Vector2 axis)
+        {
+            if (bossCollider == null)
+                return GetEffectiveDashHitRadius();
+
+            Bounds bounds = bossCollider.bounds;
+            Vector2 normalizedAxis = axis.sqrMagnitude <= 0.001f ? Vector2.right : axis.normalized;
+            return Mathf.Abs(normalizedAxis.x) * bounds.extents.x + Mathf.Abs(normalizedAxis.y) * bounds.extents.y;
         }
 
         private Vector2 GetDashHitboxCenterOffset()

@@ -50,6 +50,9 @@ namespace VampireLike.Combat
         [SerializeField]
         private Vector2 dashHurtboxOffset = Vector2.zero;
 
+        [SerializeField]
+        private bool alignDashHurtboxToVisibleSprite = true;
+
         // Collider를 찾지 못했을 때만 사용하는 예비 접촉 검사 반경이다.
         [SerializeField]
         private float contactCheckRadius = 0.35f;
@@ -186,16 +189,26 @@ namespace VampireLike.Combat
 
         public void TakeDamage(int damage, Vector2 hitDirection)
         {
+            ApplyDamage(damage, hitDirection, false);
+        }
+
+        public bool TakeDashDamage(int damage, Vector2 hitDirection)
+        {
+            return ApplyDamage(damage, hitDirection, true);
+        }
+
+        private bool ApplyDamage(int damage, Vector2 hitDirection, bool ignoreInvincibility)
+        {
             // 무적 시간 중에는 반복 피해를 막는다.
-            if (isDead || damage <= 0 || invincibleTimer > 0f)
-                return;
+            if (isDead || damage <= 0 || (!ignoreInvincibility && invincibleTimer > 0f))
+                return false;
 
             PlayerSpecialUpgradeController specialUpgradeController = GetComponent<PlayerSpecialUpgradeController>();
 
             if (specialUpgradeController != null && specialUpgradeController.TryBlockDamage(hitDirection))
             {
                 invincibleTimer = Mathf.Max(invincibleTimer, shieldBlockInvincibleDuration);
-                return;
+                return true;
             }
 
             currentHealth -= damage;
@@ -219,6 +232,8 @@ namespace VampireLike.Combat
 
             if (currentHealth <= 0)
                 Die();
+
+            return true;
         }
 
         /// <summary>
@@ -269,16 +284,12 @@ namespace VampireLike.Combat
 
         public bool IsHitByDashSweep(Vector2 startPosition, Vector2 endPosition, float dashRadius)
         {
-            Bounds hurtboxBounds = GetHurtboxBounds();
-            hurtboxBounds.center += (Vector3)dashHurtboxOffset;
-            return IsHitBySweepBounds(startPosition, endPosition, dashRadius, hurtboxBounds);
+            return IsHitBySweepBounds(startPosition, endPosition, dashRadius, GetDashHurtboxBounds());
         }
 
         public bool IsHitByDashSweep(Vector2 startPosition, Vector2 endPosition, float forwardPadding, float perpendicularPadding)
         {
-            Bounds hurtboxBounds = GetHurtboxBounds();
-            hurtboxBounds.center += (Vector3)dashHurtboxOffset;
-            return IsHitByOrientedSweepBounds(startPosition, endPosition, forwardPadding, perpendicularPadding, hurtboxBounds);
+            return IsHitByOrientedSweepBounds(startPosition, endPosition, forwardPadding, perpendicularPadding, GetDashHurtboxBounds());
         }
 
         private static bool IsHitBySweepBounds(Vector2 startPosition, Vector2 endPosition, float sweepRadius, Bounds hurtboxBounds)
@@ -464,6 +475,55 @@ namespace VampireLike.Combat
                 return playerContactCollider.bounds;
 
             return new Bounds(transform.position, Vector3.one * contactCheckRadius * 2f);
+        }
+
+        private Bounds GetDashHurtboxBounds()
+        {
+            Bounds hurtboxBounds = GetHurtboxBounds();
+
+            if (alignDashHurtboxToVisibleSprite && TryGetVisibleSpriteBounds(out Bounds visualBounds))
+            {
+                Vector3 visualCenter = visualBounds.center;
+                hurtboxBounds.center = new Vector3(visualCenter.x, visualCenter.y, hurtboxBounds.center.z);
+            }
+
+            hurtboxBounds.center += (Vector3)dashHurtboxOffset;
+            return hurtboxBounds;
+        }
+
+        private bool TryGetVisibleSpriteBounds(out Bounds visualBounds)
+        {
+            if (spriteRenderers == null || spriteRenderers.Length == 0)
+                CacheSpriteRenderer();
+
+            visualBounds = default;
+            bool hasBounds = false;
+
+            if (spriteRenderers == null)
+                return false;
+
+            for (int i = 0; i < spriteRenderers.Length; i++)
+            {
+                SpriteRenderer spriteRenderer = spriteRenderers[i];
+
+                if (spriteRenderer == null
+                    || !spriteRenderer.enabled
+                    || !spriteRenderer.gameObject.activeInHierarchy
+                    || spriteRenderer.sprite == null)
+                    continue;
+
+                if (!hasBounds)
+                {
+                    visualBounds = spriteRenderer.bounds;
+                    hasBounds = true;
+                }
+                else
+                {
+                    visualBounds.Encapsulate(spriteRenderer.bounds);
+                }
+            }
+
+            return hasBounds;
         }
 
         private static bool SegmentIntersectsRect(Vector2 startPosition, Vector2 endPosition, Rect rect)
