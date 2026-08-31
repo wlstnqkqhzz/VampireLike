@@ -239,6 +239,15 @@ namespace VampireLike.Combat
         /// <summary>
         /// 최대 체력 강화에서 호출한다. 최대 체력과 현재 체력을 함께 올린다.
         /// </summary>
+        public void SetMaxHealth(int value)
+        {
+            if (isDead)
+                return;
+
+            maxHealth = Mathf.Max(1, value);
+            currentHealth = maxHealth;
+        }
+
         public void IncreaseMaxHealth(int amount)
         {
             if (amount <= 0 || isDead)

@@ -19,6 +19,7 @@ namespace VampireLike.VFX
         WebZone,
         FireZone,
         FrostZone,
+        MoonMeteor,
         Buff
     }
 
@@ -219,6 +220,114 @@ namespace VampireLike.VFX
             PlayExpandingRing(position, CombatVFXKind.ArcaneImpact, size * 0.35f, size * 1.35f, duration * 1.15f, sortingOrder - 1);
         }
 
+        public static void PlayMoonMeteorWarning(Vector2 position, float radius, float duration = 0.55f, int sortingOrder = 760)
+        {
+            radius *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Moon Meteor Warning");
+            root.transform.position = position;
+
+            Color main = GetMainColor(CombatVFXKind.MoonMeteor);
+            Color secondary = GetSecondaryColor(CombatVFXKind.MoonMeteor);
+            SpriteRenderer fill = CreateRenderer(root.transform, "Meteor Target Fill", VFXSprites.SoftDisc, WithAlpha(main, 0.12f), sortingOrder);
+            SpriteRenderer edge = CreateRenderer(root.transform, "Meteor Target Ring", VFXSprites.WarningRing, WithAlpha(secondary, 0.78f), sortingOrder + 1);
+            SpriteRenderer glyph = CreateRenderer(root.transform, "Meteor Star Glyph", VFXSprites.Sparks, WithAlpha(secondary, 0.58f), sortingOrder + 2);
+
+            float diameter = radius * 2f;
+            fill.transform.localScale = Vector3.one * diameter;
+            edge.transform.localScale = Vector3.one * diameter;
+            glyph.transform.localScale = Vector3.one * radius * 0.9f;
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.86f, 1.04f, -34f, true);
+        }
+
+        public static GameObject PlayMoonMeteorFall(Vector2 targetPosition, float radius, float duration = 0.55f, int sortingOrder = 1880)
+        {
+            radius *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            Vector2 startPosition = GetMeteorStartPosition(targetPosition, radius);
+            GameObject root = new GameObject("VFX Moon Meteor Falling Body");
+            root.transform.position = startPosition;
+
+            Color main = GetMainColor(CombatVFXKind.MoonMeteor);
+            Color secondary = GetSecondaryColor(CombatVFXKind.MoonMeteor);
+            SpriteRenderer aura = CreateRenderer(root.transform, "Meteor Aura", VFXSprites.SoftDisc, WithAlpha(main, 0.32f), sortingOrder);
+            SpriteRenderer core = CreateRenderer(root.transform, "Meteor Core", VFXSprites.GetBurstSprite(CombatVFXKind.MoonMeteor), WithAlpha(secondary, 0.96f), sortingOrder + 2);
+            SpriteRenderer sparks = CreateRenderer(root.transform, "Meteor Sparks", VFXSprites.Sparks, WithAlpha(main, 0.84f), sortingOrder + 3);
+            SpriteRenderer tail = CreateRenderer(root.transform, "Meteor Tail", VFXSprites.LineCore, WithAlpha(main, 0.72f), sortingOrder - 1);
+            SpriteRenderer tailGlow = CreateRenderer(root.transform, "Meteor Tail Glow", VFXSprites.Line, WithAlpha(secondary, 0.28f), sortingOrder - 2);
+
+            aura.transform.localScale = Vector3.one * radius * 0.64f;
+            core.transform.localScale = Vector3.one * radius * 0.34f;
+            sparks.transform.localScale = Vector3.one * radius * 0.52f;
+
+            Vector2 fallDirection = (targetPosition - startPosition).sqrMagnitude <= 0.001f
+                ? Vector2.down
+                : (targetPosition - startPosition).normalized;
+            float angle = Mathf.Atan2(fallDirection.y, fallDirection.x) * Mathf.Rad2Deg;
+            float tailLength = Mathf.Clamp(Vector2.Distance(startPosition, targetPosition) * 0.32f, radius * 1.8f, radius * 4.4f);
+            Vector3 tailOffset = -(Vector3)fallDirection * tailLength * 0.5f;
+
+            tail.transform.localPosition = tailOffset;
+            tail.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            tail.transform.localScale = new Vector3(tailLength, radius * 0.12f, 1f);
+            tailGlow.transform.localPosition = tailOffset;
+            tailGlow.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            tailGlow.transform.localScale = new Vector3(tailLength * 1.08f, radius * 0.22f, 1f);
+
+            MoonMeteorFallEffect effect = root.AddComponent<MoonMeteorFallEffect>();
+            effect.Play(startPosition, targetPosition, Mathf.Max(0.08f, duration), radius, aura, core, sparks, tail, tailGlow);
+            return root;
+        }
+
+        public static void PlayMoonMeteorImpact(Vector2 position, float radius, float duration = 0.42f, int sortingOrder = 1820)
+        {
+            radius *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Moon Meteor Impact");
+            root.transform.position = position;
+
+            Color main = GetMainColor(CombatVFXKind.MoonMeteor);
+            Color secondary = GetSecondaryColor(CombatVFXKind.MoonMeteor);
+            SpriteRenderer core = CreateRenderer(root.transform, "Meteor Core", VFXSprites.SoftDisc, WithAlpha(main, 0.42f), sortingOrder);
+            SpriteRenderer ring = CreateRenderer(root.transform, "Meteor Shock Ring", VFXSprites.Ring, WithAlpha(secondary, 0.9f), sortingOrder + 1);
+            SpriteRenderer rays = CreateRenderer(root.transform, "Meteor Rays", VFXSprites.Sparks, WithAlpha(main, 0.82f), sortingOrder + 2);
+            SpriteRenderer star = CreateRenderer(root.transform, "Meteor Star", VFXSprites.GetBurstSprite(CombatVFXKind.MoonMeteor), WithAlpha(secondary, 0.95f), sortingOrder + 3);
+
+            core.transform.localScale = Vector3.one * radius * 1.65f;
+            ring.transform.localScale = Vector3.one * radius * 2.08f;
+            rays.transform.localScale = Vector3.one * radius * 1.25f;
+            star.transform.localScale = Vector3.one * radius * 0.92f;
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.58f, 1.18f, 86f, true);
+        }
+
+        private static Vector2 GetMeteorStartPosition(Vector2 targetPosition, float radius)
+        {
+            Camera camera = Camera.main;
+
+            if (camera == null)
+                return targetPosition + new Vector2(-radius * 1.1f, radius * 4.2f);
+
+            float screenX = camera.WorldToViewportPoint(targetPosition).x;
+            Vector3 topPoint = camera.ViewportToWorldPoint(new Vector3(screenX, 1.18f, Mathf.Abs(camera.transform.position.z)));
+            Vector2 start = new Vector2(topPoint.x, topPoint.y);
+            start.x -= radius * 1.15f;
+
+            if (start.y < targetPosition.y + radius * 3.2f)
+                start.y = targetPosition.y + radius * 3.2f;
+
+            return start;
+        }
+
         public static void PlayChainLightning(Vector2 from, Vector2 to, float duration = 0.22f, float width = 0.07f, int sortingOrder = 1900)
         {
             duration *= DurationMultiplier;
@@ -293,6 +402,30 @@ namespace VampireLike.VFX
             return root;
         }
 
+        public static GameObject CreateSeleneNebulaZoneVisual(Vector2 position, float radius, int sortingOrder = 615)
+        {
+            radius *= SizeMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Selene Nebula Zone");
+            root.transform.position = position;
+
+            Color main = GetMainColor(CombatVFXKind.FrostZone);
+            Color secondary = GetSecondaryColor(CombatVFXKind.FrostZone);
+            SpriteRenderer fill = CreateRenderer(root.transform, "Nebula Fill", VFXSprites.ZoneFill, WithAlpha(main, 0.075f), sortingOrder);
+            SpriteRenderer edge = CreateRenderer(root.transform, "Nebula Edge", VFXSprites.WarningRing, WithAlpha(secondary, 0.26f), sortingOrder + 1);
+            SpriteRenderer detail = CreateRenderer(root.transform, "Nebula Detail", VFXSprites.Glyph, WithAlpha(secondary, 0.12f), sortingOrder + 2);
+
+            float diameter = radius * 2f;
+            fill.transform.localScale = Vector3.one * diameter;
+            edge.transform.localScale = Vector3.one * diameter;
+            detail.transform.localScale = Vector3.one * diameter * 0.68f;
+
+            CombatVFXLoop loop = root.AddComponent<CombatVFXLoop>();
+            loop.Configure(detail.transform, edge, fill, 4f, 0.018f, 0.55f);
+            return root;
+        }
+
         public static void AttachTrail(GameObject host, CombatVFXKind kind, float width = 0.08f, float lifeTime = 0.18f)
         {
             if (host == null || host.GetComponent<TrailRenderer>() != null)
@@ -333,6 +466,8 @@ namespace VampireLike.VFX
                 case CombatVFXKind.Frost:
                 case CombatVFXKind.FrostZone:
                     return new Color(0.45f, 0.88f, 1f, 0.78f);
+                case CombatVFXKind.MoonMeteor:
+                    return new Color(0.78f, 0.62f, 1f, 0.84f);
                 case CombatVFXKind.Shockwave:
                     return new Color(0.78f, 0.95f, 1f, 0.62f);
                 case CombatVFXKind.Ricochet:
@@ -364,6 +499,8 @@ namespace VampireLike.VFX
                 case CombatVFXKind.Frost:
                 case CombatVFXKind.FrostZone:
                     return new Color(0.86f, 1f, 1f, 0.92f);
+                case CombatVFXKind.MoonMeteor:
+                    return new Color(0.98f, 0.94f, 1f, 0.96f);
                 case CombatVFXKind.Vampirism:
                     return new Color(0.92f, 1f, 0.65f, 0.86f);
                 case CombatVFXKind.ChainLightning:
@@ -585,6 +722,67 @@ namespace VampireLike.VFX
         }
     }
 
+    public class MoonMeteorFallEffect : MonoBehaviour
+    {
+        private Vector2 startPosition;
+        private Vector2 targetPosition;
+        private float duration;
+        private float elapsed;
+        private float radius;
+        private SpriteRenderer[] renderers;
+        private Color[] initialColors;
+
+        public void Play(
+            Vector2 start,
+            Vector2 target,
+            float fallDuration,
+            float effectRadius,
+            params SpriteRenderer[] targetRenderers)
+        {
+            startPosition = start;
+            targetPosition = target;
+            duration = Mathf.Max(0.08f, fallDuration);
+            radius = Mathf.Max(0.1f, effectRadius);
+            renderers = targetRenderers;
+            initialColors = new Color[renderers.Length];
+
+            for (int i = 0; i < renderers.Length; i++)
+                initialColors[i] = renderers[i] == null ? Color.clear : renderers[i].color;
+        }
+
+        private void Update()
+        {
+            if (GameState.IsGameOver)
+                return;
+
+            elapsed += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            float eased = 1f - Mathf.Pow(1f - progress, 3f);
+            Vector2 arcOffset = Vector2.up * Mathf.Sin(progress * Mathf.PI) * radius * 0.28f;
+            transform.position = Vector2.Lerp(startPosition, targetPosition, eased) + arcOffset;
+            transform.Rotate(0f, 0f, 300f * Time.deltaTime);
+
+            float charge = Mathf.Lerp(0.62f, 1.1f, progress);
+            transform.localScale = Vector3.one * charge;
+            float alpha = progress < 0.86f ? 1f : Mathf.Lerp(1f, 0f, (progress - 0.86f) / 0.14f);
+
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                SpriteRenderer spriteRenderer = renderers[i];
+
+                if (spriteRenderer == null)
+                    continue;
+
+                Color color = initialColors[i];
+                color.a *= alpha;
+                spriteRenderer.color = color;
+            }
+
+            if (progress >= 1f)
+                Destroy(gameObject);
+        }
+    }
+
     public class CombatVFXLoop : MonoBehaviour
     {
         private Transform rotatingPart;
@@ -592,16 +790,23 @@ namespace VampireLike.VFX
         private SpriteRenderer fill;
         private float rotateSpeed;
         private float pulseAmount;
+        private float alphaPulseAmount = 1f;
         private Color edgeBaseColor;
         private Color fillBaseColor;
 
         public void Configure(Transform detailTransform, SpriteRenderer edgeRenderer, SpriteRenderer fillRenderer, float speed, float pulse)
+        {
+            Configure(detailTransform, edgeRenderer, fillRenderer, speed, pulse, 1f);
+        }
+
+        public void Configure(Transform detailTransform, SpriteRenderer edgeRenderer, SpriteRenderer fillRenderer, float speed, float pulse, float alphaPulse)
         {
             rotatingPart = detailTransform;
             edge = edgeRenderer;
             fill = fillRenderer;
             rotateSpeed = speed;
             pulseAmount = pulse;
+            alphaPulseAmount = Mathf.Clamp01(alphaPulse);
 
             if (edge != null)
                 edgeBaseColor = edge.color;
@@ -620,12 +825,14 @@ namespace VampireLike.VFX
 
             float pulse = 1f + Mathf.Sin(Time.time * 2.2f) * pulseAmount;
             transform.localScale = Vector3.one * pulse;
+            float edgePulse = Mathf.Lerp(1f, 0.82f + Mathf.Sin(Time.time * 3f) * 0.14f, alphaPulseAmount);
+            float fillPulse = Mathf.Lerp(1f, 0.82f + Mathf.Sin(Time.time * 2f) * 0.1f, alphaPulseAmount);
 
             if (edge != null)
-                edge.color = SetAlpha(edgeBaseColor, edgeBaseColor.a * (0.82f + Mathf.Sin(Time.time * 3f) * 0.14f));
+                edge.color = SetAlpha(edgeBaseColor, edgeBaseColor.a * edgePulse);
 
             if (fill != null)
-                fill.color = SetAlpha(fillBaseColor, fillBaseColor.a * (0.82f + Mathf.Sin(Time.time * 2f) * 0.1f));
+                fill.color = SetAlpha(fillBaseColor, fillBaseColor.a * fillPulse);
         }
 
         private static Color SetAlpha(Color color, float alpha)
@@ -672,6 +879,7 @@ namespace VampireLike.VFX
             {
                 case CombatVFXKind.Explosion:
                 case CombatVFXKind.TargetImpact:
+                case CombatVFXKind.MoonMeteor:
                     return starBurst ??= CreateStarBurstSprite();
                 case CombatVFXKind.Frost:
                 case CombatVFXKind.FrostZone:

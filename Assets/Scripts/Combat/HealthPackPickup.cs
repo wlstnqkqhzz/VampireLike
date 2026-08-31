@@ -1,5 +1,6 @@
 using UnityEngine;
 using VampireLike.Audio;
+using VampireLike.VFX;
 
 namespace VampireLike.Combat
 {
@@ -10,6 +11,8 @@ namespace VampireLike.Combat
         private const int TextureSize = 32;
         private const string SmallHealthPackPath = "Pickups/health_pack_small";
         private const string LargeHealthPackPath = "Pickups/health_pack_large";
+        private const int HealthPackDepthBaseOrder = 840;
+        private const float HealthPackDepthOrderPerUnit = 6f;
 
         [SerializeField]
         private int flatHealAmount = 5;
@@ -52,7 +55,8 @@ namespace VampireLike.Combat
 
             SpriteRenderer spriteRenderer = pickupObject.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = sprite;
-            spriteRenderer.sortingOrder = 780;
+            SpriteDepthSorter depthSorter = pickupObject.AddComponent<SpriteDepthSorter>();
+            depthSorter.Configure(spriteRenderer, pickupObject.transform, HealthPackDepthBaseOrder, HealthPackDepthOrderPerUnit);
 
             CircleCollider2D collider = pickupObject.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
@@ -76,8 +80,23 @@ namespace VampireLike.Combat
             if (spriteRenderer.sprite == null)
                 spriteRenderer.sprite = GetSmallSprite();
 
+            ConfigureDepthSorting(spriteRenderer);
+
             startPosition = transform.position;
             bobOffset = Random.Range(0f, Mathf.PI * 2f);
+        }
+
+        private void ConfigureDepthSorting(SpriteRenderer spriteRenderer)
+        {
+            if (spriteRenderer == null)
+                return;
+
+            SpriteDepthSorter depthSorter = spriteRenderer.GetComponent<SpriteDepthSorter>();
+
+            if (depthSorter == null)
+                depthSorter = spriteRenderer.gameObject.AddComponent<SpriteDepthSorter>();
+
+            depthSorter.Configure(spriteRenderer, transform, HealthPackDepthBaseOrder, HealthPackDepthOrderPerUnit);
         }
 
         private void OnValidate()

@@ -100,6 +100,7 @@ namespace VampireLike.Menu
             if (playerHealth != null)
             {
                 playerHealth.SetCharacterSfx(character.HitSfxTypes, character.DeathSfxType);
+                playerHealth.SetMaxHealth(character.StartingMaxHealth);
 
                 if (character.BonusMaxHealth > 0)
                     playerHealth.IncreaseMaxHealth(character.BonusMaxHealth);

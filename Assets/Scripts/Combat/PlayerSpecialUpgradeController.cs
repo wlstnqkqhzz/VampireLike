@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using VampireLike.Enemies;
@@ -219,6 +220,9 @@ namespace VampireLike.Combat
         private float seleneFullMoonDamageRatio = 1.15f;
 
         [SerializeField]
+        private float seleneFullMoonMeteorWarningDuration = 0.52f;
+
+        [SerializeField]
         private string seleneShadowStepEnemyLayerName = "Enemy";
 
         [SerializeField]
@@ -362,6 +366,7 @@ namespace VampireLike.Combat
             public float TickTimer;
             public float Radius;
             public float Damage;
+            public GameObject Visual;
         }
 
         private sealed class HanSeorinBleed
@@ -446,6 +451,7 @@ namespace VampireLike.Combat
             seleneFullMoonLevelTwoCooldown = Mathf.Max(1f, seleneFullMoonLevelTwoCooldown);
             seleneFullMoonRadius = Mathf.Max(0.3f, seleneFullMoonRadius);
             seleneFullMoonDamageRatio = Mathf.Max(0.1f, seleneFullMoonDamageRatio);
+            seleneFullMoonMeteorWarningDuration = Mathf.Max(0.05f, seleneFullMoonMeteorWarningDuration);
             seleneEclipseResonanceBaseRequiredHits = Mathf.Max(2, seleneEclipseResonanceBaseRequiredHits);
             seleneEclipseResonanceRadius = Mathf.Max(0.2f, seleneEclipseResonanceRadius);
             seleneEclipseResonanceDamageRatio = Mathf.Max(0.01f, seleneEclipseResonanceDamageRatio);
@@ -1173,13 +1179,12 @@ namespace VampireLike.Combat
                 Radius = GetSeleneNebulaZoneRadius(),
                 Damage = Mathf.Max(0.1f, projectileDamage * GetSeleneNebulaZoneDamageRatio())
             };
+            zone.Visual = CombatVFX.CreateSeleneNebulaZoneVisual(position, zone.Radius);
 
             seleneNebulaZones.Add(zone);
 
             while (seleneNebulaZones.Count > 8)
-                seleneNebulaZones.RemoveAt(0);
-
-            CombatVFX.PlayBurst(position, CombatVFXKind.FrostZone, zone.Radius, 0.18f);
+                RemoveSeleneNebulaZoneAt(0);
         }
 
         private float GetSeleneNebulaZoneDuration()
@@ -1658,7 +1663,7 @@ namespace VampireLike.Combat
 
                 if (zone.RemainingTime <= 0f)
                 {
-                    seleneNebulaZones.RemoveAt(i);
+                    RemoveSeleneNebulaZoneAt(i);
                     continue;
                 }
 
@@ -1670,9 +1675,20 @@ namespace VampireLike.Combat
 
                 if (seleneShadowStepLevel >= 3)
                     ApplyAreaSlow(zone.Position, zone.Radius, 0.88f, seleneNebulaZoneTickInterval + 0.1f);
-
-                CombatVFX.PlayBurst(zone.Position, CombatVFXKind.FrostZone, zone.Radius, 0.08f);
             }
+        }
+
+        private void RemoveSeleneNebulaZoneAt(int index)
+        {
+            if (index < 0 || index >= seleneNebulaZones.Count)
+                return;
+
+            GameObject visual = seleneNebulaZones[index].Visual;
+
+            if (visual != null)
+                Destroy(visual);
+
+            seleneNebulaZones.RemoveAt(index);
         }
 
         private void UpdateSeleneFullMoon()
@@ -1702,13 +1718,26 @@ namespace VampireLike.Combat
             Vector2 position = target.transform.position;
             float damage = Mathf.Max(0.1f, seleneFullMoonDamageRatio * Mathf.Max(1, seleneSilentBladeLevel));
             float radius = GetSeleneFullMoonRadius();
+            StartCoroutine(ResolveSeleneFullMoonMeteor(position, damage, radius));
+        }
+
+        private IEnumerator ResolveSeleneFullMoonMeteor(Vector2 position, float damage, float radius)
+        {
+            GameSfx.Play(SfxType.SkillShockwave);
+            CombatVFX.PlayMoonMeteorWarning(position, radius, seleneFullMoonMeteorWarningDuration);
+            CombatVFX.PlayMoonMeteorFall(position, radius, seleneFullMoonMeteorWarningDuration);
+
+            yield return new WaitForSeconds(seleneFullMoonMeteorWarningDuration);
+
+            if (GameState.IsGameOver)
+                yield break;
+
             ApplyAreaDamage(position, radius, damage, null);
 
             if (seleneSilentBladeLevel >= 3)
                 CreateSeleneNebulaZone(position, damage);
 
-            GameSfx.Play(SfxType.SkillShockwave);
-            CombatVFX.PlayBurst(position, CombatVFXKind.Frost, radius, 0.32f);
+            CombatVFX.PlayMoonMeteorImpact(position, radius);
         }
 
         private float GetSeleneFullMoonCooldown()

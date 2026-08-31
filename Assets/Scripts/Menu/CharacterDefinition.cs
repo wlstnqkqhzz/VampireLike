@@ -20,6 +20,7 @@ namespace VampireLike.Menu
             float attackIntervalMultiplier,
             float projectileDamageMultiplier,
             int bonusProjectileCount,
+            int startingMaxHealth,
             int bonusMaxHealth,
             int maxPlayerLevel,
             IReadOnlyDictionary<UpgradeType, int> normalUpgradeMaxLevels,
@@ -43,6 +44,7 @@ namespace VampireLike.Menu
             AttackIntervalMultiplier = attackIntervalMultiplier;
             ProjectileDamageMultiplier = projectileDamageMultiplier;
             BonusProjectileCount = bonusProjectileCount;
+            StartingMaxHealth = startingMaxHealth;
             BonusMaxHealth = bonusMaxHealth;
             MaxPlayerLevel = maxPlayerLevel;
             NormalUpgradeMaxLevels = normalUpgradeMaxLevels;
@@ -67,6 +69,7 @@ namespace VampireLike.Menu
         public float AttackIntervalMultiplier { get; }
         public float ProjectileDamageMultiplier { get; }
         public int BonusProjectileCount { get; }
+        public int StartingMaxHealth { get; }
         public int BonusMaxHealth { get; }
         public int MaxPlayerLevel { get; }
         public IReadOnlyDictionary<UpgradeType, int> NormalUpgradeMaxLevels { get; }

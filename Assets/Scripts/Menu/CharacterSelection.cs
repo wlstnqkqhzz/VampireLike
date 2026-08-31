@@ -20,6 +20,7 @@ namespace VampireLike.Menu
                 1.22f,
                 1.55f,
                 0,
+                10,
                 20,
                 99,
                 new Dictionary<UpgradeType, int>
@@ -52,6 +53,7 @@ namespace VampireLike.Menu
                 1f,
                 1f,
                 1,
+                5,
                 0,
                 99,
                 new Dictionary<UpgradeType, int>
@@ -84,6 +86,7 @@ namespace VampireLike.Menu
                 0.68f,
                 1.1f,
                 0,
+                10,
                 0,
                 99,
                 new Dictionary<UpgradeType, int>

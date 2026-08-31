@@ -474,7 +474,7 @@ namespace VampireLike.Menu
                 ("공격 속도", FormatAttackSpeedRating(character.AttackIntervalMultiplier)),
                 ("공격력", FormatPowerRating(character.ProjectileDamageMultiplier)),
                 ("공격 범위", FormatRangeRating(character)),
-                ("체력", FormatHealthRating(character.BonusMaxHealth)));
+                ("체력", FormatHealthRating(character.StartingMaxHealth + character.BonusMaxHealth)));
         }
 
         private void DrawCharacterStatRows(Rect statRect, params (string Label, string Rating)[] rows)
@@ -587,12 +587,12 @@ namespace VampireLike.Menu
             return character.BonusProjectileCount > 0 ? "넓음" : "보통";
         }
 
-        private static string FormatHealthRating(int bonusMaxHealth)
+        private static string FormatHealthRating(int maxHealth)
         {
-            if (bonusMaxHealth <= 0)
+            if (maxHealth <= 7)
                 return "약함";
 
-            if (bonusMaxHealth >= 15)
+            if (maxHealth >= 20)
                 return "좋음";
 
             return "보통";
