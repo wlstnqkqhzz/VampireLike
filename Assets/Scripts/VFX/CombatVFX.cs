@@ -20,6 +20,7 @@ namespace VampireLike.VFX
         FireZone,
         FrostZone,
         MoonMeteor,
+        Burrow,
         Buff
     }
 
@@ -105,6 +106,51 @@ namespace VampireLike.VFX
             CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
             effect.Play(duration, impact ? 0.88f : 0.94f, impact ? 1.08f : 1.01f, impact ? 30f : 8f, true);
             return root;
+        }
+
+        public static GameObject PlayBurrowWarning(Vector2 position, float size, float duration = 0.8f, int sortingOrder = 1450)
+        {
+            size *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+            GameObject root = new GameObject("VFX Burrow Warning");
+            root.transform.position = position;
+
+            Color main = GetMainColor(CombatVFXKind.Burrow);
+            Color secondary = GetSecondaryColor(CombatVFXKind.Burrow);
+            SpriteRenderer dust = CreateRenderer(root.transform, "Dust", VFXSprites.SoftDisc, WithAlpha(main, 0.13f), sortingOrder);
+            SpriteRenderer cracks = CreateRenderer(root.transform, "Ground Cracks", VFXSprites.GroundCracks, WithAlpha(secondary, 0.42f), sortingOrder + 1);
+            SpriteRenderer ring = CreateRenderer(root.transform, "Pressure Ring", VFXSprites.WarningRing, WithAlpha(secondary, 0.24f), sortingOrder + 2);
+
+            dust.transform.localScale = Vector3.one * size * 1.15f;
+            cracks.transform.localScale = Vector3.one * size * 0.9f;
+            ring.transform.localScale = Vector3.one * size;
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.86f, 1.08f, 18f, false);
+            return root;
+        }
+
+        public static void PlayBurrowEmerge(Vector2 position, float size, float duration = 0.36f, int sortingOrder = 1480)
+        {
+            size *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+            GameObject root = new GameObject("VFX Burrow Emerge");
+            root.transform.position = position;
+
+            Color main = GetMainColor(CombatVFXKind.Burrow);
+            Color secondary = GetSecondaryColor(CombatVFXKind.Burrow);
+            SpriteRenderer dust = CreateRenderer(root.transform, "Dust Burst", VFXSprites.SoftDisc, WithAlpha(main, 0.3f), sortingOrder);
+            SpriteRenderer cracks = CreateRenderer(root.transform, "Crack Burst", VFXSprites.GroundCracks, WithAlpha(secondary, 0.72f), sortingOrder + 1);
+            SpriteRenderer sparks = CreateRenderer(root.transform, "Pebbles", VFXSprites.Sparks, WithAlpha(secondary, 0.38f), sortingOrder + 2);
+
+            dust.transform.localScale = Vector3.one * size * 1.2f;
+            cracks.transform.localScale = Vector3.one * size;
+            sparks.transform.localScale = Vector3.one * size * 0.72f;
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.78f, 1.28f, 90f, true);
         }
 
         public static void PlayLine(Vector2 from, Vector2 to, CombatVFXKind kind, float duration = 0.16f, float width = 0.08f, int sortingOrder = 1850)
@@ -468,6 +514,8 @@ namespace VampireLike.VFX
                     return new Color(0.45f, 0.88f, 1f, 0.78f);
                 case CombatVFXKind.MoonMeteor:
                     return new Color(0.78f, 0.62f, 1f, 0.84f);
+                case CombatVFXKind.Burrow:
+                    return new Color(0.38f, 0.25f, 0.16f, 0.7f);
                 case CombatVFXKind.Shockwave:
                     return new Color(0.78f, 0.95f, 1f, 0.62f);
                 case CombatVFXKind.Ricochet:
@@ -501,6 +549,8 @@ namespace VampireLike.VFX
                     return new Color(0.86f, 1f, 1f, 0.92f);
                 case CombatVFXKind.MoonMeteor:
                     return new Color(0.98f, 0.94f, 1f, 0.96f);
+                case CombatVFXKind.Burrow:
+                    return new Color(0.95f, 0.58f, 0.28f, 0.82f);
                 case CombatVFXKind.Vampirism:
                     return new Color(0.92f, 1f, 0.65f, 0.86f);
                 case CombatVFXKind.ChainLightning:
@@ -859,6 +909,7 @@ namespace VampireLike.VFX
         private static Sprite lineCore;
         private static Sprite zoneFill;
         private static Sprite web;
+        private static Sprite groundCracks;
 
         public static Sprite Ring => ring ??= CreateRingSprite(128, 0.37f, 0.43f);
         public static Sprite WarningRing => warningRing ??= CreateRingSprite(128, 0.39f, 0.43f, true);
@@ -872,6 +923,7 @@ namespace VampireLike.VFX
         public static Sprite LineCore => lineCore ??= CreateLineSprite(true);
         public static Sprite ZoneFill => zoneFill ??= CreateSoftDiscSprite(96);
         public static Sprite Web => web ??= CreateWebSprite();
+        public static Sprite GroundCracks => groundCracks ??= CreateGroundCrackSprite();
 
         public static Sprite GetBurstSprite(CombatVFXKind kind)
         {
@@ -1063,6 +1115,53 @@ namespace VampireLike.VFX
             }
 
             return ToSprite(texture);
+        }
+
+        private static Sprite CreateGroundCrackSprite()
+        {
+            Texture2D texture = CreateTexture(128, 128);
+            Vector2 center = new Vector2(63.5f, 63.5f);
+            float[] angles = { 0.12f, 0.9f, 1.7f, 2.55f, 3.35f, 4.15f, 5.02f, 5.76f };
+
+            for (int i = 0; i < angles.Length; i++)
+            {
+                float length = 28f + (i % 3) * 8f;
+                Vector2 start = center + Direction(angles[i]) * 8f;
+                Vector2 end = center + Direction(angles[i]) * length;
+                DrawJaggedLine(texture, start, end, i);
+            }
+
+            DrawRing(texture, center, 18f, 1);
+            DrawRing(texture, center, 35f, 1, 0.55f);
+            return ToSprite(texture);
+        }
+
+        private static void DrawJaggedLine(Texture2D texture, Vector2 from, Vector2 to, int seed)
+        {
+            Vector2 previous = from;
+            int segments = 4;
+
+            for (int i = 1; i <= segments; i++)
+            {
+                float t = i / (float)segments;
+                Vector2 point = Vector2.Lerp(from, to, t);
+                Vector2 normal = Direction(Mathf.Atan2(to.y - from.y, to.x - from.x) + Mathf.PI * 0.5f);
+                point += normal * (((seed + i) % 2 == 0) ? 3f : -3f);
+                DrawLine(texture, previous, point, i == segments ? 1 : 2);
+                previous = point;
+            }
+        }
+
+        private static void DrawRing(Texture2D texture, Vector2 center, float radius, int width, float arcRatio = 1f)
+        {
+            int steps = Mathf.RoundToInt(160f * Mathf.Clamp01(arcRatio));
+
+            for (int i = 0; i < steps; i++)
+            {
+                float t = i / 160f;
+                float angle = t * Mathf.PI * 2f;
+                DrawDot(texture, center + Direction(angle) * radius, width);
+            }
         }
 
         private static Texture2D CreateTexture(int width, int height)

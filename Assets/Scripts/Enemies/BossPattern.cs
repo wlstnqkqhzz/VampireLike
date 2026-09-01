@@ -45,6 +45,18 @@ namespace VampireLike.Enemies
             ValidateValues();
         }
 
+        public void ConfigurePatternTiming(float cooldown, float initialDelay, int priority, int minimumPhase, int maximumPhase, bool allowMovementDuringPattern)
+        {
+            this.cooldown = cooldown;
+            this.initialDelay = initialDelay;
+            this.priority = priority;
+            this.minimumPhase = minimumPhase;
+            this.maximumPhase = maximumPhase;
+            this.allowMovementDuringPattern = allowMovementDuringPattern;
+            ValidateValues();
+            nextReadyTime = Time.time + this.initialDelay;
+        }
+
         public bool CanExecute()
         {
             if (Boss == null || !enabled || Boss.IsDead)

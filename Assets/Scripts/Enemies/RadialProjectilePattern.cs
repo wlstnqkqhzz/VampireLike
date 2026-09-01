@@ -70,6 +70,19 @@ namespace VampireLike.Enemies
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
+        public void ConfigureRadial(int projectileCount, int phaseBonusProjectileCount, float projectileSpeed,
+            int damage, float projectileLifetime, float startAngle, float prepareTime)
+        {
+            this.projectileCount = projectileCount;
+            this.phaseBonusProjectileCount = phaseBonusProjectileCount;
+            this.projectileSpeed = projectileSpeed;
+            this.damage = damage;
+            this.projectileLifetime = projectileLifetime;
+            this.startAngle = startAngle;
+            this.prepareTime = prepareTime;
+            OnValidate();
+        }
+
         protected override void OnValidate()
         {
             base.OnValidate();

@@ -71,5 +71,14 @@ namespace VampireLike.Enemies
             maxDistance = Mathf.Max(minDistance, maxDistance);
             strafeWeight = Mathf.Max(0f, strafeWeight);
         }
+
+        public void ConfigureMovement(float moveSpeed, float minDistance, float maxDistance, float strafeWeight)
+        {
+            this.moveSpeed = moveSpeed;
+            this.minDistance = minDistance;
+            this.maxDistance = maxDistance;
+            this.strafeWeight = strafeWeight;
+            OnValidate();
+        }
     }
 }

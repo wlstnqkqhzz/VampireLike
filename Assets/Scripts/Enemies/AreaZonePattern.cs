@@ -165,6 +165,9 @@ namespace VampireLike.Enemies
 
         private GameObject CreateZoneWarning(Vector2 position, CombatVFXKind vfxKind)
         {
+            if (vfxKind == CombatVFXKind.WebZone)
+                return CreateWebZoneWarning(position);
+
             GameObject warning = new GameObject("Boss Area Zone Warning");
             warning.transform.position = position;
 
@@ -204,6 +207,34 @@ namespace VampireLike.Enemies
             }
 
             CombatVFX.PlayExpandingRing(position, vfxKind, radius * 0.45f, radius * 2f, Mathf.Max(0.18f, warningDuration), 615);
+            return warning;
+        }
+
+        private GameObject CreateWebZoneWarning(Vector2 position)
+        {
+            GameObject warning = new GameObject("Boss Web Zone Warning");
+            warning.transform.position = position;
+
+            GameObject fill = new GameObject("Web Warning Fill");
+            fill.transform.SetParent(warning.transform, false);
+            fill.transform.localScale = Vector3.one * radius * 2f;
+
+            SpriteRenderer fillRenderer = fill.AddComponent<SpriteRenderer>();
+            fillRenderer.sprite = SpecialUpgradePulse.GetFilledCircleSprite();
+            fillRenderer.color = new Color(0.58f, 0.46f, 0.78f, 0.04f);
+            fillRenderer.sortingOrder = 612;
+
+            GameObject web = new GameObject("Web Warning Shape");
+            web.transform.SetParent(warning.transform, false);
+            web.transform.localScale = Vector3.one * radius * 2f;
+
+            SpriteRenderer webRenderer = web.AddComponent<SpriteRenderer>();
+            webRenderer.sprite = SpecialUpgradePulse.GetWebSprite();
+            webRenderer.color = new Color(0.92f, 0.94f, 1f, 0.08f);
+            webRenderer.sortingOrder = 614;
+
+            WebWarningVisual visual = warning.AddComponent<WebWarningVisual>();
+            visual.Play(fillRenderer, webRenderer, warningDuration);
             return warning;
         }
 
@@ -317,6 +348,25 @@ namespace VampireLike.Enemies
             damagePerTick = Mathf.Max(1, Mathf.RoundToInt(damagePerTick * Mathf.Max(0.1f, multiplier)));
         }
 
+        public void ConfigureAreaZone(float radius, float duration, float spawnRadius, int zonesPerCast,
+            int phaseBonusZonesPerCast, int maxActiveZones, int phaseBonusMaxZones, float slowMultiplier,
+            int damagePerTick, float damageInterval, float warningDuration, Color fallbackZoneColor)
+        {
+            this.radius = radius;
+            this.duration = duration;
+            this.spawnRadius = spawnRadius;
+            this.zonesPerCast = zonesPerCast;
+            this.phaseBonusZonesPerCast = phaseBonusZonesPerCast;
+            this.maxActiveZones = maxActiveZones;
+            this.phaseBonusMaxZones = phaseBonusMaxZones;
+            this.slowMultiplier = slowMultiplier;
+            this.damagePerTick = damagePerTick;
+            this.damageInterval = damageInterval;
+            this.warningDuration = warningDuration;
+            this.fallbackZoneColor = fallbackZoneColor;
+            OnValidate();
+        }
+
         protected override void OnValidate()
         {
             base.OnValidate();
@@ -333,6 +383,37 @@ namespace VampireLike.Enemies
             centerBindRadius = Mathf.Clamp(centerBindRadius, 0.05f, radius);
             centerBindDuration = Mathf.Max(0f, centerBindDuration);
             warningDuration = Mathf.Max(0f, warningDuration);
+        }
+    }
+
+    public class WebWarningVisual : MonoBehaviour
+    {
+        private SpriteRenderer fillRenderer;
+        private SpriteRenderer webRenderer;
+        private float duration;
+        private float elapsedTime;
+
+        public void Play(SpriteRenderer fillRenderer, SpriteRenderer webRenderer, float duration)
+        {
+            this.fillRenderer = fillRenderer;
+            this.webRenderer = webRenderer;
+            this.duration = Mathf.Max(0.05f, duration);
+        }
+
+        private void Update()
+        {
+            if (webRenderer == null)
+                return;
+
+            elapsedTime += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsedTime / duration);
+            float pulse = 0.5f + Mathf.Sin(progress * Mathf.PI * 8f) * 0.5f;
+
+            webRenderer.color = new Color(0.95f, 0.97f, 1f, Mathf.Lerp(0.08f, 0.74f, progress));
+            webRenderer.transform.localScale = Vector3.one * Mathf.Lerp(0.92f, 1.02f, progress);
+
+            if (fillRenderer != null)
+                fillRenderer.color = new Color(0.58f, 0.46f, 0.78f, Mathf.Lerp(0.03f, 0.16f, progress) + pulse * 0.025f);
         }
     }
 }

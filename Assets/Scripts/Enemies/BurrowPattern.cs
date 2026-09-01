@@ -49,6 +49,7 @@ namespace VampireLike.Enemies
         private SpriteRenderer[] spriteRenderers;
         private Collider2D bossCollider;
         private EnemyContactDamage contactDamage;
+        private bool isCurrentlyBurrowed;
 
         protected override IEnumerator ExecutePattern()
         {
@@ -123,7 +124,7 @@ namespace VampireLike.Enemies
         private GameObject CreateWarning(Vector2 position)
         {
             if (warningPrefab == null)
-                return CombatVFX.PlayWarning(position, CombatVFXKind.TargetWarning, 0.95f, warningDuration, 1450);
+                return CombatVFX.PlayBurrowWarning(position, 1.35f, warningDuration, 1450);
 
             return Instantiate(warningPrefab, position, Quaternion.identity);
         }
@@ -138,11 +139,31 @@ namespace VampireLike.Enemies
                     spriteRenderer.enabled = !isBurrowed;
             }
 
+            bool wasBurrowed = isCurrentlyBurrowed;
+            isCurrentlyBurrowed = isBurrowed;
+
             if (disableColliderWhileBurrowed && bossCollider != null)
                 bossCollider.enabled = !isBurrowed;
 
             if (disableContactDamageWhileBurrowed && contactDamage != null)
                 contactDamage.enabled = !isBurrowed;
+
+            if (!isBurrowed && wasBurrowed)
+                CombatVFX.PlayBurrowEmerge(transform.position, 1.25f, 0.36f, 1480);
+        }
+
+        public void ConfigureBurrow(float burrowDelay, float undergroundDuration, float phaseUndergroundDurationReduction,
+            int burrowCount, int phase3BonusBurrowCount, float repeatDelay, float warningDuration, float reappearDistance)
+        {
+            this.burrowDelay = burrowDelay;
+            this.undergroundDuration = undergroundDuration;
+            this.phaseUndergroundDurationReduction = phaseUndergroundDurationReduction;
+            this.burrowCount = burrowCount;
+            this.phase3BonusBurrowCount = phase3BonusBurrowCount;
+            this.repeatDelay = repeatDelay;
+            this.warningDuration = warningDuration;
+            this.reappearDistance = reappearDistance;
+            OnValidate();
         }
 
         protected override void OnValidate()

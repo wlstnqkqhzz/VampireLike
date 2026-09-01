@@ -193,6 +193,22 @@ namespace VampireLike.Enemies
             damagePerTick = Mathf.Max(1, Mathf.RoundToInt(damagePerTick * Mathf.Max(0.1f, multiplier)));
         }
 
+        public void ConfigureBreath(float prepareTime, float duration, float range, float angle, int damagePerTick,
+            float damageInterval, bool moveDuringBreath, float breathMoveSpeed, bool trackPlayerDuringBreath, float breathTurnSpeed)
+        {
+            this.prepareTime = prepareTime;
+            this.duration = duration;
+            this.range = range;
+            this.angle = angle;
+            this.damagePerTick = damagePerTick;
+            this.damageInterval = damageInterval;
+            this.moveDuringBreath = moveDuringBreath;
+            this.breathMoveSpeed = breathMoveSpeed;
+            this.trackPlayerDuringBreath = trackPlayerDuringBreath;
+            this.breathTurnSpeed = breathTurnSpeed;
+            OnValidate();
+        }
+
         protected override void OnValidate()
         {
             base.OnValidate();

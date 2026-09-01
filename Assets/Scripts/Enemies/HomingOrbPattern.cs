@@ -73,6 +73,22 @@ namespace VampireLike.Enemies
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
+        public void ConfigureHomingOrb(int orbCount, int phaseBonusOrbCount, float spawnInterval,
+            float projectileSpeed, int damage, float projectileLifetime, float homingDuration,
+            float turnSpeed, float spawnRadius)
+        {
+            this.orbCount = orbCount;
+            this.phaseBonusOrbCount = phaseBonusOrbCount;
+            this.spawnInterval = spawnInterval;
+            this.projectileSpeed = projectileSpeed;
+            this.damage = damage;
+            this.projectileLifetime = projectileLifetime;
+            this.homingDuration = homingDuration;
+            this.turnSpeed = turnSpeed;
+            this.spawnRadius = spawnRadius;
+            OnValidate();
+        }
+
         protected override void OnValidate()
         {
             base.OnValidate();

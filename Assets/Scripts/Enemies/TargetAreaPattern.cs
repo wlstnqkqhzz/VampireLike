@@ -233,6 +233,22 @@ namespace VampireLike.Enemies
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
+        public void ConfigureTargetArea(float warningDuration, float radius, int targetAreaCount,
+            int phaseBonusTargetAreaCount, float targetAreaInterval, float minimumTargetDistance,
+            int damage, float impactLifetime, Color warningColor)
+        {
+            this.warningDuration = warningDuration;
+            this.radius = radius;
+            this.targetAreaCount = targetAreaCount;
+            this.phaseBonusTargetAreaCount = phaseBonusTargetAreaCount;
+            this.targetAreaInterval = targetAreaInterval;
+            this.minimumTargetDistance = minimumTargetDistance;
+            this.damage = damage;
+            this.impactLifetime = impactLifetime;
+            this.warningColor = warningColor;
+            OnValidate();
+        }
+
         protected override void OnValidate()
         {
             base.OnValidate();

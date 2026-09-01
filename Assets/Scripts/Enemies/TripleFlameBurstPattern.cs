@@ -139,6 +139,20 @@ namespace VampireLike.Enemies
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
         }
 
+        public void ConfigureTripleFlame(float prepareTime, int burstCount, float burstInterval, float range,
+            float angle, int damage, float warningLifetime, float impactLifetime)
+        {
+            this.prepareTime = prepareTime;
+            this.burstCount = burstCount;
+            this.burstInterval = burstInterval;
+            this.range = range;
+            this.angle = angle;
+            this.damage = damage;
+            this.warningLifetime = warningLifetime;
+            this.impactLifetime = impactLifetime;
+            OnValidate();
+        }
+
         protected override void OnValidate()
         {
             base.OnValidate();

@@ -1732,6 +1732,7 @@ namespace VampireLike.Combat
             if (GameState.IsGameOver)
                 yield break;
 
+            GameSfx.Play(SfxType.SkillMeteorImpact);
             ApplyAreaDamage(position, radius, damage, null);
 
             if (seleneSilentBladeLevel >= 3)

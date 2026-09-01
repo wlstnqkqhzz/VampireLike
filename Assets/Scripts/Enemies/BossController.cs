@@ -77,13 +77,10 @@ namespace VampireLike.Enemies
             enemyController = GetComponent<EnemyController>();
             enemyHealth = GetComponent<EnemyHealth>();
             spriteAnimator = GetComponentInChildren<BossSpriteAnimator>();
-            patterns = GetComponents<BossPattern>();
+            RefreshPatterns();
 
             if (player == null)
                 player = GameObject.Find("Player")?.transform;
-
-            foreach (BossPattern pattern in patterns)
-                pattern.Initialize(this);
         }
 
         private void Update()
@@ -137,6 +134,17 @@ namespace VampireLike.Enemies
 
             if (target != null)
                 player = target;
+
+            BossStagePatternLoadout.Apply(this);
+            RefreshPatterns();
+        }
+
+        public void RefreshPatterns()
+        {
+            patterns = GetComponents<BossPattern>();
+
+            foreach (BossPattern pattern in patterns)
+                pattern.Initialize(this);
         }
 
         public void SetState(BossState state, bool allowMovement)
