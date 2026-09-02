@@ -955,6 +955,30 @@ namespace VampireLike.Combat
             }
         }
 
+        private void ApplyBoxDamage(Vector2 center, Vector2 size, float angle, float damage, EnemyHealth excludedEnemy, bool allowSeleneResonance = true)
+        {
+            int hitCount = Physics2D.OverlapBoxNonAlloc(center, size, angle, areaResults, enemyLayerMask);
+            HashSet<EnemyHealth> damagedEnemies = new HashSet<EnemyHealth>();
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D hit = areaResults[i];
+
+                if (hit == null)
+                    continue;
+
+                EnemyHealth enemy = hit.GetComponentInParent<EnemyHealth>();
+
+                if (enemy == null || enemy == excludedEnemy || enemy.IsDead || !damagedEnemies.Add(enemy))
+                    continue;
+
+                enemy.TakeDamage(damage);
+
+                if (allowSeleneResonance && seleneEclipseResonanceLevel > 0 && !enemy.IsDead)
+                    CountSeleneEclipseResonance(enemy, damage);
+            }
+        }
+
         private void TriggerKaelBlackSwordWave(EnemyHealth hitEnemy, float projectileDamage, Vector2 hitPosition)
         {
             float radius = kaelBlackSwordWaveRadius + 0.12f * Mathf.Max(0, kaelBlackSwordWaveLevel - 1);
@@ -1148,16 +1172,20 @@ namespace VampireLike.Combat
         private void TriggerSeleneSilverMoonWave(float projectileDamage)
         {
             seleneSilverMoonWavePending = false;
-            Vector2 center = (Vector2)GetEffectCenterPosition() + seleneSilverMoonWaveDirection * 0.75f;
-            float radius = GetSeleneSilverMoonWaveRadius();
+            Vector2 direction = seleneSilverMoonWaveDirection.sqrMagnitude <= 0.001f ? Vector2.right : seleneSilverMoonWaveDirection.normalized;
+            Vector2 start = (Vector2)GetEffectCenterPosition() + direction * 0.55f;
+            float length = GetSeleneSilverMoonWaveLength();
+            float width = GetSeleneSilverMoonWaveWidth();
+            Vector2 center = start + direction * (length * 0.5f);
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             float damage = Mathf.Max(0.1f, projectileDamage * GetSeleneSilverMoonWaveDamageRatio());
-            ApplyAreaDamage(center, radius, damage, null);
+            ApplyBoxDamage(center, new Vector2(length, width), angle, damage, null);
 
             if (seleneTwinMoonFlurryLevel >= 3)
-                ApplyAreaSlow(center, radius, seleneSilverMoonWaveSlowMultiplier, frostDuration);
+                ApplyBoxSlow(center, new Vector2(length, width), angle, seleneSilverMoonWaveSlowMultiplier, frostDuration);
 
             GameSfx.Play(SfxType.SeleneSilvermoonWave);
-            CombatVFX.PlayBurst(center, CombatVFXKind.Frost, radius, 0.22f);
+            CombatVFX.PlaySilverMoonWave(start, direction, length, width, 0.24f);
         }
 
         private int GetSeleneSilverMoonWaveInterval()
@@ -1173,6 +1201,16 @@ namespace VampireLike.Combat
         private float GetSeleneSilverMoonWaveRadius()
         {
             return seleneSilverMoonWaveRadius + 0.12f * Mathf.Max(0, seleneTwinMoonFlurryLevel - 1);
+        }
+
+        private float GetSeleneSilverMoonWaveLength()
+        {
+            return GetSeleneSilverMoonWaveRadius() * 3.6f;
+        }
+
+        private float GetSeleneSilverMoonWaveWidth()
+        {
+            return 0.48f + 0.04f * Mathf.Max(0, seleneTwinMoonFlurryLevel - 1);
         }
 
         private float GetSeleneSilverMoonWaveDamageRatio()
@@ -1818,6 +1856,37 @@ namespace VampireLike.Combat
 
                     statusEffects = enemy.gameObject.AddComponent<EnemyStatusEffects>();
                 }
+
+                statusEffects.ApplySlow(moveSpeedMultiplier, duration);
+            }
+        }
+
+        private void ApplyBoxSlow(Vector2 center, Vector2 size, float angle, float moveSpeedMultiplier, float duration)
+        {
+            int hitCount = Physics2D.OverlapBoxNonAlloc(center, size, angle, areaResults, enemyLayerMask);
+            HashSet<EnemyStatusEffects> slowedEnemies = new HashSet<EnemyStatusEffects>();
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D hit = areaResults[i];
+
+                if (hit == null)
+                    continue;
+
+                EnemyStatusEffects statusEffects = hit.GetComponentInParent<EnemyStatusEffects>();
+
+                if (statusEffects == null)
+                {
+                    EnemyHealth enemy = hit.GetComponentInParent<EnemyHealth>();
+
+                    if (enemy == null)
+                        continue;
+
+                    statusEffects = enemy.gameObject.AddComponent<EnemyStatusEffects>();
+                }
+
+                if (!slowedEnemies.Add(statusEffects))
+                    continue;
 
                 statusEffects.ApplySlow(moveSpeedMultiplier, duration);
             }

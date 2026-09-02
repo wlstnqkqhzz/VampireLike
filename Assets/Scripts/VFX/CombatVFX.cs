@@ -260,6 +260,38 @@ namespace VampireLike.VFX
             effect.Play(duration, 1f, 0.92f, 0f, true);
         }
 
+        public static void PlaySilverMoonWave(Vector2 start, Vector2 direction, float length, float width, float duration = 0.24f, int sortingOrder = 1780)
+        {
+            direction = direction.sqrMagnitude <= 0.001f ? Vector2.right : direction.normalized;
+            length *= SizeMultiplier;
+            width *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            Vector2 center = start + direction * (length * 0.5f);
+            GameObject root = new GameObject("VFX Selene Silver Moon Wave");
+            root.transform.position = center;
+            root.transform.right = direction;
+
+            Color main = GetMainColor(CombatVFXKind.Frost);
+            Color secondary = GetSecondaryColor(CombatVFXKind.Frost);
+            SpriteRenderer trail = CreateRenderer(root.transform, "Silver Moon Trail", VFXSprites.Line, WithAlpha(main, 0.26f), sortingOrder);
+            SpriteRenderer core = CreateRenderer(root.transform, "Silver Moon Core", VFXSprites.LineCore, WithAlpha(Color.white, 0.44f), sortingOrder + 1);
+            SpriteRenderer moon = CreateRenderer(root.transform, "Silver Moon Crescent", VFXSprites.CrescentMoon, WithAlpha(secondary, 0.82f), sortingOrder + 2);
+            SpriteRenderer wake = CreateRenderer(root.transform, "Silver Moon Wake", VFXSprites.MoonImpactShards, WithAlpha(main, 0.2f), sortingOrder + 3);
+
+            trail.transform.localScale = new Vector3(length, width * 1.45f, 1f);
+            core.transform.localScale = new Vector3(length * 0.86f, width * 0.36f, 1f);
+            moon.transform.localPosition = Vector3.right * (length * 0.36f);
+            moon.transform.localRotation = Quaternion.Euler(0f, 0f, -90f);
+            moon.transform.localScale = new Vector3(width * 2.7f, width * 2.7f, 1f);
+            wake.transform.localScale = new Vector3(length * 0.52f, width * 2.2f, 1f);
+            wake.transform.localPosition = Vector3.left * (length * 0.12f);
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 1.02f, 0.9f, 0f, true);
+        }
+
         public static void PlayTeleportBurst(Vector2 position, float size = 0.85f, float duration = 0.24f, int sortingOrder = 1700)
         {
             PlayBurst(position, CombatVFXKind.ArcaneImpact, size, duration, sortingOrder);
@@ -277,17 +309,20 @@ namespace VampireLike.VFX
 
             Color main = GetMainColor(CombatVFXKind.MoonMeteor);
             Color secondary = GetSecondaryColor(CombatVFXKind.MoonMeteor);
-            SpriteRenderer fill = CreateRenderer(root.transform, "Meteor Target Fill", VFXSprites.SoftDisc, WithAlpha(main, 0.12f), sortingOrder);
-            SpriteRenderer edge = CreateRenderer(root.transform, "Meteor Target Ring", VFXSprites.WarningRing, WithAlpha(secondary, 0.78f), sortingOrder + 1);
-            SpriteRenderer glyph = CreateRenderer(root.transform, "Meteor Star Glyph", VFXSprites.Sparks, WithAlpha(secondary, 0.58f), sortingOrder + 2);
+            SpriteRenderer fill = CreateRenderer(root.transform, "Meteor Moonlight Fill", VFXSprites.SoftDisc, WithAlpha(main, 0.1f), sortingOrder);
+            SpriteRenderer magicCircle = CreateRenderer(root.transform, "Meteor Moon Magic Circle", VFXSprites.MoonMagicCircle, WithAlpha(secondary, 0.72f), sortingOrder + 1);
+            SpriteRenderer centerMoon = CreateRenderer(root.transform, "Meteor Center Moon", VFXSprites.FullMoon, WithAlpha(secondary, 0.62f), sortingOrder + 2);
+            SpriteRenderer glimmer = CreateRenderer(root.transform, "Meteor Fine Stars", VFXSprites.MoonImpactShards, WithAlpha(main, 0.2f), sortingOrder + 3);
 
             float diameter = radius * 2f;
-            fill.transform.localScale = Vector3.one * diameter;
-            edge.transform.localScale = Vector3.one * diameter;
-            glyph.transform.localScale = Vector3.one * radius * 0.9f;
+            fill.transform.localScale = Vector3.one * diameter * 1.02f;
+            magicCircle.transform.localScale = Vector3.one * diameter * 1.2f;
+            centerMoon.transform.localScale = Vector3.one * radius * 0.42f;
+            centerMoon.transform.localPosition = Vector3.up * radius * 0.18f;
+            glimmer.transform.localScale = Vector3.one * radius * 0.86f;
 
             CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
-            effect.Play(duration, 0.86f, 1.04f, -34f, true);
+            effect.Play(duration, 0.92f, 1.04f, -12f, true);
         }
 
         public static GameObject PlayMoonMeteorFall(Vector2 targetPosition, float radius, float duration = 0.55f, int sortingOrder = 1880)
@@ -302,15 +337,15 @@ namespace VampireLike.VFX
 
             Color main = GetMainColor(CombatVFXKind.MoonMeteor);
             Color secondary = GetSecondaryColor(CombatVFXKind.MoonMeteor);
-            SpriteRenderer aura = CreateRenderer(root.transform, "Meteor Aura", VFXSprites.SoftDisc, WithAlpha(main, 0.32f), sortingOrder);
-            SpriteRenderer core = CreateRenderer(root.transform, "Meteor Core", VFXSprites.GetBurstSprite(CombatVFXKind.MoonMeteor), WithAlpha(secondary, 0.96f), sortingOrder + 2);
-            SpriteRenderer sparks = CreateRenderer(root.transform, "Meteor Sparks", VFXSprites.Sparks, WithAlpha(main, 0.84f), sortingOrder + 3);
-            SpriteRenderer tail = CreateRenderer(root.transform, "Meteor Tail", VFXSprites.LineCore, WithAlpha(main, 0.72f), sortingOrder - 1);
-            SpriteRenderer tailGlow = CreateRenderer(root.transform, "Meteor Tail Glow", VFXSprites.Line, WithAlpha(secondary, 0.28f), sortingOrder - 2);
+            SpriteRenderer aura = CreateRenderer(root.transform, "Meteor Aura", VFXSprites.SoftDisc, WithAlpha(main, 0.36f), sortingOrder);
+            SpriteRenderer core = CreateRenderer(root.transform, "Meteor Moon Core", VFXSprites.FullMoon, WithAlpha(secondary, 0.98f), sortingOrder + 2);
+            SpriteRenderer sparks = CreateRenderer(root.transform, "Meteor Sparks", VFXSprites.MoonImpactShards, WithAlpha(main, 0.5f), sortingOrder + 3);
+            SpriteRenderer tail = CreateRenderer(root.transform, "Meteor Tail", VFXSprites.LineCore, WithAlpha(Color.white, 0.78f), sortingOrder - 1);
+            SpriteRenderer tailGlow = CreateRenderer(root.transform, "Meteor Tail Glow", VFXSprites.Line, WithAlpha(secondary, 0.44f), sortingOrder - 2);
 
-            aura.transform.localScale = Vector3.one * radius * 0.64f;
-            core.transform.localScale = Vector3.one * radius * 0.34f;
-            sparks.transform.localScale = Vector3.one * radius * 0.52f;
+            aura.transform.localScale = Vector3.one * radius * 0.92f;
+            core.transform.localScale = Vector3.one * radius * 0.58f;
+            sparks.transform.localScale = Vector3.one * radius * 0.48f;
 
             Vector2 fallDirection = (targetPosition - startPosition).sqrMagnitude <= 0.001f
                 ? Vector2.down
@@ -321,10 +356,10 @@ namespace VampireLike.VFX
 
             tail.transform.localPosition = tailOffset;
             tail.transform.rotation = Quaternion.Euler(0f, 0f, angle);
-            tail.transform.localScale = new Vector3(tailLength, radius * 0.12f, 1f);
+            tail.transform.localScale = new Vector3(tailLength, radius * 0.1f, 1f);
             tailGlow.transform.localPosition = tailOffset;
             tailGlow.transform.rotation = Quaternion.Euler(0f, 0f, angle);
-            tailGlow.transform.localScale = new Vector3(tailLength * 1.08f, radius * 0.22f, 1f);
+            tailGlow.transform.localScale = new Vector3(tailLength * 1.12f, radius * 0.3f, 1f);
 
             MoonMeteorFallEffect effect = root.AddComponent<MoonMeteorFallEffect>();
             effect.Play(startPosition, targetPosition, Mathf.Max(0.08f, duration), radius, aura, core, sparks, tail, tailGlow);
@@ -342,18 +377,29 @@ namespace VampireLike.VFX
 
             Color main = GetMainColor(CombatVFXKind.MoonMeteor);
             Color secondary = GetSecondaryColor(CombatVFXKind.MoonMeteor);
-            SpriteRenderer core = CreateRenderer(root.transform, "Meteor Core", VFXSprites.SoftDisc, WithAlpha(main, 0.42f), sortingOrder);
-            SpriteRenderer ring = CreateRenderer(root.transform, "Meteor Shock Ring", VFXSprites.Ring, WithAlpha(secondary, 0.9f), sortingOrder + 1);
-            SpriteRenderer rays = CreateRenderer(root.transform, "Meteor Rays", VFXSprites.Sparks, WithAlpha(main, 0.82f), sortingOrder + 2);
-            SpriteRenderer star = CreateRenderer(root.transform, "Meteor Star", VFXSprites.GetBurstSprite(CombatVFXKind.MoonMeteor), WithAlpha(secondary, 0.95f), sortingOrder + 3);
+            SpriteRenderer core = CreateRenderer(root.transform, "Meteor Impact Glow", VFXSprites.SoftDisc, WithAlpha(main, 0.48f), sortingOrder);
+            SpriteRenderer magicCircle = CreateRenderer(root.transform, "Meteor Impact Magic Circle", VFXSprites.MoonMagicCircle, WithAlpha(secondary, 0.86f), sortingOrder + 1);
+            SpriteRenderer shards = CreateRenderer(root.transform, "Meteor Impact Shards", VFXSprites.MoonImpactShards, WithAlpha(main, 0.76f), sortingOrder + 2);
+            SpriteRenderer rays = CreateRenderer(root.transform, "Meteor Moon Rays", VFXSprites.Sparks, WithAlpha(Color.white, 0.34f), sortingOrder + 3);
+            SpriteRenderer moon = CreateRenderer(root.transform, "Meteor Impact Moon", VFXSprites.FullMoon, WithAlpha(secondary, 0.98f), sortingOrder + 4);
+            SpriteRenderer beam = CreateRenderer(root.transform, "Meteor Moon Beam", VFXSprites.Line, WithAlpha(secondary, 0.56f), sortingOrder + 5);
+            SpriteRenderer beamCore = CreateRenderer(root.transform, "Meteor Moon Beam Core", VFXSprites.LineCore, WithAlpha(Color.white, 0.9f), sortingOrder + 6);
 
-            core.transform.localScale = Vector3.one * radius * 1.65f;
-            ring.transform.localScale = Vector3.one * radius * 2.08f;
-            rays.transform.localScale = Vector3.one * radius * 1.25f;
-            star.transform.localScale = Vector3.one * radius * 0.92f;
+            core.transform.localScale = Vector3.one * radius * 1.62f;
+            magicCircle.transform.localScale = Vector3.one * radius * 2.45f;
+            shards.transform.localScale = Vector3.one * radius * 1.4f;
+            rays.transform.localScale = Vector3.one * radius * 1.18f;
+            moon.transform.localScale = Vector3.one * radius * 0.72f;
+            moon.transform.localPosition = Vector3.up * radius * 0.56f;
+            beam.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+            beam.transform.localPosition = Vector3.up * radius * 1.18f;
+            beam.transform.localScale = new Vector3(radius * 3.35f, radius * 0.32f, 1f);
+            beamCore.transform.rotation = beam.transform.rotation;
+            beamCore.transform.localPosition = beam.transform.localPosition;
+            beamCore.transform.localScale = new Vector3(radius * 3f, radius * 0.09f, 1f);
 
             CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
-            effect.Play(duration, 0.58f, 1.18f, 86f, true);
+            effect.Play(duration, 0.72f, 1.12f, 28f, true);
         }
 
         private static Vector2 GetMeteorStartPosition(Vector2 targetPosition, float radius)
@@ -458,17 +504,17 @@ namespace VampireLike.VFX
 
             Color main = GetMainColor(CombatVFXKind.FrostZone);
             Color secondary = GetSecondaryColor(CombatVFXKind.FrostZone);
-            SpriteRenderer fill = CreateRenderer(root.transform, "Nebula Fill", VFXSprites.ZoneFill, WithAlpha(main, 0.075f), sortingOrder);
-            SpriteRenderer edge = CreateRenderer(root.transform, "Nebula Edge", VFXSprites.WarningRing, WithAlpha(secondary, 0.26f), sortingOrder + 1);
-            SpriteRenderer detail = CreateRenderer(root.transform, "Nebula Detail", VFXSprites.Glyph, WithAlpha(secondary, 0.12f), sortingOrder + 2);
+            SpriteRenderer fill = CreateRenderer(root.transform, "Nebula Fill", VFXSprites.ZoneFill, WithAlpha(main, 0.032f), sortingOrder);
+            SpriteRenderer edge = CreateRenderer(root.transform, "Nebula Edge", VFXSprites.Ring, WithAlpha(secondary, 0.11f), sortingOrder + 1);
+            SpriteRenderer detail = CreateRenderer(root.transform, "Nebula Pentagram", VFXSprites.Pentagram, WithAlpha(secondary, 0.105f), sortingOrder + 2);
 
             float diameter = radius * 2f;
             fill.transform.localScale = Vector3.one * diameter;
             edge.transform.localScale = Vector3.one * diameter;
-            detail.transform.localScale = Vector3.one * diameter * 0.68f;
+            detail.transform.localScale = Vector3.one * diameter * 0.56f;
 
             CombatVFXLoop loop = root.AddComponent<CombatVFXLoop>();
-            loop.Configure(detail.transform, edge, fill, 4f, 0.018f, 0.55f);
+            loop.Configure(detail.transform, edge, fill, 1.2f, 0.006f, 0.18f);
             return root;
         }
 
@@ -574,6 +620,23 @@ namespace VampireLike.VFX
             renderer.color = color;
             renderer.sortingOrder = sortingOrder;
             return renderer;
+        }
+
+        private static void AddMoonCircleMarkers(Transform parent, float radius, Color color, int sortingOrder, float alpha = 0.42f)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = Mathf.PI * 0.5f * i + Mathf.PI * 0.25f;
+                SpriteRenderer marker = CreateRenderer(parent, $"Moon Marker {i + 1}", VFXSprites.CrescentMoon, WithAlpha(color, alpha), sortingOrder + i);
+                marker.transform.localPosition = Direction(angle) * radius * 0.92f;
+                marker.transform.localRotation = Quaternion.Euler(0f, 0f, angle * Mathf.Rad2Deg - 90f);
+                marker.transform.localScale = Vector3.one * radius * 0.24f;
+            }
+        }
+
+        private static Vector2 Direction(float angle)
+        {
+            return new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
         }
 
         private static Sprite GetZoneEdgeSprite(CombatVFXKind kind)
@@ -910,6 +973,11 @@ namespace VampireLike.VFX
         private static Sprite zoneFill;
         private static Sprite web;
         private static Sprite groundCracks;
+        private static Sprite crescentMoon;
+        private static Sprite pentagram;
+        private static Sprite fullMoon;
+        private static Sprite moonMagicCircle;
+        private static Sprite moonImpactShards;
 
         public static Sprite Ring => ring ??= CreateRingSprite(128, 0.37f, 0.43f);
         public static Sprite WarningRing => warningRing ??= CreateRingSprite(128, 0.39f, 0.43f, true);
@@ -924,6 +992,11 @@ namespace VampireLike.VFX
         public static Sprite ZoneFill => zoneFill ??= CreateSoftDiscSprite(96);
         public static Sprite Web => web ??= CreateWebSprite();
         public static Sprite GroundCracks => groundCracks ??= CreateGroundCrackSprite();
+        public static Sprite CrescentMoon => crescentMoon ??= CreateCrescentMoonSprite();
+        public static Sprite Pentagram => pentagram ??= CreatePentagramSprite();
+        public static Sprite FullMoon => fullMoon ??= CreateFullMoonSprite();
+        public static Sprite MoonMagicCircle => moonMagicCircle ??= CreateMoonMagicCircleSprite();
+        public static Sprite MoonImpactShards => moonImpactShards ??= CreateMoonImpactShardsSprite();
 
         public static Sprite GetBurstSprite(CombatVFXKind kind)
         {
@@ -1047,6 +1120,137 @@ namespace VampireLike.VFX
             return ToSprite(texture);
         }
 
+        private static Sprite CreateCrescentMoonSprite()
+        {
+            Texture2D texture = CreateTexture(96, 96);
+            Vector2 center = new Vector2(47.5f, 47.5f);
+            Vector2 cutoutCenter = center + new Vector2(11f, 4f);
+
+            for (int y = 0; y < 96; y++)
+            {
+                for (int x = 0; x < 96; x++)
+                {
+                    Vector2 point = new Vector2(x, y);
+                    float outer = Vector2.Distance(point, center);
+                    float cutout = Vector2.Distance(point, cutoutCenter);
+                    float alpha = Mathf.Clamp01((30f - outer) / 2.2f) * Mathf.Clamp01((cutout - 21f) / 2.2f);
+
+                    if (alpha <= 0f)
+                        continue;
+
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            DrawDot(texture, center + new Vector2(17f, 15f), 2);
+            return ToSprite(texture);
+        }
+
+        private static Sprite CreateFullMoonSprite()
+        {
+            Texture2D texture = CreateTexture(128, 128);
+            Vector2 center = new Vector2(63.5f, 63.5f);
+
+            for (int y = 0; y < 128; y++)
+            {
+                for (int x = 0; x < 128; x++)
+                {
+                    Vector2 point = new Vector2(x, y);
+                    float distance = Vector2.Distance(point, center);
+                    float normalized = distance / 42f;
+
+                    if (normalized > 1.08f)
+                        continue;
+
+                    float edge = Mathf.Clamp01((1.08f - normalized) / 0.08f);
+                    float glow = normalized <= 1f ? Mathf.Lerp(0.98f, 0.7f, normalized) : edge * 0.45f;
+                    float craterA = Mathf.Clamp01(1f - Vector2.Distance(point, center + new Vector2(-10f, 9f)) / 13f) * 0.16f;
+                    float craterB = Mathf.Clamp01(1f - Vector2.Distance(point, center + new Vector2(12f, -7f)) / 10f) * 0.13f;
+                    float craterC = Mathf.Clamp01(1f - Vector2.Distance(point, center + new Vector2(8f, 16f)) / 7f) * 0.1f;
+                    float alpha = Mathf.Clamp01(glow - craterA - craterB - craterC);
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            DrawRing(texture, center, 43f, 1, 1f);
+            return ToSprite(texture);
+        }
+
+        private static Sprite CreateMoonMagicCircleSprite()
+        {
+            Texture2D texture = CreateTexture(192, 192);
+            Vector2 center = new Vector2(95.5f, 95.5f);
+
+            DrawRing(texture, center, 84f, 1, 1f);
+            DrawRing(texture, center, 78f, 1, 0.78f);
+            DrawRing(texture, center, 49f, 1, 1f);
+            DrawRing(texture, center, 42f, 1, 0.64f);
+
+            for (int i = 0; i < 12; i++)
+            {
+                float angle = Mathf.PI * 2f * i / 12f;
+                float length = i % 3 == 0 ? 10f : 6f;
+                Vector2 outer = center + Direction(angle) * 84f;
+                DrawLine(texture, outer - Direction(angle) * length, outer + Direction(angle) * 2f, 1);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = Mathf.PI * 0.5f * i + Mathf.PI * 0.25f;
+                Vector2 position = center + Direction(angle) * 67f;
+                DrawCrescent(texture, position, angle - Mathf.PI * 0.5f, 9f);
+            }
+
+            DrawDot(texture, center + Vector2.up * 70f, 2);
+            DrawDot(texture, center + Vector2.down * 70f, 2);
+            DrawDot(texture, center + Vector2.left * 70f, 2);
+            DrawDot(texture, center + Vector2.right * 70f, 2);
+            return ToSprite(texture);
+        }
+
+        private static Sprite CreateMoonImpactShardsSprite()
+        {
+            Texture2D texture = CreateTexture(160, 160);
+            Vector2 center = new Vector2(79.5f, 79.5f);
+
+            for (int i = 0; i < 18; i++)
+            {
+                float angle = Mathf.PI * 2f * i / 18f + (i % 2) * 0.08f;
+                float start = 16f + (i * 11 % 15);
+                float end = 42f + (i * 17 % 34);
+                int width = i % 3 == 0 ? 2 : 1;
+                DrawLine(texture, center + Direction(angle) * start, center + Direction(angle) * end, width);
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                float angle = Mathf.PI * 2f * i / 10f + 0.18f;
+                DrawDot(texture, center + Direction(angle) * (50f + i % 3 * 8f), 1);
+            }
+
+            return ToSprite(texture);
+        }
+
+        private static Sprite CreatePentagramSprite()
+        {
+            Texture2D texture = CreateTexture(96, 96);
+            Vector2 center = new Vector2(47.5f, 47.5f);
+            Vector2[] points = new Vector2[5];
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                float angle = -Mathf.PI * 0.5f + Mathf.PI * 2f * i / points.Length;
+                points[i] = center + Direction(angle) * 31f;
+            }
+
+            int[] order = { 0, 2, 4, 1, 3, 0 };
+            for (int i = 0; i < order.Length - 1; i++)
+                DrawLine(texture, points[order[i]], points[order[i + 1]], 1);
+
+            DrawRing(texture, center, 34f, 1, 1f);
+            return ToSprite(texture);
+        }
+
         private static Sprite CreateConeSprite(bool edgeOnly)
         {
             const int width = 128;
@@ -1161,6 +1365,31 @@ namespace VampireLike.VFX
                 float t = i / 160f;
                 float angle = t * Mathf.PI * 2f;
                 DrawDot(texture, center + Direction(angle) * radius, width);
+            }
+        }
+
+        private static void DrawCrescent(Texture2D texture, Vector2 center, float rotation, float radius)
+        {
+            Vector2 cutoutOffset = new Vector2(Mathf.Cos(rotation), Mathf.Sin(rotation)) * radius * 0.42f;
+
+            for (int y = Mathf.FloorToInt(center.y - radius * 1.2f); y <= Mathf.CeilToInt(center.y + radius * 1.2f); y++)
+            {
+                for (int x = Mathf.FloorToInt(center.x - radius * 1.2f); x <= Mathf.CeilToInt(center.x + radius * 1.2f); x++)
+                {
+                    if (x < 0 || x >= texture.width || y < 0 || y >= texture.height)
+                        continue;
+
+                    Vector2 point = new Vector2(x, y);
+                    float outer = Vector2.Distance(point, center);
+                    float cutout = Vector2.Distance(point, center + cutoutOffset);
+                    float alpha = Mathf.Clamp01((radius - outer) / 1.2f) * Mathf.Clamp01((cutout - radius * 0.68f) / 1.2f);
+
+                    if (alpha <= 0f)
+                        continue;
+
+                    Color current = texture.GetPixel(x, y);
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, Mathf.Max(current.a, alpha)));
+                }
             }
         }
 

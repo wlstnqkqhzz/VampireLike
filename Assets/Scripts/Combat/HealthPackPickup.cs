@@ -13,6 +13,8 @@ namespace VampireLike.Combat
         private const string LargeHealthPackPath = "Pickups/health_pack_large";
         private const int HealthPackDepthBaseOrder = 840;
         private const float HealthPackDepthOrderPerUnit = 6f;
+        private const float SmallPickupColliderRadius = 6.4f;
+        private const float LargePickupColliderRadius = 7.2f;
 
         [SerializeField]
         private int flatHealAmount = 5;
@@ -30,12 +32,12 @@ namespace VampireLike.Combat
 
         public static HealthPackPickup DropSmall(Vector3 position, int healAmount)
         {
-            return Drop(position, GetSmallSprite(), healAmount, 0f, 0.055f, "Small Health Pack Pickup");
+            return Drop(position, GetSmallSprite(), healAmount, 0f, 0.055f, SmallPickupColliderRadius, "Small Health Pack Pickup");
         }
 
         public static HealthPackPickup DropLarge(Vector3 position, float maxHealthRatio)
         {
-            return Drop(position, GetLargeSprite(), 0, maxHealthRatio, 0.07f, "Large Health Pack Pickup");
+            return Drop(position, GetLargeSprite(), 0, maxHealthRatio, 0.07f, LargePickupColliderRadius, "Large Health Pack Pickup");
         }
 
         private static HealthPackPickup Drop(
@@ -44,6 +46,7 @@ namespace VampireLike.Combat
             int flatHealAmount,
             float maxHealthHealRatio,
             float visualScale,
+            float colliderRadius,
             string objectName)
         {
             GameObject pickupObject = new GameObject(objectName);
@@ -57,7 +60,7 @@ namespace VampireLike.Combat
 
             CircleCollider2D collider = pickupObject.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
-            collider.radius = 4f;
+            collider.radius = colliderRadius;
 
             HealthPackPickup pickup = pickupObject.AddComponent<HealthPackPickup>();
             pickup.flatHealAmount = Mathf.Max(0, flatHealAmount);
