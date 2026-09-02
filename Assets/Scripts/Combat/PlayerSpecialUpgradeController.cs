@@ -347,6 +347,7 @@ namespace VampireLike.Combat
         private float eclipseAuraTimer;
         private float kaelBlackIronBarrierTimer;
         private float kaelBlackIronRegenTimer;
+        private bool kaelBlackIronBarrierReadySoundPlayed;
         private float seleneFullMoonTimer;
         private bool shieldReady;
         private PlayerHealth playerHealth;
@@ -576,6 +577,12 @@ namespace VampireLike.Combat
         {
             kaelBlackIronBarrierLevel++;
             kaelBlackIronBarrierTimer = Mathf.Min(kaelBlackIronBarrierTimer, GetKaelBlackIronBarrierCooldown());
+
+            if (kaelBlackIronBarrierTimer <= 0f && !kaelBlackIronBarrierReadySoundPlayed)
+            {
+                GameSfx.Play(SfxType.KaelBlackIronBarrierOn);
+                kaelBlackIronBarrierReadySoundPlayed = true;
+            }
         }
 
         public void AddKaelExecutionBladeLevel()
@@ -745,6 +752,7 @@ namespace VampireLike.Combat
             if (hanSeorinShadowDaggerLevel > 0 && Random.value < GetHanSeorinShadowDaggerChance())
             {
                 directions.Add(Rotate(baseDirection, Random.Range(-hanSeorinShadowDaggerAngle, hanSeorinShadowDaggerAngle)).normalized);
+                GameSfx.Play(SfxType.HanSeorinShadowDagger);
                 CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.Vampirism, 0.3f, 0.12f);
             }
 
@@ -952,6 +960,7 @@ namespace VampireLike.Combat
             float radius = kaelBlackSwordWaveRadius + 0.12f * Mathf.Max(0, kaelBlackSwordWaveLevel - 1);
             float damage = projectileDamage * kaelBlackSwordWaveDamageRatio * kaelBlackSwordWaveLevel;
             ApplyAreaDamage(hitPosition, radius, damage, hitEnemy);
+            GameSfx.Play(SfxType.KaelBlackWave);
             CombatVFX.PlayBurst(hitPosition, CombatVFXKind.ArcaneImpact, radius, 0.2f);
         }
 
@@ -964,7 +973,7 @@ namespace VampireLike.Combat
 
             kaelManaSlashHitCount = 0;
             ApplyAreaDamage(hitPosition, kaelManaSlashRadius, projectileDamage * GetKaelManaSlashDamageRatio(), null);
-            GameSfx.Play(SfxType.SkillShockwave);
+            GameSfx.Play(SfxType.KaelMagicSlash);
             CombatVFX.PlayBurst(hitPosition, CombatVFXKind.Shockwave, kaelManaSlashRadius, 0.28f);
         }
 
@@ -987,6 +996,7 @@ namespace VampireLike.Combat
 
             float damage = projectileDamage * kaelExecutionDamageRatioPerLevel * kaelExecutionBladeLevel;
             enemy.TakeDamage(damage);
+            GameSfx.Play(SfxType.KaelExecutionBlade);
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Explosion, 0.36f, 0.14f);
         }
 
@@ -1000,6 +1010,7 @@ namespace VampireLike.Combat
             if (stacks < GetSeleneMoonlightMarkRequiredStacks())
             {
                 moonlightMarkStacks[enemy] = stacks;
+                GameSfx.Play(SfxType.SeleneMoonmarkApply);
                 CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Frost, 0.28f, 0.1f);
                 return;
             }
@@ -1011,7 +1022,7 @@ namespace VampireLike.Combat
             if (seleneMoonlightMarkLevel >= 3)
                 SpreadSeleneMoonlightMark(enemy.transform.position, enemy);
 
-            GameSfx.Play(SfxType.SkillRicochet);
+            GameSfx.Play(SfxType.SeleneMoonmarkBurst);
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Frost, GetSeleneMoonlightMarkExplosionRadius(), 0.22f);
         }
 
@@ -1029,7 +1040,7 @@ namespace VampireLike.Combat
             if (chainedTargets <= 0)
                 return;
 
-            GameSfx.Play(SfxType.SeleneDaggerThrow);
+            GameSfx.Play(SfxType.SeleneStarlightChain);
         }
 
         private void CountSeleneEclipseResonance(EnemyHealth enemy, float areaDamage)
@@ -1051,7 +1062,7 @@ namespace VampireLike.Combat
             float radius = GetSeleneEclipseResonanceRadius();
             ApplyAreaDamage(enemy.transform.position, radius, damage, enemy, false);
             enemy.TakeDamage(damage);
-            GameSfx.Play(SfxType.SkillRicochet);
+            GameSfx.Play(SfxType.SeleneEclipseResonance);
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Frost, radius, 0.16f);
         }
 
@@ -1145,7 +1156,7 @@ namespace VampireLike.Combat
             if (seleneTwinMoonFlurryLevel >= 3)
                 ApplyAreaSlow(center, radius, seleneSilverMoonWaveSlowMultiplier, frostDuration);
 
-            GameSfx.Play(SfxType.SkillShockwave);
+            GameSfx.Play(SfxType.SeleneSilvermoonWave);
             CombatVFX.PlayBurst(center, CombatVFXKind.Frost, radius, 0.22f);
         }
 
@@ -1169,7 +1180,7 @@ namespace VampireLike.Combat
             return seleneSilverMoonWaveDamageRatio * (1f + 0.12f * Mathf.Max(0, seleneTwinMoonFlurryLevel - 1));
         }
 
-        private void CreateSeleneNebulaZone(Vector2 position, float projectileDamage)
+        private void CreateSeleneNebulaZone(Vector2 position, float projectileDamage, bool playSpawnSfx = true)
         {
             SeleneNebulaZone zone = new SeleneNebulaZone
             {
@@ -1182,6 +1193,9 @@ namespace VampireLike.Combat
             zone.Visual = CombatVFX.CreateSeleneNebulaZoneVisual(position, zone.Radius);
 
             seleneNebulaZones.Add(zone);
+
+            if (playSpawnSfx)
+                GameSfx.Play(SfxType.SeleneNebulaSpawn);
 
             while (seleneNebulaZones.Count > 8)
                 RemoveSeleneNebulaZoneAt(0);
@@ -1262,6 +1276,7 @@ namespace VampireLike.Combat
             {
                 hanSeorinBloodMarkStacks[enemy] = stacks;
                 SetHanSeorinBloodMarkVfx(enemy, stacks);
+                GameSfx.Play(SfxType.HanSeorinBloodMarkApply);
                 CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.18f + 0.03f * stacks, 0.08f);
                 return;
             }
@@ -1274,7 +1289,7 @@ namespace VampireLike.Combat
             if (hanSeorinBloodMarkLevel >= 3)
                 ApplyAreaDamage(enemy.transform.position, GetHanSeorinBloodMarkSplashRadius(), damage * GetHanSeorinBloodMarkSplashDamageRatio(), enemy);
 
-            GameSfx.Play(SfxType.SkillExplosion);
+            GameSfx.Play(SfxType.HanSeorinBloodMarkBurst);
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Explosion, hanSeorinBloodMarkLevel >= 3 ? GetHanSeorinBloodMarkSplashRadius() : 0.42f, 0.18f);
         }
 
@@ -1294,6 +1309,9 @@ namespace VampireLike.Combat
                 hanSeorinKillingIntentStacks = 1;
             }
 
+            if (IsHanSeorinKillingIntentMaxed())
+                GameSfx.Play(SfxType.HanSeorinKillingIntentMax);
+
             SetHanSeorinKillingIntentVfx(enemy);
         }
 
@@ -1306,7 +1324,7 @@ namespace VampireLike.Combat
                 return;
 
             enemy.TakeDamage(enemy.MaxHealth);
-            GameSfx.Play(SfxType.SkillVampirism);
+            GameSfx.Play(SfxType.HanSeorinRedExecution);
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.52f, 0.16f);
         }
 
@@ -1327,6 +1345,7 @@ namespace VampireLike.Combat
             bleed.RemainingTime = GetHanSeorinBloodFangDuration();
             bleed.TickTimer = Mathf.Min(bleed.TickTimer, hanSeorinBloodFangTickInterval);
             bleed.DamagePerTick = Mathf.Max(bleed.DamagePerTick, damagePerTick);
+            GameSfx.Play(SfxType.HanSeorinBloodFangApply);
             CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.16f, 0.06f);
         }
 
@@ -1406,6 +1425,15 @@ namespace VampireLike.Combat
         private float GetHanSeorinKillingIntentMaxBonus()
         {
             return 0.15f * Mathf.Clamp(hanSeorinKillingIntentLevel, 1, 5);
+        }
+
+        private bool IsHanSeorinKillingIntentMaxed()
+        {
+            if (hanSeorinKillingIntentLevel <= 0)
+                return false;
+
+            int requiredStacks = Mathf.CeilToInt(GetHanSeorinKillingIntentMaxBonus() / Mathf.Max(0.01f, hanSeorinKillingIntentBonusPerHit));
+            return hanSeorinKillingIntentStacks == requiredStacks;
         }
 
         private void SetHanSeorinBloodMarkVfx(EnemyHealth enemy, int stacks)
@@ -1621,7 +1649,8 @@ namespace VampireLike.Combat
                 return false;
 
             kaelBlackIronBarrierTimer = GetKaelBlackIronBarrierCooldown();
-            GameSfx.Play(SfxType.ShieldBlock);
+            kaelBlackIronBarrierReadySoundPlayed = false;
+            GameSfx.Play(SfxType.KaelBlackIronBarrierBlock);
             CombatVFX.PlayBurst(GetShieldCenterPosition(), CombatVFXKind.Shockwave, 0.72f, 0.2f);
             return true;
         }
@@ -1642,7 +1671,7 @@ namespace VampireLike.Combat
             if (Random.value > chance)
                 return false;
 
-            GameSfx.Play(SfxType.ShieldBlock);
+            GameSfx.Play(SfxType.KaelGuardiansResolve);
             CombatVFX.PlayBurst(GetShieldCenterPosition(), CombatVFXKind.Vampirism, 0.58f, 0.18f);
             return true;
         }
@@ -1723,22 +1752,35 @@ namespace VampireLike.Combat
 
         private IEnumerator ResolveSeleneFullMoonMeteor(Vector2 position, float damage, float radius)
         {
-            GameSfx.Play(SfxType.SkillShockwave);
+            GameSfx.Play(SfxType.SeleneFullmoonWarning);
             CombatVFX.PlayMoonMeteorWarning(position, radius, seleneFullMoonMeteorWarningDuration);
             CombatVFX.PlayMoonMeteorFall(position, radius, seleneFullMoonMeteorWarningDuration);
 
-            yield return new WaitForSeconds(seleneFullMoonMeteorWarningDuration);
+            float fallSfxDelay = Mathf.Min(0.12f, seleneFullMoonMeteorWarningDuration * 0.35f);
+            yield return new WaitForSeconds(fallSfxDelay);
 
             if (GameState.IsGameOver)
                 yield break;
 
-            GameSfx.Play(SfxType.SkillMeteorImpact);
+            GameSfx.Play(SfxType.SeleneFullmoonFall);
+
+            yield return new WaitForSeconds(Mathf.Max(0f, seleneFullMoonMeteorWarningDuration - fallSfxDelay));
+
+            if (GameState.IsGameOver)
+                yield break;
+
+            GameSfx.Play(SfxType.SeleneFullmoonImpact);
             ApplyAreaDamage(position, radius, damage, null);
 
             if (seleneSilentBladeLevel >= 3)
-                CreateSeleneNebulaZone(position, damage);
+                CreateSeleneNebulaZone(position, damage, false);
 
             CombatVFX.PlayMoonMeteorImpact(position, radius);
+
+            yield return new WaitForSeconds(0.05f);
+
+            if (!GameState.IsGameOver)
+                GameSfx.Play(SfxType.SeleneFullmoonExplosion);
         }
 
         private float GetSeleneFullMoonCooldown()
@@ -1792,7 +1834,15 @@ namespace VampireLike.Combat
                 return;
 
             if (kaelBlackIronBarrierTimer > 0f)
+            {
                 kaelBlackIronBarrierTimer -= Time.deltaTime;
+
+                if (kaelBlackIronBarrierTimer <= 0f && kaelBlackIronBarrierLevel > 0 && !kaelBlackIronBarrierReadySoundPlayed)
+                {
+                    GameSfx.Play(SfxType.KaelBlackIronBarrierOn);
+                    kaelBlackIronBarrierReadySoundPlayed = true;
+                }
+            }
 
             UpdateKaelBlackIronRegen();
         }
@@ -1820,6 +1870,7 @@ namespace VampireLike.Combat
                 healAmount *= 2;
 
             playerHealth.Heal(healAmount);
+            GameSfx.Play(SfxType.KaelBlackIronRegen);
             CombatVFX.PlayBurst(GetEffectCenterPosition(), CombatVFXKind.Vampirism, 0.46f, 0.16f);
         }
 

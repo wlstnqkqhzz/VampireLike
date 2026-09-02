@@ -23,9 +23,6 @@ namespace VampireLike.Combat
         [SerializeField]
         private SfxType pickupSfxType = SfxType.SmallHealthPackPickup;
 
-        [SerializeField]
-        private float lifetime = 18f;
-
         private static Sprite generatedSmallSprite;
         private static Sprite generatedLargeSprite;
         private float bobOffset;
@@ -103,18 +100,10 @@ namespace VampireLike.Combat
         {
             flatHealAmount = Mathf.Max(0, flatHealAmount);
             maxHealthHealRatio = Mathf.Clamp01(maxHealthHealRatio);
-            lifetime = Mathf.Max(1f, lifetime);
         }
 
         private void Update()
         {
-            lifetime -= Time.deltaTime;
-            if (lifetime <= 0f)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
             float bob = Mathf.Sin(Time.time * 4f + bobOffset) * 0.035f;
             transform.position = startPosition + Vector3.up * bob;
         }

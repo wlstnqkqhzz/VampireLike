@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using VampireLike.Audio;
 using VampireLike.VFX;
 
 namespace VampireLike.Combat
@@ -311,6 +312,7 @@ namespace VampireLike.Combat
             remainingPierceCount = Mathf.Max(remainingPierceCount, returnBonusPierce);
             hitEnemies.Clear();
             UpdateReturnDirection();
+            GameSfx.Play(SfxType.HanSeorinReturningBlade);
             CombatVFX.PlayBurst(transform.position, CombatVFXKind.Vampirism, 0.24f, 0.08f);
         }
 
