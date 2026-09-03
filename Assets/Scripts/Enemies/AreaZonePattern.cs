@@ -75,6 +75,16 @@ namespace VampireLike.Enemies
         [SerializeField]
         private Color fallbackZoneColor = new Color(0.82f, 0.82f, 0.95f, 0.45f);
 
+        [Header("장판 효과음")]
+        [SerializeField]
+        private bool playWarningSfx;
+
+        [SerializeField]
+        private SfxType warningSfxType = SfxType.BossZone;
+
+        [SerializeField]
+        private SfxType spawnSfxType = SfxType.BossZone;
+
         private readonly List<GameObject> activeZones = new List<GameObject>();
         private readonly List<GameObject> activeWarnings = new List<GameObject>();
 
@@ -95,6 +105,9 @@ namespace VampireLike.Enemies
             int count = Mathf.Min(availableSlots, zonesPerCast + Mathf.Max(0, Boss.CurrentPhase - 1) * phaseBonusZonesPerCast);
 
             Vector2[] positions = new Vector2[count];
+
+            if (count > 0 && playWarningSfx)
+                GameSfx.Play(warningSfxType);
 
             for (int i = 0; i < count && !Boss.IsDead; i++)
             {
@@ -156,7 +169,7 @@ namespace VampireLike.Enemies
             if (zonePrefab != null)
                 ScaleZoneVisual(zone);
 
-            GameSfx.Play(SfxType.BossZone);
+            GameSfx.Play(spawnSfxType);
             CombatVFXKind vfxKind = GetVfxKind();
             CombatVFX.PlayExpandingRing(position, vfxKind, radius * 0.35f, radius * 2f, 0.28f, 620);
             CombatVFX.CreateZoneVisual(zone.transform, vfxKind, radius, fallbackZoneColor);
@@ -365,6 +378,13 @@ namespace VampireLike.Enemies
             this.warningDuration = warningDuration;
             this.fallbackZoneColor = fallbackZoneColor;
             OnValidate();
+        }
+
+        public void ConfigureAreaZoneSfx(SfxType warningSfxType, SfxType spawnSfxType)
+        {
+            playWarningSfx = true;
+            this.warningSfxType = warningSfxType;
+            this.spawnSfxType = spawnSfxType;
         }
 
         protected override void OnValidate()

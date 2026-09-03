@@ -49,6 +49,16 @@ namespace VampireLike.Enemies
         [SerializeField]
         private LayerMask playerLayerMask = ~0;
 
+        [Header("타겟 장판 효과음")]
+        [SerializeField]
+        private bool playWarningSfx;
+
+        [SerializeField]
+        private SfxType warningSfxType = SfxType.BossZone;
+
+        [SerializeField]
+        private SfxType impactSfxType = SfxType.BossZone;
+
         private readonly Collider2D[] hitResults = new Collider2D[4];
         private readonly System.Collections.Generic.List<GameObject> activeWarnings = new System.Collections.Generic.List<GameObject>();
 
@@ -60,6 +70,9 @@ namespace VampireLike.Enemies
             Boss.SetState(BossState.Preparing, false);
             CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.72f, warningDuration * 0.55f, 1500);
             Vector2[] targetPositions = GetTargetPositions();
+
+            if (playWarningSfx)
+                GameSfx.Play(warningSfxType);
 
             foreach (Vector2 targetPosition in targetPositions)
             {
@@ -140,7 +153,7 @@ namespace VampireLike.Enemies
 
         private void SpawnImpact(Vector2 position)
         {
-            GameSfx.Play(SfxType.BossZone);
+            GameSfx.Play(impactSfxType);
             CombatVFX.PlayBurst(position, CombatVFXKind.TargetImpact, radius * 2f, impactLifetime, 1550);
             CombatVFX.PlayExpandingRing(position, CombatVFXKind.TargetImpact, radius * 0.35f, radius * 2f, impactLifetime, 1551);
         }
@@ -247,6 +260,13 @@ namespace VampireLike.Enemies
             this.impactLifetime = impactLifetime;
             this.warningColor = warningColor;
             OnValidate();
+        }
+
+        public void ConfigureTargetAreaSfx(SfxType warningSfxType, SfxType impactSfxType)
+        {
+            playWarningSfx = true;
+            this.warningSfxType = warningSfxType;
+            this.impactSfxType = impactSfxType;
         }
 
         protected override void OnValidate()

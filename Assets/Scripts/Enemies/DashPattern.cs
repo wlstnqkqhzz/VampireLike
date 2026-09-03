@@ -76,6 +76,22 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float impactSize = 0.85f;
 
+        [Header("돌진 효과음")]
+        [SerializeField]
+        private bool playPrepareSfx;
+
+        [SerializeField]
+        private SfxType prepareSfxType = SfxType.BossDash;
+
+        [SerializeField]
+        private SfxType dashSfxType = SfxType.BossDash;
+
+        [SerializeField]
+        private bool playImpactSfx;
+
+        [SerializeField]
+        private SfxType impactSfxType = SfxType.BossDash;
+
         [Header("돌진 피격 판정")]
         [SerializeField]
         private bool useSweptDashHitbox = true;
@@ -139,6 +155,8 @@ namespace VampireLike.Enemies
                 Boss.SetState(BossState.Preparing, false);
                 Boss.FaceDirection(dashDirection);
                 Boss.ShowAttackFrame(0);
+                if (playPrepareSfx)
+                    GameSfx.Play(prepareSfxType);
                 CombatVFX.PlayBossCastAura(transform, CombatVFXKind.TargetWarning, 0.9f, effectivePrepareTime, 1500);
 
                 if (showDashPathIndicator)
@@ -152,7 +170,7 @@ namespace VampireLike.Enemies
             Boss.SetState(BossState.Attacking, false);
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(1);
-            GameSfx.Play(SfxType.BossDash);
+            GameSfx.Play(dashSfxType);
             float elapsedTime = 0f;
             float nextTrailTime = 0f;
             bool hasHitPlayer = false;
@@ -182,7 +200,23 @@ namespace VampireLike.Enemies
 
             BossRigidbody.linearVelocity = Vector2.zero;
             SetContactDamageEnabled(true);
+            if (playImpactSfx)
+                GameSfx.Play(impactSfxType);
             BossImpact.PlayDashImpact(BossRigidbody.position, dashDirection, impactSize);
+        }
+
+        public void ConfigureDashSfx(SfxType prepareSfxType, SfxType dashSfxType, SfxType impactSfxType)
+        {
+            playPrepareSfx = true;
+            this.prepareSfxType = prepareSfxType;
+            this.dashSfxType = dashSfxType;
+            playImpactSfx = true;
+            this.impactSfxType = impactSfxType;
+        }
+
+        public void ConfigureDashSfx(SfxType dashSfxType)
+        {
+            this.dashSfxType = dashSfxType;
         }
 
         private bool TryApplySweptDashDamage(Vector2 previousPosition, Vector2 nextPosition, Vector2 dashDirection)

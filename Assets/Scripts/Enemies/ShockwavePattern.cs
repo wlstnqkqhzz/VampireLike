@@ -58,6 +58,10 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float impactSizeMultiplier = 1f;
 
+        [Header("충격파 효과음")]
+        [SerializeField]
+        private SfxType shockwaveSfxType = SfxType.BossZone;
+
         private readonly Collider2D[] hitResults = new Collider2D[4];
         private readonly HashSet<global::PlayerController> slowedPlayers = new HashSet<global::PlayerController>();
         private Collider2D bossCollider;
@@ -85,7 +89,7 @@ namespace VampireLike.Enemies
             GameObject visual = CreateVisual(center);
             CombatVFX.PlayExpandingRing(center, CombatVFXKind.Shockwave, 0.18f, targetRadius * 2f, expandDuration, 1550);
             BossImpact.PlayShockwaveImpact(center, targetRadius * impactSizeMultiplier);
-            GameSfx.Play(SfxType.BossZone);
+            GameSfx.Play(shockwaveSfxType);
 
             while (elapsedTime < expandDuration && !Boss.IsDead)
             {
@@ -104,6 +108,11 @@ namespace VampireLike.Enemies
 
             if (visual != null)
                 Destroy(visual);
+        }
+
+        public void ConfigureShockwaveSfx(SfxType shockwaveSfxType)
+        {
+            this.shockwaveSfxType = shockwaveSfxType;
         }
 
         private GameObject CreateVisual(Vector2 center)

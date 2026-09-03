@@ -1,4 +1,5 @@
 using UnityEngine;
+using VampireLike.Audio;
 
 namespace VampireLike.Enemies
 {
@@ -11,6 +12,15 @@ namespace VampireLike.Enemies
 
             switch (boss.BossStage)
             {
+                case 1:
+                    ApplyBrute(boss);
+                    break;
+                case 2:
+                    ApplyNecromancer(boss);
+                    break;
+                case 3:
+                    ApplySpiderQueen(boss);
+                    break;
                 case 4:
                     ApplyFlameCaster(boss);
                     break;
@@ -21,6 +31,49 @@ namespace VampireLike.Enemies
                     ApplyFlameDragon(boss);
                     break;
             }
+        }
+
+        private static void ApplyBrute(BossController boss)
+        {
+            GameObject gameObject = boss.gameObject;
+
+            DashPattern dash = gameObject.GetComponent<DashPattern>();
+            if (dash != null)
+                dash.ConfigureDashSfx(SfxType.Boss1DashPrepare, SfxType.Boss1Dash, SfxType.Boss1DashImpact);
+
+            ShockwavePattern shockwave = gameObject.GetComponent<ShockwavePattern>();
+            if (shockwave != null)
+                shockwave.ConfigureShockwaveSfx(SfxType.Boss1Shockwave);
+        }
+
+        private static void ApplyNecromancer(BossController boss)
+        {
+            GameObject gameObject = boss.gameObject;
+
+            SummonPattern summon = gameObject.GetComponent<SummonPattern>();
+            if (summon != null)
+                summon.ConfigureSummonSfx(SfxType.Boss2SummonPrepare, SfxType.Boss2Summon);
+
+            TargetAreaPattern targetArea = gameObject.GetComponent<TargetAreaPattern>();
+            if (targetArea != null)
+                targetArea.ConfigureTargetAreaSfx(SfxType.Boss2AreaWarning, SfxType.Boss2AreaExplosion);
+        }
+
+        private static void ApplySpiderQueen(BossController boss)
+        {
+            GameObject gameObject = boss.gameObject;
+
+            AreaZonePattern areaZone = gameObject.GetComponent<AreaZonePattern>();
+            if (areaZone != null)
+                areaZone.ConfigureAreaZoneSfx(SfxType.Boss3WebWarning, SfxType.Boss3WebSpawn);
+
+            DashPattern dash = gameObject.GetComponent<DashPattern>();
+            if (dash != null)
+                dash.ConfigureDashSfx(SfxType.Boss3Dash);
+
+            SummonPattern summon = gameObject.GetComponent<SummonPattern>();
+            if (summon != null)
+                summon.ConfigureSummonSfx(SfxType.Boss3Summon);
         }
 
         private static void ApplyFlameCaster(BossController boss)
@@ -35,17 +88,22 @@ namespace VampireLike.Enemies
 
             tripleFlame.ConfigurePatternTiming(4.35f, 1.15f, 8, 1, 3, false);
             tripleFlame.ConfigureTripleFlame(0.4f, 3, 0.22f, 2.75f, 34f, 2, 0.16f, 0.2f);
+            tripleFlame.ConfigureFlameSfx(SfxType.Boss4TripleFlame);
 
             RadialProjectilePattern radial = gameObject.GetComponent<RadialProjectilePattern>();
             if (radial != null)
             {
                 radial.ConfigurePatternTiming(4.8f, 2.3f, 6, 1, 3, false);
                 radial.ConfigureRadial(7, 1, 3.35f, 1, 5.5f, 0f, 0.38f);
+                radial.ConfigureBarrageSfx(SfxType.Boss4RadialBarrage);
             }
 
             RotatingProjectilePattern rotating = gameObject.GetComponent<RotatingProjectilePattern>();
             if (rotating != null)
+            {
                 rotating.ConfigurePatternTiming(6.2f, 4.5f, 7, 2, 3, false);
+                rotating.ConfigureBarrageSfx(SfxType.Boss4RotatingBarrage);
+            }
         }
 
         private static void ApplyBurrowWarlock(BossController boss)

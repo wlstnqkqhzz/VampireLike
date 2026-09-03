@@ -239,6 +239,7 @@ namespace VampireLike.Enemies
                 "EnemyExploder" => "EnemyAnimations/Exploder",
                 "EnemySplitter" => "EnemyAnimations/Splitter",
                 "EnemySplitSmall" => "EnemyAnimations/SplitSmall",
+                "EnemySpiderling" => "EnemyAnimations/Spiderling",
                 "EnemySupport" => "EnemyAnimations/Support",
                 _ => "EnemyAnimations/Basic"
             };

@@ -208,6 +208,9 @@ namespace VampireLike.Combat
         private float seleneStarChainRadius = 2.8f;
 
         [SerializeField]
+        private float seleneStarChainDelay = 0.15f;
+
+        [SerializeField]
         private float seleneFullMoonBaseCooldown = 12f;
 
         [SerializeField]
@@ -448,6 +451,7 @@ namespace VampireLike.Combat
             seleneStarChainDamageRatio = Mathf.Max(0.1f, seleneStarChainDamageRatio);
             seleneStarChainLevelThreeDamageRatio = Mathf.Max(seleneStarChainDamageRatio, seleneStarChainLevelThreeDamageRatio);
             seleneStarChainRadius = Mathf.Max(0.3f, seleneStarChainRadius);
+            seleneStarChainDelay = Mathf.Clamp(seleneStarChainDelay, 0.02f, 0.6f);
             seleneFullMoonBaseCooldown = Mathf.Max(1f, seleneFullMoonBaseCooldown);
             seleneFullMoonLevelTwoCooldown = Mathf.Max(1f, seleneFullMoonLevelTwoCooldown);
             seleneFullMoonRadius = Mathf.Max(0.3f, seleneFullMoonRadius);
@@ -1059,12 +1063,7 @@ namespace VampireLike.Combat
 
             float damage = projectileDamage * GetSeleneStarChainDamageRatio();
             int maxTargets = GetSeleneStarChainMaxTargets();
-            int chainedTargets = ChainSeleneStarDamage(startPosition, firstEnemy, damage, maxTargets);
-
-            if (chainedTargets <= 0)
-                return;
-
-            GameSfx.Play(SfxType.SeleneStarlightChain);
+            StartCoroutine(ResolveSeleneStarlightBurst(firstEnemy, startPosition, damage, maxTargets));
         }
 
         private void CountSeleneEclipseResonance(EnemyHealth enemy, float areaDamage)
@@ -1256,28 +1255,32 @@ namespace VampireLike.Combat
                 : seleneNebulaZoneDamageRatio;
         }
 
-        private int ChainSeleneStarDamage(Vector2 startPosition, EnemyHealth firstEnemy, float damage, int maxTargets)
+        private IEnumerator ResolveSeleneStarlightBurst(EnemyHealth sourceEnemy, Vector2 center, float damage, int maxTargets)
         {
-            int chainedTargets = 0;
-            Vector2 currentPosition = startPosition;
-            EnemyHealth currentEnemy = firstEnemy;
+            CombatVFX.PlayBurst(center, CombatVFXKind.Frost, 0.28f, seleneStarChainDelay);
 
-            for (int i = 0; i < maxTargets; i++)
+            if (seleneStarChainDelay > 0f)
+                yield return new WaitForSeconds(seleneStarChainDelay);
+
+            List<EnemyHealth> targets = CollectClosestEnemiesAround(center, seleneStarChainRadius, sourceEnemy, maxTargets);
+
+            if (targets.Count <= 0)
+                yield break;
+
+            GameSfx.Play(SfxType.SeleneStarlightChain);
+            CombatVFX.PlayBurst(center, CombatVFXKind.Frost, 0.42f, 0.16f);
+
+            for (int i = 0; i < targets.Count; i++)
             {
-                EnemyHealth target = FindClosestEnemyAround(currentPosition, seleneStarChainRadius, currentEnemy);
+                EnemyHealth target = targets[i];
 
-                if (target == null)
-                    break;
+                if (target == null || target.IsDead)
+                    continue;
 
-                CombatVFX.PlayChainLightning(currentPosition, target.transform.position, 0.2f, 0.065f);
-                CombatVFX.PlayChainLightningImpact(target.transform.position, 0.22f, 0.1f);
+                CombatVFX.PlayLine(center, target.transform.position, CombatVFXKind.Frost, 0.18f, 0.055f);
+                CombatVFX.PlayBurst(target.transform.position, CombatVFXKind.Frost, 0.34f, 0.14f);
                 target.TakeDamage(damage);
-                currentPosition = target.transform.position;
-                currentEnemy = target;
-                chainedTargets++;
             }
-
-            return chainedTargets;
         }
 
         private float GetSeleneStarChainDamageRatio()
@@ -1315,7 +1318,7 @@ namespace VampireLike.Combat
                 hanSeorinBloodMarkStacks[enemy] = stacks;
                 SetHanSeorinBloodMarkVfx(enemy, stacks);
                 GameSfx.Play(SfxType.HanSeorinBloodMarkApply);
-                CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.18f + 0.03f * stacks, 0.08f);
+                CombatVFX.PlayBurst(enemy.transform.position, CombatVFXKind.Vampirism, 0.12f + 0.02f * stacks, 0.06f);
                 return;
             }
 
@@ -1679,6 +1682,48 @@ namespace VampireLike.Combat
             }
 
             return closestEnemy;
+        }
+
+        private List<EnemyHealth> CollectClosestEnemiesAround(Vector2 position, float radius, EnemyHealth excludedEnemy, int maxTargets)
+        {
+            List<EnemyHealth> targets = new List<EnemyHealth>();
+            List<float> distances = new List<float>();
+            int hitCount = Physics2D.OverlapCircleNonAlloc(position, radius, areaResults, enemyLayerMask);
+            float maxSqrDistance = radius * radius;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D hit = areaResults[i];
+
+                if (hit == null)
+                    continue;
+
+                EnemyHealth enemy = hit.GetComponentInParent<EnemyHealth>();
+
+                if (enemy == null || enemy == excludedEnemy || enemy.IsDead || targets.Contains(enemy))
+                    continue;
+
+                float sqrDistance = ((Vector2)enemy.transform.position - position).sqrMagnitude;
+
+                if (sqrDistance > maxSqrDistance)
+                    continue;
+
+                int insertIndex = 0;
+
+                while (insertIndex < distances.Count && distances[insertIndex] <= sqrDistance)
+                    insertIndex++;
+
+                targets.Insert(insertIndex, enemy);
+                distances.Insert(insertIndex, sqrDistance);
+
+                if (targets.Count > maxTargets)
+                {
+                    targets.RemoveAt(targets.Count - 1);
+                    distances.RemoveAt(distances.Count - 1);
+                }
+            }
+
+            return targets;
         }
 
         private bool TryBlockWithKaelBlackIronBarrier(Vector2 hitDirection)

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VampireLike.Audio;
 using VampireLike.VFX;
 
 namespace VampireLike.Enemies
@@ -39,6 +40,19 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float summonTelegraphDelay = 0.45f;
 
+        [Header("소환 효과음")]
+        [SerializeField]
+        private bool playPrepareSfx;
+
+        [SerializeField]
+        private SfxType prepareSfxType = SfxType.BossZone;
+
+        [SerializeField]
+        private bool playSummonSfx;
+
+        [SerializeField]
+        private SfxType summonSfxType = SfxType.BossZone;
+
         private readonly List<BossSummonTracker> activeSummons = new List<BossSummonTracker>();
 
         protected override bool CanExecutePattern()
@@ -58,6 +72,9 @@ namespace VampireLike.Enemies
             int randomCount = Random.Range(desiredMin, desiredMax + 1);
             int count = Mathf.Min(availableSlots, randomCount);
 
+            if (count > 0 && playPrepareSfx)
+                GameSfx.Play(prepareSfxType);
+
             for (int i = 0; i < count && !Boss.IsDead; i++)
             {
                 Vector2 spawnPosition = GetSummonPosition(i, count);
@@ -73,6 +90,9 @@ namespace VampireLike.Enemies
 
                 if (selectedPrefab == null)
                     yield break;
+
+                if (playSummonSfx)
+                    GameSfx.Play(summonSfxType);
 
                 GameObject summon = Instantiate(selectedPrefab, spawnPosition, Quaternion.identity);
                 BossSummonTracker tracker = summon.AddComponent<BossSummonTracker>();
@@ -148,6 +168,20 @@ namespace VampireLike.Enemies
         private void HandleSummonRemoved(BossSummonTracker summon)
         {
             activeSummons.Remove(summon);
+        }
+
+        public void ConfigureSummonSfx(SfxType prepareSfxType, SfxType summonSfxType)
+        {
+            playPrepareSfx = true;
+            this.prepareSfxType = prepareSfxType;
+            playSummonSfx = true;
+            this.summonSfxType = summonSfxType;
+        }
+
+        public void ConfigureSummonSfx(SfxType summonSfxType)
+        {
+            playSummonSfx = true;
+            this.summonSfxType = summonSfxType;
         }
 
         protected override void OnValidate()

@@ -41,6 +41,9 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float effectCameraPadding = 0.7f;
 
+        [SerializeField]
+        private SfxType flameSfxType = SfxType.BossZone;
+
         private readonly Collider2D[] hitResults = new Collider2D[8];
 
         protected override bool UseSkillAnimation => true;
@@ -68,7 +71,7 @@ namespace VampireLike.Enemies
                 if (warningLifetime > 0f)
                     yield return new WaitForSeconds(warningLifetime);
 
-                GameSfx.Play(SfxType.BossZone);
+                GameSfx.Play(flameSfxType);
                 SpawnCone(direction, CombatVFXKind.FireZone, impactLifetime, true);
                 CombatVFX.PlayDirectionalStreak(transform.position, direction, CombatVFXKind.ConeImpact, range * 0.58f, 0.16f, 0.14f, 1650);
                 ApplyDamage(direction);
@@ -151,6 +154,11 @@ namespace VampireLike.Enemies
             this.warningLifetime = warningLifetime;
             this.impactLifetime = impactLifetime;
             OnValidate();
+        }
+
+        public void ConfigureFlameSfx(SfxType flameSfxType)
+        {
+            this.flameSfxType = flameSfxType;
         }
 
         protected override void OnValidate()

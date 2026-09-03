@@ -36,6 +36,9 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float prepareTime = 0.45f;
 
+        [SerializeField]
+        private SfxType barrageSfxType = SfxType.BossProjectile;
+
         protected override IEnumerator ExecutePattern()
         {
             Boss.SetState(BossState.Preparing, false);
@@ -53,7 +56,7 @@ namespace VampireLike.Enemies
             if (projectilePrefab == null || count <= 0)
                 return;
 
-            GameSfx.Play(SfxType.BossProjectile);
+            GameSfx.Play(barrageSfxType);
             CombatVFX.PlayExpandingRing(transform.position, CombatVFXKind.FireZone, 0.22f, 1.1f, 0.22f, 1500);
 
             for (int i = 0; i < count; i++)
@@ -81,6 +84,11 @@ namespace VampireLike.Enemies
             this.startAngle = startAngle;
             this.prepareTime = prepareTime;
             OnValidate();
+        }
+
+        public void ConfigureBarrageSfx(SfxType barrageSfxType)
+        {
+            this.barrageSfxType = barrageSfxType;
         }
 
         protected override void OnValidate()
