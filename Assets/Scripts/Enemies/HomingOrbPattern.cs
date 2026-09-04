@@ -41,6 +41,10 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float spawnRadius = 0.35f;
 
+        [Header("유도 투사체 효과음")]
+        [SerializeField]
+        private SfxType orbSfxType = SfxType.BossProjectile;
+
         protected override bool CanExecutePattern()
         {
             return projectilePrefab != null && Player != null;
@@ -61,7 +65,7 @@ namespace VampireLike.Enemies
                 Vector2 offset = Quaternion.Euler(0f, 0f, i * 360f / Mathf.Max(1, count)) * Vector2.right * spawnRadius;
                 EnemyProjectileController projectile = Instantiate(projectilePrefab, (Vector2)transform.position + offset, Quaternion.identity);
                 projectile.InitializeHoming(Player, direction, projectileSpeed, damage, projectileLifetime, homingDuration, turnSpeed);
-                GameSfx.Play(SfxType.BossProjectile);
+                GameSfx.Play(orbSfxType);
 
                 if (spawnInterval > 0f)
                     yield return new WaitForSeconds(spawnInterval);
@@ -87,6 +91,11 @@ namespace VampireLike.Enemies
             this.turnSpeed = turnSpeed;
             this.spawnRadius = spawnRadius;
             OnValidate();
+        }
+
+        public void ConfigureHomingOrbSfx(SfxType sfxType)
+        {
+            orbSfxType = sfxType;
         }
 
         protected override void OnValidate()

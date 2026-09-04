@@ -46,6 +46,13 @@ namespace VampireLike.Enemies
         [SerializeField]
         private bool disableContactDamageWhileBurrowed = true;
 
+        [SerializeField]
+        private bool useWarlockTeleportVisual;
+
+        [Header("잠복/순간이동 효과음")]
+        [SerializeField]
+        private SfxType teleportSfxType = SfxType.BossZone;
+
         private SpriteRenderer[] spriteRenderers;
         private Collider2D bossCollider;
         private EnemyContactDamage contactDamage;
@@ -62,10 +69,15 @@ namespace VampireLike.Enemies
             for (int i = 0; i < count && !Boss.IsDead; i++)
             {
                 Boss.SetState(BossState.Burrowed, false);
-                CombatVFX.PlayBossCastAura(transform, CombatVFXKind.Shockwave, 0.82f, burrowDelay, 1500);
+                CombatVFX.PlayBossCastAura(transform, useWarlockTeleportVisual ? CombatVFXKind.ArcaneImpact : CombatVFXKind.Shockwave, 0.82f, burrowDelay, 1500);
                 yield return new WaitForSeconds(burrowDelay);
 
-                CombatVFX.PlayTeleportBurst(transform.position, 0.8f, 0.22f, 1500);
+                if (useWarlockTeleportVisual)
+                    CombatVFX.PlayWarlockTeleportBurst(transform.position, 1f, 0.3f, 1500);
+                else
+                    CombatVFX.PlayTeleportBurst(transform.position, 0.8f, 0.22f, 1500);
+
+                GameSfx.Play(teleportSfxType);
                 SetBurrowedVisualState(true);
                 yield return new WaitForSeconds(GetCurrentUndergroundDuration());
 
@@ -78,8 +90,12 @@ namespace VampireLike.Enemies
 
                 BossRigidbody.position = reappearPosition;
                 SetBurrowedVisualState(false);
-                GameSfx.Play(SfxType.BossZone);
-                CombatVFX.PlayExpandingRing(reappearPosition, CombatVFXKind.Shockwave, 0.18f, 1.35f, 0.28f, 1500);
+                GameSfx.Play(teleportSfxType);
+
+                if (useWarlockTeleportVisual)
+                    CombatVFX.PlayWarlockTeleportBurst(reappearPosition, 1.12f, 0.34f, 1500);
+                else
+                    CombatVFX.PlayExpandingRing(reappearPosition, CombatVFXKind.Shockwave, 0.18f, 1.35f, 0.28f, 1500);
 
                 if (i < count - 1)
                     yield return new WaitForSeconds(repeatDelay);
@@ -123,6 +139,9 @@ namespace VampireLike.Enemies
 
         private GameObject CreateWarning(Vector2 position)
         {
+            if (useWarlockTeleportVisual)
+                return CombatVFX.PlayWarlockTeleportWarning(position, 1.25f, warningDuration, 1450);
+
             if (warningPrefab == null)
                 return CombatVFX.PlayBurrowWarning(position, 1.35f, warningDuration, 1450);
 
@@ -148,7 +167,7 @@ namespace VampireLike.Enemies
             if (disableContactDamageWhileBurrowed && contactDamage != null)
                 contactDamage.enabled = !isBurrowed;
 
-            if (!isBurrowed && wasBurrowed)
+            if (!isBurrowed && wasBurrowed && !useWarlockTeleportVisual)
                 CombatVFX.PlayBurrowEmerge(transform.position, 1.25f, 0.36f, 1480);
         }
 
@@ -164,6 +183,16 @@ namespace VampireLike.Enemies
             this.warningDuration = warningDuration;
             this.reappearDistance = reappearDistance;
             OnValidate();
+        }
+
+        public void ConfigureWarlockTeleportVisual(bool enabled)
+        {
+            useWarlockTeleportVisual = enabled;
+        }
+
+        public void ConfigureTeleportSfx(SfxType sfxType)
+        {
+            teleportSfxType = sfxType;
         }
 
         protected override void OnValidate()

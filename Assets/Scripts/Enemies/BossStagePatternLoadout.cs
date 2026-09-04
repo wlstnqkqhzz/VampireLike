@@ -166,7 +166,8 @@ namespace VampireLike.Enemies
             if (burrow == null)
                 burrow = gameObject.AddComponent<BurrowPattern>();
 
-            SetOnlyEnabled(gameObject, burrow, gameObject.GetComponent<TargetAreaPattern>(), gameObject.GetComponent<HomingOrbPattern>());
+            SummonPattern summon = gameObject.GetComponent<SummonPattern>();
+            SetOnlyEnabled(gameObject, burrow, gameObject.GetComponent<TargetAreaPattern>(), gameObject.GetComponent<HomingOrbPattern>(), summon);
 
             BossDistanceMovement movement = gameObject.GetComponent<BossDistanceMovement>();
             if (movement != null)
@@ -174,12 +175,16 @@ namespace VampireLike.Enemies
 
             burrow.ConfigurePatternTiming(4.05f, 1.1f, 10, 1, 3, false);
             burrow.ConfigureBurrow(0.32f, 0.68f, 0.12f, 1, 1, 0.24f, 0.82f, 1.05f);
+            burrow.ConfigureWarlockTeleportVisual(true);
+            burrow.ConfigureTeleportSfx(SfxType.Boss7Teleport);
 
             TargetAreaPattern targetArea = gameObject.GetComponent<TargetAreaPattern>();
             if (targetArea != null)
             {
                 targetArea.ConfigurePatternTiming(5.4f, 2.1f, 7, 1, 3, false);
                 targetArea.ConfigureTargetArea(0.82f, 0.82f, 1, 1, 0.16f, 0.78f, 2, 0.32f, new Color(0.58f, 0.28f, 0.95f, 0.34f));
+                targetArea.ConfigureTargetAreaSfx(SfxType.Boss7CurseWarning, SfxType.Boss7CurseExplosion);
+                targetArea.ConfigureWarlockCurseVisual(true);
             }
 
             HomingOrbPattern homingOrb = gameObject.GetComponent<HomingOrbPattern>();
@@ -187,6 +192,15 @@ namespace VampireLike.Enemies
             {
                 homingOrb.ConfigurePatternTiming(6.2f, 3.3f, 4, 2, 3, false);
                 homingOrb.ConfigureHomingOrb(1, 1, 0.22f, 2.45f, 1, 4.8f, 1.9f, 105f, 0.32f);
+                homingOrb.ConfigureHomingOrbSfx(SfxType.Boss7HomingOrb);
+            }
+
+            if (summon != null)
+            {
+                summon.ConfigurePatternTiming(7.1f, 2.8f, 5, 2, 3, true);
+                summon.ConfigureSummon(10, 10, 0, 10, 1.9f, 0.06f, 0.22f);
+                summon.ConfigureSummonSfx(SfxType.Boss7Summon);
+                summon.ConfigureWarlockSummonVisual(true);
             }
         }
 

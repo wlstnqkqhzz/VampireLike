@@ -53,6 +53,10 @@ namespace VampireLike.Enemies
         [SerializeField]
         private SfxType summonSfxType = SfxType.BossZone;
 
+        [Header("소환 연출")]
+        [SerializeField]
+        private bool useWarlockSummonVisual;
+
         private readonly List<BossSummonTracker> activeSummons = new List<BossSummonTracker>();
 
         protected override bool CanExecutePattern()
@@ -78,7 +82,11 @@ namespace VampireLike.Enemies
             for (int i = 0; i < count && !Boss.IsDead; i++)
             {
                 Vector2 spawnPosition = GetSummonPosition(i, count);
-                CombatVFX.PlayExpandingRing(spawnPosition, CombatVFXKind.ArcaneImpact, 0.18f, 0.9f, summonTelegraphDelay, 900);
+
+                if (useWarlockSummonVisual)
+                    CombatVFX.PlayWarlockTeleportWarning(spawnPosition, 0.82f, summonTelegraphDelay, 900);
+                else
+                    CombatVFX.PlayExpandingRing(spawnPosition, CombatVFXKind.ArcaneImpact, 0.18f, 0.9f, summonTelegraphDelay, 900);
 
                 if (summonTelegraphDelay > 0f)
                     yield return new WaitForSeconds(summonTelegraphDelay);
@@ -95,6 +103,10 @@ namespace VampireLike.Enemies
                     GameSfx.Play(summonSfxType);
 
                 GameObject summon = Instantiate(selectedPrefab, spawnPosition, Quaternion.identity);
+                
+                if (useWarlockSummonVisual)
+                    CombatVFX.PlayWarlockTeleportBurst(spawnPosition, 0.84f, 0.24f, 1450);
+
                 BossSummonTracker tracker = summon.AddComponent<BossSummonTracker>();
                 tracker.Initialize(HandleSummonRemoved);
                 activeSummons.Add(tracker);
@@ -182,6 +194,24 @@ namespace VampireLike.Enemies
         {
             playSummonSfx = true;
             this.summonSfxType = summonSfxType;
+        }
+
+        public void ConfigureSummon(int minSummonCount, int summonCount, int phaseBonusSummonCount,
+            int maxActiveSummons, float spawnRadius, float summonInterval, float summonTelegraphDelay)
+        {
+            this.minSummonCount = minSummonCount;
+            this.summonCount = summonCount;
+            this.phaseBonusSummonCount = phaseBonusSummonCount;
+            this.maxActiveSummons = maxActiveSummons;
+            this.spawnRadius = spawnRadius;
+            this.summonInterval = summonInterval;
+            this.summonTelegraphDelay = summonTelegraphDelay;
+            OnValidate();
+        }
+
+        public void ConfigureWarlockSummonVisual(bool enabled)
+        {
+            useWarlockSummonVisual = enabled;
         }
 
         protected override void OnValidate()

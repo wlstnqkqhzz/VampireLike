@@ -348,6 +348,116 @@ namespace VampireLike.VFX
             return root;
         }
 
+        public static void PlayWarlockTeleportBurst(Vector2 position, float size = 0.95f, float duration = 0.3f, int sortingOrder = 1700)
+        {
+            size *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Warlock Teleport Burst");
+            root.transform.position = position;
+
+            Color voidColor = new Color(0.08f, 0.01f, 0.15f, 0.72f);
+            Color violet = new Color(0.68f, 0.18f, 1f, 0.86f);
+            Color pale = new Color(0.92f, 0.76f, 1f, 0.68f);
+
+            SpriteRenderer smoke = CreateRenderer(root.transform, "Void Smoke", VFXSprites.SoftDisc, WithAlpha(voidColor, 0.62f), sortingOrder);
+            SpriteRenderer glyph = CreateRenderer(root.transform, "Warlock Glyph", VFXSprites.Pentagram, WithAlpha(violet, 0.7f), sortingOrder + 1);
+            SpriteRenderer ring = CreateRenderer(root.transform, "Rift Ring", VFXSprites.WarningRing, WithAlpha(pale, 0.5f), sortingOrder + 2);
+            SpriteRenderer sparks = CreateRenderer(root.transform, "Curse Sparks", VFXSprites.Sparks, WithAlpha(violet, 0.44f), sortingOrder + 3);
+
+            smoke.transform.localScale = Vector3.one * size * 1.2f;
+            glyph.transform.localScale = Vector3.one * size * 0.74f;
+            ring.transform.localScale = Vector3.one * size;
+            sparks.transform.localScale = Vector3.one * size * 0.8f;
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.72f, 1.18f, -220f, true);
+        }
+
+        public static GameObject PlayWarlockTeleportWarning(Vector2 position, float size, float duration = 0.55f, int sortingOrder = 1450)
+        {
+            size *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Warlock Teleport Warning");
+            root.transform.position = position;
+
+            Color shadow = new Color(0.07f, 0.01f, 0.13f, 0.58f);
+            Color violet = new Color(0.68f, 0.2f, 1f, 0.76f);
+            SpriteRenderer puddle = CreateRenderer(root.transform, "Void Landing Mark", VFXSprites.SoftDisc, WithAlpha(shadow, 0.42f), sortingOrder);
+            SpriteRenderer glyph = CreateRenderer(root.transform, "Landing Curse Glyph", VFXSprites.Pentagram, WithAlpha(violet, 0.42f), sortingOrder + 1);
+            SpriteRenderer ring = CreateRenderer(root.transform, "Thin Rift Ring", VFXSprites.WarningRing, WithAlpha(violet, 0.3f), sortingOrder + 2);
+
+            puddle.transform.localScale = Vector3.one * size * 1.1f;
+            glyph.transform.localScale = Vector3.one * size * 0.72f;
+            ring.transform.localScale = Vector3.one * size * 0.9f;
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.88f, 1.08f, 74f, true);
+            return root;
+        }
+
+        public static GameObject PlayWarlockCurseWarning(Vector2 position, float radius, float duration = 0.9f, int sortingOrder = 760)
+        {
+            radius *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Warlock Curse Warning");
+            root.transform.position = position;
+
+            Color shadow = new Color(0.09f, 0f, 0.15f, 0.54f);
+            Color violet = new Color(0.58f, 0.18f, 0.92f, 0.78f);
+            Color spirit = new Color(0.9f, 0.72f, 1f, 0.88f);
+
+            SpriteRenderer fill = CreateRenderer(root.transform, "Curse Pool", VFXSprites.ZoneFill, WithAlpha(shadow, 0.18f), sortingOrder);
+            SpriteRenderer glyph = CreateRenderer(root.transform, "Curse Pentagram", VFXSprites.Pentagram, WithAlpha(violet, 0.34f), sortingOrder + 1);
+            SpriteRenderer ring = CreateRenderer(root.transform, "Curse Boundary", VFXSprites.WarningRing, WithAlpha(violet, 0.24f), sortingOrder + 2);
+
+            float diameter = radius * 2f;
+            fill.transform.localScale = Vector3.one * diameter * 1.08f;
+            glyph.transform.localScale = Vector3.one * diameter * 0.84f;
+            ring.transform.localScale = Vector3.one * diameter;
+
+            for (int i = 0; i < 7; i++)
+            {
+                float angle = Mathf.PI * 2f * i / 7f + Random.Range(-0.18f, 0.18f);
+                SpriteRenderer skull = CreateRenderer(root.transform, $"Curse Skull Aura {i + 1}", VFXSprites.Skull, WithAlpha(spirit, 0.72f), sortingOrder + 6 + i);
+                skull.transform.localPosition = Direction(angle) * radius * Random.Range(0.36f, 0.84f);
+                skull.transform.localScale = Vector3.one * radius * Random.Range(0.38f, 0.5f);
+            }
+
+            WarlockCurseAuraEffect effect = root.AddComponent<WarlockCurseAuraEffect>();
+            effect.Play(duration, 18f);
+            return root;
+        }
+
+        public static void PlayWarlockCurseImpact(Vector2 position, float radius, float duration = 0.35f, int sortingOrder = 1820)
+        {
+            radius *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Warlock Curse Impact");
+            root.transform.position = position;
+
+            Color flash = new Color(0.78f, 0.44f, 1f, 0.72f);
+            Color shadow = new Color(0.09f, 0f, 0.14f, 0.66f);
+            SpriteRenderer burst = CreateRenderer(root.transform, "Curse Flash", VFXSprites.Sparks, WithAlpha(flash, 0.72f), sortingOrder + 2);
+            SpriteRenderer ring = CreateRenderer(root.transform, "Curse Shock Ring", VFXSprites.WarningRing, WithAlpha(flash, 0.58f), sortingOrder + 1);
+            SpriteRenderer smoke = CreateRenderer(root.transform, "Curse Smoke", VFXSprites.SoftDisc, WithAlpha(shadow, 0.38f), sortingOrder);
+
+            float diameter = radius * 2f;
+            smoke.transform.localScale = Vector3.one * diameter * 1.15f;
+            ring.transform.localScale = Vector3.one * diameter * 0.75f;
+            burst.transform.localScale = Vector3.one * diameter * 0.9f;
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.78f, 1.24f, 130f, true);
+        }
+
         public static void PlayNinjaTeleportAfterimage(SpriteRenderer source, bool appearing, float duration = 0.24f, int sortingOrder = 1700)
         {
             if (source == null || source.sprite == null)
@@ -957,6 +1067,66 @@ namespace VampireLike.VFX
         }
     }
 
+    public class WarlockCurseAuraEffect : MonoBehaviour
+    {
+        private SpriteRenderer[] renderers;
+        private Vector3[] startPositions;
+        private Vector3[] startScales;
+        private Color[] startColors;
+        private float duration;
+        private float rotateSpeed;
+        private float elapsed;
+
+        public void Play(float effectDuration, float rotationSpeed)
+        {
+            renderers = GetComponentsInChildren<SpriteRenderer>(true);
+            startPositions = new Vector3[renderers.Length];
+            startScales = new Vector3[renderers.Length];
+            startColors = new Color[renderers.Length];
+            duration = Mathf.Max(0.05f, effectDuration);
+            rotateSpeed = rotationSpeed;
+            elapsed = 0f;
+
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Transform rendererTransform = renderers[i].transform;
+                startPositions[i] = rendererTransform.localPosition;
+                startScales[i] = rendererTransform.localScale;
+                startColors[i] = renderers[i].color;
+            }
+        }
+
+        private void Update()
+        {
+            if (GameState.IsGameOver)
+                return;
+
+            elapsed += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            transform.Rotate(0f, 0f, rotateSpeed * Time.deltaTime);
+            float pulse = 0.92f + Mathf.Sin(progress * Mathf.PI * 5f) * 0.08f;
+
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                bool skull = renderers[i].name.Contains("Skull");
+                Transform rendererTransform = renderers[i].transform;
+                float skullPulse = 0.96f + Mathf.Sin((progress * Mathf.PI * 4f) + i) * 0.12f;
+                rendererTransform.localScale = startScales[i] * (skull ? skullPulse : pulse);
+
+                if (skull)
+                    rendererTransform.localPosition = startPositions[i] + Vector3.up * Mathf.Lerp(0.05f, 0.42f, progress);
+
+                Color color = startColors[i];
+                float fade = skull ? Mathf.Lerp(0.92f, 0.38f, progress) : Mathf.Lerp(1f, 0.18f, progress);
+                color.a *= fade;
+                renderers[i].color = color;
+            }
+
+            if (progress >= 1f)
+                Destroy(gameObject);
+        }
+    }
+
     public class CombatVFXLineEffect : MonoBehaviour
     {
         private LineRenderer[] lineRenderers;
@@ -1358,6 +1528,7 @@ namespace VampireLike.VFX
         private static Sprite moonImpactShards;
         private static Sprite iceShard;
         private static Sprite slashArc;
+        private static Sprite skull;
 
         public static Sprite Ring => ring ??= CreateRingSprite(128, 0.37f, 0.43f);
         public static Sprite WarningRing => warningRing ??= CreateRingSprite(128, 0.39f, 0.43f, true);
@@ -1380,6 +1551,7 @@ namespace VampireLike.VFX
         public static Sprite MoonImpactShards => moonImpactShards ??= CreateMoonImpactShardsSprite();
         public static Sprite IceShard => iceShard ??= CreateIceShardSprite();
         public static Sprite SlashArc => slashArc ??= CreateSlashArcSprite();
+        public static Sprite Skull => skull ??= CreateSkullSprite();
 
         public static Sprite GetBurstSprite(CombatVFXKind kind)
         {
@@ -1726,6 +1898,37 @@ namespace VampireLike.VFX
             return ToSprite(texture);
         }
 
+        private static Sprite CreateSkullSprite()
+        {
+            Texture2D texture = CreateTexture(72, 72);
+            Vector2 center = new Vector2(35.5f, 38f);
+
+            for (int y = 0; y < texture.height; y++)
+            {
+                for (int x = 0; x < texture.width; x++)
+                {
+                    Vector2 point = new Vector2(x, y);
+                    float head = Mathf.Clamp01(1f - Vector2.Distance(point, center + Vector2.up * 7f) / 22f);
+                    float jaw = Mathf.Clamp01(1f - Mathf.Abs(point.x - center.x) / 16f) * Mathf.Clamp01(1f - Mathf.Abs(point.y - 25f) / 12f);
+                    float alpha = Mathf.Max(Mathf.Pow(head, 0.7f), jaw * 0.82f);
+
+                    if (alpha <= 0.03f)
+                        continue;
+
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            ClearDot(texture, center + new Vector2(-8f, 10f), 4);
+            ClearDot(texture, center + new Vector2(8f, 10f), 4);
+            ClearDot(texture, center + new Vector2(0f, 1f), 2);
+
+            for (int x = 26; x <= 45; x += 6)
+                DrawLine(texture, new Vector2(x, 18f), new Vector2(x, 25f), 1);
+
+            return ToSprite(texture);
+        }
+
         private static Sprite CreateConeSprite(bool edgeOnly)
         {
             const int width = 128;
@@ -1932,6 +2135,31 @@ namespace VampireLike.VFX
                     float alpha = 1f - distance / (radius + 0.01f);
                     Color current = texture.GetPixel(px, py);
                     texture.SetPixel(px, py, new Color(1f, 1f, 1f, Mathf.Max(current.a, alpha)));
+                }
+            }
+        }
+
+        private static void ClearDot(Texture2D texture, Vector2 position, int radius)
+        {
+            int cx = Mathf.RoundToInt(position.x);
+            int cy = Mathf.RoundToInt(position.y);
+
+            for (int y = -radius; y <= radius; y++)
+            {
+                for (int x = -radius; x <= radius; x++)
+                {
+                    int px = cx + x;
+                    int py = cy + y;
+
+                    if (px < 0 || px >= texture.width || py < 0 || py >= texture.height)
+                        continue;
+
+                    float distance = Mathf.Sqrt(x * x + y * y);
+
+                    if (distance > radius)
+                        continue;
+
+                    texture.SetPixel(px, py, Color.clear);
                 }
             }
         }

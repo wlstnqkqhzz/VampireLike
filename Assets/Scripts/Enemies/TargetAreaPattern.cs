@@ -63,6 +63,9 @@ namespace VampireLike.Enemies
         [SerializeField]
         private bool useFrostDropVisual;
 
+        [SerializeField]
+        private bool useWarlockCurseVisual;
+
         private readonly Collider2D[] hitResults = new Collider2D[4];
         private readonly System.Collections.Generic.List<GameObject> activeWarnings = new System.Collections.Generic.List<GameObject>();
 
@@ -118,6 +121,9 @@ namespace VampireLike.Enemies
             if (useFrostDropVisual)
                 return CombatVFX.PlayFrostDropWarning(position, radius, warningDuration, 1480);
 
+            if (useWarlockCurseVisual)
+                return CombatVFX.PlayWarlockCurseWarning(position, radius, warningDuration, 1480);
+
             return CreateWarningCircle(position);
         }
 
@@ -165,6 +171,12 @@ namespace VampireLike.Enemies
             if (useFrostDropVisual)
             {
                 CombatVFX.PlayFrostDropImpact(position, radius, impactLifetime, 1550);
+                return;
+            }
+
+            if (useWarlockCurseVisual)
+            {
+                CombatVFX.PlayWarlockCurseImpact(position, radius, impactLifetime, 1550);
                 return;
             }
 
@@ -286,6 +298,11 @@ namespace VampireLike.Enemies
         public void ConfigureFrostDropVisual(bool enabled)
         {
             useFrostDropVisual = enabled;
+        }
+
+        public void ConfigureWarlockCurseVisual(bool enabled)
+        {
+            useWarlockCurseVisual = enabled;
         }
 
         protected override void OnValidate()

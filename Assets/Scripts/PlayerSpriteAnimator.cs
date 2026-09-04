@@ -1,8 +1,9 @@
+using System.Linq;
 using UnityEngine;
 using VampireLike.Growth;
 
 /// <summary>
-/// 플레이어용 3프레임 스프라이트 시트를 런타임에 잘라 Idle, Walk, Attack, Hit, Death, Cast 모션으로 재생합니다.
+/// 플레이어용 개별 프레임 또는 스프라이트 시트를 런타임에 불러와 Idle, Walk, Attack, Hit, Death, Cast 모션으로 재생합니다.
 /// </summary>
 public class PlayerSpriteAnimator : MonoBehaviour
 {
@@ -407,17 +408,40 @@ public class PlayerSpriteAnimator : MonoBehaviour
 
     private void LoadAllFrames()
     {
-        idleFrames = LoadStrip("01_Idle_3Frames", DefaultFrameCount);
-        walkFrames = LoadStrip("02_Walk_Production_8Frames", 8);
+        idleFrames = LoadFrameSet("Idle", "01_Idle_3Frames", DefaultFrameCount);
+        walkFrames = LoadFrameSet("Walk", "02_Walk_Production_8Frames", 8);
 
         if (walkFrames.Length == 0)
-            walkFrames = LoadStrip("02_Walk_3Frames", DefaultFrameCount);
+            walkFrames = LoadFrameSet("Walk", "02_Walk_3Frames", DefaultFrameCount);
 
-        attackFrames = LoadStrip("03_Attack_3Frames", DefaultFrameCount);
-        hitFrames = LoadStrip("04_Hit_3Frames", DefaultFrameCount);
-        deathFrames = LoadStrip("05_Death_3Frames", DefaultFrameCount);
-        castFrames = LoadStrip("06_Cast_3Frames", DefaultFrameCount);
+        attackFrames = LoadFrameSet("Attack", "03_Attack_3Frames", DefaultFrameCount);
+        hitFrames = LoadFrameSet("Hit", "04_Hit_3Frames", DefaultFrameCount);
+        deathFrames = LoadFrameSet("Death", "05_Death_3Frames", DefaultFrameCount);
+        castFrames = LoadFrameSet("Cast", "06_Cast_3Frames", DefaultFrameCount);
         currentLoopFrames = null;
+    }
+
+    private Sprite[] LoadFrameSet(string framePrefix, string stripFileName, int stripFrameCount)
+    {
+        Sprite[] individualFrames = LoadIndividualFrames(framePrefix);
+        return individualFrames.Length > 0 ? individualFrames : LoadStrip(stripFileName, stripFrameCount);
+    }
+
+    private Sprite[] LoadIndividualFrames(string framePrefix)
+    {
+        Sprite[] textureFrames = Resources.LoadAll<Texture2D>(resourceFolder)
+            .Where(texture => IsExactFrameName(texture.name, framePrefix))
+            .OrderBy(texture => GetFrameNumber(texture.name, framePrefix))
+            .Select(CreateSpriteFromTexture)
+            .ToArray();
+
+        if (textureFrames.Length > 0)
+            return textureFrames;
+
+        return Resources.LoadAll<Sprite>(resourceFolder)
+            .Where(sprite => IsExactFrameName(sprite.name, framePrefix))
+            .OrderBy(sprite => GetFrameNumber(sprite.name, framePrefix))
+            .ToArray();
     }
 
     private Sprite[] LoadStrip(string fileName, int frameCount)
@@ -441,6 +465,33 @@ public class PlayerSpriteAnimator : MonoBehaviour
         }
 
         return frames;
+    }
+
+    private Sprite CreateSpriteFromTexture(Texture2D texture)
+    {
+        float effectivePixelsPerUnit = pixelsPerUnit * Mathf.Max(0.01f, texture.height / ExpectedFrameHeight);
+        return Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.14f), effectivePixelsPerUnit);
+    }
+
+    private static bool IsExactFrameName(string assetName, string framePrefix)
+    {
+        string expectedPrefix = framePrefix + "_";
+
+        if (!assetName.StartsWith(expectedPrefix, System.StringComparison.Ordinal))
+            return false;
+
+        string frameNumber = assetName.Substring(expectedPrefix.Length);
+        return int.TryParse(frameNumber, out _);
+    }
+
+    private static int GetFrameNumber(string assetName, string framePrefix)
+    {
+        string expectedPrefix = framePrefix + "_";
+
+        if (!assetName.StartsWith(expectedPrefix, System.StringComparison.Ordinal))
+            return int.MaxValue;
+
+        return int.TryParse(assetName.Substring(expectedPrefix.Length), out int frameNumber) ? frameNumber : int.MaxValue;
     }
 
     private SpriteRenderer GetOrCreateVisualRenderer()
