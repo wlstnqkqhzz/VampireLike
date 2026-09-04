@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using VampireLike.Audio;
 
 namespace VampireLike.Enemies
 {
@@ -25,6 +26,9 @@ namespace VampireLike.Enemies
         [SerializeField]
         private Color enragedColor = new Color(1f, 0.45f, 0.35f, 1f);
 
+        [SerializeField]
+        private SfxType enrageSfxType = SfxType.BossZone;
+
         private bool hasTriggered;
         private SpriteRenderer spriteRenderer;
 
@@ -45,11 +49,17 @@ namespace VampireLike.Enemies
             Boss.SetState(BossState.PhaseChanging, false);
             Boss.MultiplyMoveSpeed(moveSpeedMultiplier);
             Boss.MultiplyPatternCooldown(cooldownMultiplier);
+            GameSfx.Play(enrageSfxType);
 
             if (spriteRenderer != null)
                 spriteRenderer.color = enragedColor;
 
             yield return new WaitForSeconds(pauseDuration);
+        }
+
+        public void ConfigureEnrageSfx(SfxType enrageSfxType)
+        {
+            this.enrageSfxType = enrageSfxType;
         }
 
         protected override void OnValidate()

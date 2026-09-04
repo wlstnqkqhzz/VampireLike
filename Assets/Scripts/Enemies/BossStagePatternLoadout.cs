@@ -24,6 +24,12 @@ namespace VampireLike.Enemies
                 case 4:
                     ApplyFlameCaster(boss);
                     break;
+                case 5:
+                    ApplyFrostGolem(boss);
+                    break;
+                case 6:
+                    ApplyShadowAssassin(boss);
+                    break;
                 case 7:
                     ApplyBurrowWarlock(boss);
                     break;
@@ -104,6 +110,52 @@ namespace VampireLike.Enemies
                 rotating.ConfigurePatternTiming(6.2f, 4.5f, 7, 2, 3, false);
                 rotating.ConfigureBarrageSfx(SfxType.Boss4RotatingBarrage);
             }
+        }
+
+        private static void ApplyShadowAssassin(BossController boss)
+        {
+            GameObject gameObject = boss.gameObject;
+
+            TeleportPattern teleport = gameObject.GetComponent<TeleportPattern>();
+            if (teleport != null)
+            {
+                teleport.ConfigureShadowTeleportVisual(true);
+                teleport.ConfigureTeleportSfx(SfxType.Boss6Teleport);
+            }
+
+            ConeAttackPattern coneAttack = gameObject.GetComponent<ConeAttackPattern>();
+            if (coneAttack != null)
+            {
+                coneAttack.ConfigureShadowSlashVisual(true);
+                coneAttack.ConfigureSlashSfx(SfxType.Boss6FrontSlash);
+            }
+
+            DashPattern dash = gameObject.GetComponent<DashPattern>();
+            if (dash != null)
+                dash.ConfigureDashSfx(SfxType.Boss6DashFirst, SfxType.Boss6DashSecond);
+        }
+
+        private static void ApplyFrostGolem(BossController boss)
+        {
+            GameObject gameObject = boss.gameObject;
+
+            ShockwavePattern shockwave = gameObject.GetComponent<ShockwavePattern>();
+            if (shockwave != null)
+            {
+                shockwave.SetAllowMovementDuringPattern(true);
+                shockwave.ConfigureShockwaveSfx(SfxType.Boss5Shockwave);
+            }
+
+            TargetAreaPattern targetArea = gameObject.GetComponent<TargetAreaPattern>();
+            if (targetArea != null)
+            {
+                targetArea.ConfigureTargetAreaSfx(SfxType.Boss5AreaWarning, SfxType.Boss5AreaExplosion);
+                targetArea.ConfigureFrostDropVisual(true);
+            }
+
+            EnragePattern enrage = gameObject.GetComponent<EnragePattern>();
+            if (enrage != null)
+                enrage.ConfigureEnrageSfx(SfxType.Boss5Enrage);
         }
 
         private static void ApplyBurrowWarlock(BossController boss)

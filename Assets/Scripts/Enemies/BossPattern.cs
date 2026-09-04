@@ -57,6 +57,11 @@ namespace VampireLike.Enemies
             nextReadyTime = Time.time + this.initialDelay;
         }
 
+        public void SetAllowMovementDuringPattern(bool allowMovement)
+        {
+            allowMovementDuringPattern = allowMovement;
+        }
+
         public bool CanExecute()
         {
             if (Boss == null || !enabled || Boss.IsDead)

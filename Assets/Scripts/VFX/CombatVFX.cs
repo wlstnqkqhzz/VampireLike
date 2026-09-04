@@ -298,6 +298,147 @@ namespace VampireLike.VFX
             PlayExpandingRing(position, CombatVFXKind.ArcaneImpact, size * 0.35f, size * 1.35f, duration * 1.15f, sortingOrder - 1);
         }
 
+        public static void PlayShadowTeleportBurst(Vector2 position, float size = 0.85f, float duration = 0.24f, int sortingOrder = 1700)
+        {
+            size *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Shadow Teleport Burst");
+            root.transform.position = position;
+
+            Color shadow = new Color(0.16f, 0.03f, 0.24f, 0.78f);
+            Color edge = new Color(0.82f, 0.18f, 1f, 0.88f);
+            SpriteRenderer smoke = CreateRenderer(root.transform, "Shadow Smoke", VFXSprites.SoftDisc, WithAlpha(shadow, 0.62f), sortingOrder);
+            SpriteRenderer ring = CreateRenderer(root.transform, "Shadow Tear Ring", VFXSprites.WarningRing, WithAlpha(edge, 0.56f), sortingOrder + 1);
+            SpriteRenderer slashA = CreateRenderer(root.transform, "Shadow Tear A", VFXSprites.LineCore, WithAlpha(edge, 0.82f), sortingOrder + 2);
+            SpriteRenderer slashB = CreateRenderer(root.transform, "Shadow Tear B", VFXSprites.LineCore, WithAlpha(edge, 0.58f), sortingOrder + 3);
+
+            smoke.transform.localScale = Vector3.one * size * 1.2f;
+            ring.transform.localScale = Vector3.one * size * 0.9f;
+            slashA.transform.localRotation = Quaternion.Euler(0f, 0f, 28f);
+            slashB.transform.localRotation = Quaternion.Euler(0f, 0f, -38f);
+            slashA.transform.localScale = new Vector3(size * 1.15f, size * 0.08f, 1f);
+            slashB.transform.localScale = new Vector3(size * 0.92f, size * 0.06f, 1f);
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.72f, 1.22f, -180f, true);
+        }
+
+        public static GameObject PlayShadowTeleportArrivalWarning(Vector2 position, float size = 0.72f, float duration = 0.2f, int sortingOrder = 1450)
+        {
+            size *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Shadow Teleport Arrival Warning");
+            root.transform.position = position;
+
+            Color shadow = new Color(0.1f, 0.02f, 0.16f, 0.62f);
+            Color edge = new Color(0.74f, 0.1f, 1f, 0.7f);
+            SpriteRenderer puddle = CreateRenderer(root.transform, "Arrival Shadow", VFXSprites.SoftDisc, WithAlpha(shadow, 0.48f), sortingOrder);
+            SpriteRenderer mark = CreateRenderer(root.transform, "Arrival Slash Mark", VFXSprites.LineCore, WithAlpha(edge, 0.68f), sortingOrder + 1);
+
+            puddle.transform.localScale = new Vector3(size * 1.2f, size * 0.55f, 1f);
+            mark.transform.localRotation = Quaternion.Euler(0f, 0f, -18f);
+            mark.transform.localScale = new Vector3(size * 1.08f, size * 0.08f, 1f);
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, 0.86f, 1.08f, 0f, true);
+            return root;
+        }
+
+        public static void PlayNinjaTeleportAfterimage(SpriteRenderer source, bool appearing, float duration = 0.24f, int sortingOrder = 1700)
+        {
+            if (source == null || source.sprite == null)
+                return;
+
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject(appearing ? "VFX Ninja Teleport Appearing" : "VFX Ninja Teleport Vanishing");
+            root.transform.position = source.transform.position;
+            root.transform.rotation = source.transform.rotation;
+            root.transform.localScale = source.transform.lossyScale;
+
+            Color bodyColor = appearing
+                ? new Color(0.36f, 0.88f, 1f, 0.42f)
+                : new Color(0.78f, 0.18f, 1f, 0.4f);
+            Color lineColor = appearing
+                ? new Color(0.72f, 1f, 1f, 0.88f)
+                : new Color(0.98f, 0.28f, 1f, 0.82f);
+
+            SpriteRenderer body = CreateRenderer(root.transform, "Afterimage Body", source.sprite, WithAlpha(bodyColor, bodyColor.a), sortingOrder);
+            body.flipX = source.flipX;
+            body.flipY = source.flipY;
+
+            int lineCount = 14;
+            SpriteRenderer[] lines = new SpriteRenderer[lineCount];
+            float height = Mathf.Max(0.08f, source.sprite.bounds.size.y);
+            float width = Mathf.Max(0.08f, source.sprite.bounds.size.x);
+            float startY = -height * 0.42f;
+            float step = height * 0.84f / Mathf.Max(1, lineCount - 1);
+
+            for (int i = 0; i < lineCount; i++)
+            {
+                SpriteRenderer line = CreateRenderer(root.transform, $"Afterimage Scanline {i + 1}", VFXSprites.LineCore, WithAlpha(lineColor, lineColor.a), sortingOrder + 1 + i);
+                float y = startY + step * i;
+                float jitter = Mathf.Sin(i * 12.17f) * width * 0.04f;
+                line.transform.localPosition = new Vector3(jitter, y, 0f);
+                line.transform.localScale = new Vector3(width * (0.78f + (i % 3) * 0.08f), 0.018f, 1f);
+                lines[i] = line;
+            }
+
+            NinjaTeleportAfterimageEffect effect = root.AddComponent<NinjaTeleportAfterimageEffect>();
+            effect.Play(duration, appearing, body, lines);
+        }
+
+        public static GameObject PlayShadowSlashWarning(Vector2 origin, Vector2 direction, float range, float angle, float duration, int sortingOrder = 1480)
+        {
+            return PlayShadowSlash(origin, direction, range, angle, duration, false, sortingOrder);
+        }
+
+        public static GameObject PlayShadowSlashImpact(Vector2 origin, Vector2 direction, float range, float angle, float duration, int sortingOrder = 1650)
+        {
+            return PlayShadowSlash(origin, direction, range, angle, duration, true, sortingOrder);
+        }
+
+        private static GameObject PlayShadowSlash(Vector2 origin, Vector2 direction, float range, float angle, float duration, bool impact, int sortingOrder)
+        {
+            range *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+            direction = direction.sqrMagnitude <= 0.001f ? Vector2.right : direction.normalized;
+
+            float slashAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            Vector2 center = origin + direction * range * 0.52f;
+            GameObject root = new GameObject(impact ? "VFX Shadow Slash Impact" : "VFX Shadow Slash Warning");
+            root.transform.position = center;
+            root.transform.rotation = Quaternion.Euler(0f, 0f, slashAngle);
+
+            Color dark = new Color(0.18f, 0.01f, 0.08f, impact ? 0.58f : 0.24f);
+            Color red = new Color(1f, 0.04f, 0.13f, impact ? 0.92f : 0.46f);
+            Color violet = new Color(0.74f, 0.18f, 1f, impact ? 0.72f : 0.34f);
+            SpriteRenderer shadow = CreateRenderer(root.transform, "Slash Shadow", VFXSprites.SoftDisc, WithAlpha(dark, dark.a), sortingOrder);
+            SpriteRenderer arc = CreateRenderer(root.transform, "Slash Arc", VFXSprites.SlashArc, WithAlpha(red, red.a), sortingOrder + 1);
+            SpriteRenderer core = CreateRenderer(root.transform, "Slash Core", VFXSprites.LineCore, WithAlpha(violet, violet.a), sortingOrder + 2);
+            SpriteRenderer trail = CreateRenderer(root.transform, "Slash Trail", VFXSprites.Line, WithAlpha(red, impact ? 0.42f : 0.2f), sortingOrder);
+
+            shadow.transform.localPosition = Vector3.left * range * 0.06f;
+            shadow.transform.localScale = new Vector3(range * 0.82f, range * 0.44f, 1f);
+            arc.transform.localScale = Vector3.one * range * (impact ? 1.02f : 0.92f);
+            core.transform.localPosition = Vector3.right * range * 0.08f;
+            core.transform.localRotation = Quaternion.Euler(0f, 0f, impact ? -8f : -5f);
+            core.transform.localScale = new Vector3(range * 0.72f, range * 0.035f, 1f);
+            trail.transform.localPosition = Vector3.left * range * 0.02f;
+            trail.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Clamp(angle * 0.22f, 8f, 18f));
+            trail.transform.localScale = new Vector3(range * 0.52f, range * 0.18f, 1f);
+
+            CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
+            effect.Play(duration, impact ? 0.72f : 0.92f, impact ? 1.18f : 1.02f, impact ? 36f : 6f, true);
+            return root;
+        }
+
         public static void PlayMoonMeteorWarning(Vector2 position, float radius, float duration = 0.55f, int sortingOrder = 760)
         {
             radius *= SizeMultiplier;
@@ -369,6 +510,63 @@ namespace VampireLike.VFX
 
             CombatVFXEffect effect = root.AddComponent<CombatVFXEffect>();
             effect.Play(duration, 0.8f, 1.08f, 0f, true);
+        }
+
+        public static GameObject PlayFrostDropWarning(Vector2 position, float radius, float duration = 0.9f, int sortingOrder = 760)
+        {
+            radius *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Frost Drop Warning");
+            root.transform.position = position;
+
+            Color main = GetMainColor(CombatVFXKind.FrostZone);
+            Color secondary = GetSecondaryColor(CombatVFXKind.FrostZone);
+            SpriteRenderer shadow = CreateRenderer(root.transform, "Frost Landing Shadow", VFXSprites.ZoneFill, WithAlpha(main, 0.16f), sortingOrder);
+            SpriteRenderer cracks = CreateRenderer(root.transform, "Frost Crack Preview", VFXSprites.GroundCracks, WithAlpha(secondary, 0.38f), sortingOrder + 1);
+            SpriteRenderer shard = CreateRenderer(root.transform, "Falling Ice Preview", VFXSprites.IceShard, WithAlpha(secondary, 0.48f), sortingOrder + 2);
+
+            shadow.transform.localScale = Vector3.one * radius * 1.9f;
+            cracks.transform.localScale = Vector3.one * radius * 1.45f;
+            shard.transform.localPosition = new Vector3(0f, radius * 1.65f, 0f);
+            shard.transform.localRotation = Quaternion.Euler(0f, 0f, -10f);
+            shard.transform.localScale = Vector3.one * radius * 0.78f;
+
+            FrostDropWarningEffect effect = root.AddComponent<FrostDropWarningEffect>();
+            effect.Play(duration, radius, shadow, cracks, shard);
+            return root;
+        }
+
+        public static void PlayFrostDropImpact(Vector2 position, float radius, float duration = 0.35f, int sortingOrder = 1820)
+        {
+            radius *= SizeMultiplier;
+            duration *= DurationMultiplier;
+            sortingOrder += SortingOffset;
+
+            GameObject root = new GameObject("VFX Frost Drop Impact");
+            root.transform.position = position;
+
+            Color main = GetMainColor(CombatVFXKind.Frost);
+            Color secondary = GetSecondaryColor(CombatVFXKind.Frost);
+            SpriteRenderer shock = CreateRenderer(root.transform, "Frost Impact Flash", VFXSprites.SoftDisc, WithAlpha(main, 0.34f), sortingOrder);
+            SpriteRenderer cracks = CreateRenderer(root.transform, "Frost Impact Cracks", VFXSprites.GroundCracks, WithAlpha(secondary, 0.78f), sortingOrder + 1);
+            SpriteRenderer burst = CreateRenderer(root.transform, "Frost Impact Shards", VFXSprites.MoonImpactShards, WithAlpha(secondary, 0.62f), sortingOrder + 2);
+            SpriteRenderer shard = CreateRenderer(root.transform, "Falling Ice Shard", VFXSprites.IceShard, WithAlpha(secondary, 0.98f), sortingOrder + 3);
+            SpriteRenderer trail = CreateRenderer(root.transform, "Falling Ice Trail", VFXSprites.LineCore, WithAlpha(Color.white, 0.62f), sortingOrder - 1);
+
+            shock.transform.localScale = Vector3.one * radius * 1.75f;
+            cracks.transform.localScale = Vector3.one * radius * 1.75f;
+            burst.transform.localScale = Vector3.one * radius * 1.35f;
+            shard.transform.localPosition = new Vector3(-radius * 0.18f, radius * 0.28f, 0f);
+            shard.transform.localRotation = Quaternion.Euler(0f, 0f, -12f);
+            shard.transform.localScale = Vector3.one * radius * 0.82f;
+            trail.transform.localPosition = new Vector3(-radius * 0.18f, radius * 0.98f, 0f);
+            trail.transform.localRotation = Quaternion.Euler(0f, 0f, -78f);
+            trail.transform.localScale = new Vector3(radius * 1.85f, radius * 0.09f, 1f);
+
+            FrostDropImpactEffect effect = root.AddComponent<FrostDropImpactEffect>();
+            effect.Play(duration, radius, shock, cracks, burst, shard, trail);
         }
 
         private static Vector2 GetMeteorStartPosition(Vector2 targetPosition, float radius)
@@ -876,6 +1074,205 @@ namespace VampireLike.VFX
         }
     }
 
+    public class FrostDropWarningEffect : MonoBehaviour
+    {
+        private SpriteRenderer shadow;
+        private SpriteRenderer cracks;
+        private SpriteRenderer shard;
+        private Color shadowColor;
+        private Color cracksColor;
+        private Color shardColor;
+        private float duration;
+        private float radius;
+        private float elapsed;
+
+        public void Play(float duration, float radius, SpriteRenderer shadow, SpriteRenderer cracks, SpriteRenderer shard)
+        {
+            this.duration = Mathf.Max(0.05f, duration);
+            this.radius = Mathf.Max(0.05f, radius);
+            this.shadow = shadow;
+            this.cracks = cracks;
+            this.shard = shard;
+            shadowColor = shadow == null ? Color.clear : shadow.color;
+            cracksColor = cracks == null ? Color.clear : cracks.color;
+            shardColor = shard == null ? Color.clear : shard.color;
+        }
+
+        private void Update()
+        {
+            elapsed += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            float pulse = 0.88f + Mathf.Sin(Time.time * 10f) * 0.06f;
+
+            if (shadow != null)
+            {
+                shadow.transform.localScale = Vector3.one * radius * Mathf.Lerp(1.35f, 1.95f, progress) * pulse;
+                shadow.color = SetAlpha(shadowColor, Mathf.Lerp(0.06f, shadowColor.a, progress));
+            }
+
+            if (cracks != null)
+            {
+                cracks.transform.localScale = Vector3.one * radius * Mathf.Lerp(0.8f, 1.45f, progress);
+                cracks.color = SetAlpha(cracksColor, cracksColor.a * Mathf.Lerp(0.25f, 1f, progress));
+            }
+
+            if (shard != null)
+            {
+                shard.transform.localPosition = new Vector3(0f, Mathf.Lerp(radius * 2.3f, radius * 1.25f, progress), 0f);
+                shard.color = SetAlpha(shardColor, shardColor.a * Mathf.Lerp(0.24f, 0.7f, progress));
+            }
+
+            if (progress >= 1f)
+                Destroy(gameObject);
+        }
+
+        private static Color SetAlpha(Color color, float alpha)
+        {
+            color.a = Mathf.Clamp01(alpha);
+            return color;
+        }
+    }
+
+    public class NinjaTeleportAfterimageEffect : MonoBehaviour
+    {
+        private SpriteRenderer body;
+        private SpriteRenderer[] lines;
+        private Color bodyColor;
+        private Color[] lineColors;
+        private Vector3[] linePositions;
+        private Vector3[] lineScales;
+        private float duration;
+        private float elapsed;
+        private bool appearing;
+
+        public void Play(float duration, bool appearing, SpriteRenderer body, SpriteRenderer[] lines)
+        {
+            this.duration = Mathf.Max(0.06f, duration);
+            this.appearing = appearing;
+            this.body = body;
+            this.lines = lines ?? System.Array.Empty<SpriteRenderer>();
+            bodyColor = body == null ? Color.clear : body.color;
+            lineColors = new Color[this.lines.Length];
+            linePositions = new Vector3[this.lines.Length];
+            lineScales = new Vector3[this.lines.Length];
+
+            for (int i = 0; i < this.lines.Length; i++)
+            {
+                SpriteRenderer line = this.lines[i];
+
+                if (line == null)
+                    continue;
+
+                lineColors[i] = line.color;
+                linePositions[i] = line.transform.localPosition;
+                lineScales[i] = line.transform.localScale;
+            }
+        }
+
+        private void Update()
+        {
+            elapsed += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            float visibility = appearing ? progress : 1f - progress;
+            float smear = appearing ? 1f - progress : progress;
+
+            if (body != null)
+            {
+                body.color = SetAlpha(bodyColor, bodyColor.a * visibility * 0.85f);
+                body.transform.localScale = Vector3.one * Mathf.Lerp(1.06f, 0.98f, visibility);
+            }
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                SpriteRenderer line = lines[i];
+
+                if (line == null)
+                    continue;
+
+                float direction = i % 2 == 0 ? 1f : -1f;
+                float offset = Mathf.Sin((i + 1) * 1.73f) * 0.05f + direction * smear * 0.18f;
+                line.transform.localPosition = linePositions[i] + new Vector3(offset, 0f, 0f);
+                line.transform.localScale = new Vector3(lineScales[i].x * Mathf.Lerp(0.72f, 1.28f, smear), lineScales[i].y, lineScales[i].z);
+                line.color = SetAlpha(lineColors[i], lineColors[i].a * Mathf.Clamp01(visibility + 0.16f));
+            }
+
+            if (progress >= 1f)
+                Destroy(gameObject);
+        }
+
+        private static Color SetAlpha(Color color, float alpha)
+        {
+            color.a = Mathf.Clamp01(alpha);
+            return color;
+        }
+    }
+
+    public class FrostDropImpactEffect : MonoBehaviour
+    {
+        private SpriteRenderer[] renderers;
+        private Color[] colors;
+        private SpriteRenderer shard;
+        private SpriteRenderer trail;
+        private float duration;
+        private float radius;
+        private float elapsed;
+
+        public void Play(float duration, float radius, SpriteRenderer shock, SpriteRenderer cracks, SpriteRenderer burst, SpriteRenderer shard, SpriteRenderer trail)
+        {
+            this.duration = Mathf.Max(0.06f, duration);
+            this.radius = Mathf.Max(0.05f, radius);
+            this.shard = shard;
+            this.trail = trail;
+            renderers = new[] { shock, cracks, burst, shard, trail };
+            colors = new Color[renderers.Length];
+
+            for (int i = 0; i < renderers.Length; i++)
+                colors[i] = renderers[i] == null ? Color.clear : renderers[i].color;
+        }
+
+        private void Update()
+        {
+            elapsed += Time.deltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            float fade = 1f - Mathf.Pow(progress, 1.7f);
+
+            if (shard != null)
+            {
+                float drop = Mathf.Clamp01(progress / 0.42f);
+                shard.transform.localPosition = new Vector3(-radius * 0.18f, Mathf.Lerp(radius * 2.1f, radius * 0.08f, drop), 0f);
+                shard.transform.localScale = Vector3.one * radius * Mathf.Lerp(1.05f, 0.76f, progress);
+            }
+
+            if (trail != null)
+            {
+                float drop = Mathf.Clamp01(progress / 0.42f);
+                trail.transform.localPosition = new Vector3(-radius * 0.18f, Mathf.Lerp(radius * 2.9f, radius * 0.86f, drop), 0f);
+                trail.transform.localScale = new Vector3(radius * Mathf.Lerp(2.45f, 0.9f, progress), radius * 0.09f, 1f);
+            }
+
+            transform.localScale = Vector3.one * Mathf.Lerp(0.82f, 1.12f, progress);
+
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                SpriteRenderer spriteRenderer = renderers[i];
+
+                if (spriteRenderer == null)
+                    continue;
+
+                spriteRenderer.color = SetAlpha(colors[i], colors[i].a * fade);
+            }
+
+            if (progress >= 1f)
+                Destroy(gameObject);
+        }
+
+        private static Color SetAlpha(Color color, float alpha)
+        {
+            color.a = Mathf.Clamp01(alpha);
+            return color;
+        }
+    }
+
     public class CombatVFXLoop : MonoBehaviour
     {
         private Transform rotatingPart;
@@ -959,6 +1356,8 @@ namespace VampireLike.VFX
         private static Sprite fullMoonDescent;
         private static Sprite moonMagicCircle;
         private static Sprite moonImpactShards;
+        private static Sprite iceShard;
+        private static Sprite slashArc;
 
         public static Sprite Ring => ring ??= CreateRingSprite(128, 0.37f, 0.43f);
         public static Sprite WarningRing => warningRing ??= CreateRingSprite(128, 0.39f, 0.43f, true);
@@ -979,6 +1378,8 @@ namespace VampireLike.VFX
         public static Sprite FullMoonDescent => fullMoonDescent ??= LoadResourceSprite("Effects/selene_fullmoon_descent", MoonMagicCircle);
         public static Sprite MoonMagicCircle => moonMagicCircle ??= CreateMoonMagicCircleSprite();
         public static Sprite MoonImpactShards => moonImpactShards ??= CreateMoonImpactShardsSprite();
+        public static Sprite IceShard => iceShard ??= CreateIceShardSprite();
+        public static Sprite SlashArc => slashArc ??= CreateSlashArcSprite();
 
         public static Sprite GetBurstSprite(CombatVFXKind kind)
         {
@@ -1228,6 +1629,83 @@ namespace VampireLike.VFX
             return ToSprite(texture);
         }
 
+        private static Sprite CreateIceShardSprite()
+        {
+            Texture2D texture = CreateTexture(96, 128);
+            Vector2 center = new Vector2(47.5f, 63.5f);
+            Vector2 top = center + new Vector2(0f, 53f);
+            Vector2 right = center + new Vector2(22f, 8f);
+            Vector2 bottom = center + new Vector2(0f, -54f);
+            Vector2 left = center + new Vector2(-22f, 8f);
+
+            for (int y = 0; y < 128; y++)
+            {
+                for (int x = 0; x < 96; x++)
+                {
+                    Vector2 point = new Vector2(x, y);
+                    float upper = Mathf.Clamp01(1f - Mathf.Abs(SignedDistanceToSegment(point, top, right)) / 12f)
+                        + Mathf.Clamp01(1f - Mathf.Abs(SignedDistanceToSegment(point, top, left)) / 12f);
+                    float lower = Mathf.Clamp01(1f - Mathf.Abs(SignedDistanceToSegment(point, bottom, right)) / 15f)
+                        + Mathf.Clamp01(1f - Mathf.Abs(SignedDistanceToSegment(point, bottom, left)) / 15f);
+                    float centerGlow = Mathf.Clamp01(1f - Mathf.Abs(point.x - center.x) / 12f) * Mathf.Clamp01(1f - Mathf.Abs(point.y - center.y) / 58f);
+                    float alpha = Mathf.Clamp01((upper + lower) * 0.22f + centerGlow * 0.58f);
+
+                    if (alpha > 0.02f)
+                        texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            DrawLine(texture, top, right, 2);
+            DrawLine(texture, right, bottom, 2);
+            DrawLine(texture, bottom, left, 2);
+            DrawLine(texture, left, top, 2);
+            DrawLine(texture, top, bottom, 1);
+            DrawLine(texture, left, right, 1);
+            return ToSprite(texture);
+        }
+
+        private static Sprite CreateSlashArcSprite()
+        {
+            Texture2D texture = CreateTexture(160, 112);
+            Vector2 center = new Vector2(26f, 55.5f);
+            float innerRadius = 42f;
+            float outerRadius = 78f;
+            float minAngle = -38f;
+            float maxAngle = 38f;
+
+            for (int y = 0; y < texture.height; y++)
+            {
+                for (int x = 0; x < texture.width; x++)
+                {
+                    Vector2 offset = new Vector2(x, y) - center;
+                    float radius = offset.magnitude;
+                    float angle = Mathf.Atan2(offset.y, offset.x) * Mathf.Rad2Deg;
+
+                    if (radius < innerRadius || radius > outerRadius || angle < minAngle || angle > maxAngle)
+                        continue;
+
+                    float radiusProgress = Mathf.InverseLerp(innerRadius, outerRadius, radius);
+                    float angleProgress = Mathf.InverseLerp(minAngle, maxAngle, angle);
+                    float edgeFade = Mathf.Sin(angleProgress * Mathf.PI);
+                    float body = Mathf.Sin(radiusProgress * Mathf.PI);
+                    float alpha = Mathf.Clamp01(body * edgeFade * 1.35f);
+
+                    if (radiusProgress > 0.72f)
+                        alpha = Mathf.Max(alpha, edgeFade * 0.72f);
+
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            for (int i = 0; i < 9; i++)
+            {
+                float angle = Mathf.Lerp(minAngle + 6f, maxAngle - 6f, i / 8f) * Mathf.Deg2Rad;
+                DrawLine(texture, center + Direction(angle) * 52f, center + Direction(angle) * 82f, i % 3 == 0 ? 2 : 1);
+            }
+
+            return ToSprite(texture, 96f);
+        }
+
         private static Sprite CreatePentagramSprite()
         {
             Texture2D texture = CreateTexture(96, 96);
@@ -1388,6 +1866,18 @@ namespace VampireLike.VFX
                     texture.SetPixel(x, y, new Color(1f, 1f, 1f, Mathf.Max(current.a, alpha)));
                 }
             }
+        }
+
+        private static float SignedDistanceToSegment(Vector2 point, Vector2 from, Vector2 to)
+        {
+            Vector2 segment = to - from;
+            float segmentLength = segment.sqrMagnitude;
+
+            if (segmentLength <= 0.001f)
+                return Vector2.Distance(point, from);
+
+            float t = Mathf.Clamp01(Vector2.Dot(point - from, segment) / segmentLength);
+            return Vector2.Distance(point, from + segment * t);
         }
 
         private static Texture2D CreateTexture(int width, int height)

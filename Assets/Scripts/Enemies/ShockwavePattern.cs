@@ -70,7 +70,7 @@ namespace VampireLike.Enemies
         {
             float targetRadius = GetTargetRadius();
             Vector2 center = GetShockwaveCenter();
-            Boss.SetState(BossState.Preparing, false);
+            Boss.SetState(BossState.Preparing, AllowMovementDuringPattern);
             CombatVFX.PlayBossCastAura(transform, center - (Vector2)transform.position, CombatVFXKind.Shockwave, 0.9f, prepareTime, 1500);
             BossTelegraph.ShowCircle(center, targetRadius, prepareTime, telegraphColor, telegraphSortingOrder);
 

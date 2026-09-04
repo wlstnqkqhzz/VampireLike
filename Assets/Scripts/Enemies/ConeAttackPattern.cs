@@ -41,6 +41,12 @@ namespace VampireLike.Enemies
         [SerializeField]
         private float effectCameraPadding = 0.7f;
 
+        [SerializeField]
+        private bool useShadowSlashVisual;
+
+        [SerializeField]
+        private SfxType slashSfxType = SfxType.BossDash;
+
         private readonly Collider2D[] hitResults = new Collider2D[8];
         private GameObject activeWarning;
 
@@ -55,16 +61,23 @@ namespace VampireLike.Enemies
             if (direction.sqrMagnitude <= 0.001f)
                 direction = Vector2.down;
 
-            CombatVFX.PlayBossCastAura(transform, CombatVFXKind.ConeWarning, 0.68f, prepareTime, 1500);
+            if (useShadowSlashVisual)
+                CombatVFX.PlayBossCastAura(transform, CombatVFXKind.Vampirism, 0.58f, prepareTime, 1500);
+            else
+                CombatVFX.PlayBossCastAura(transform, CombatVFXKind.ConeWarning, 0.68f, prepareTime, 1500);
+
             activeWarning = SpawnEffect(warningPrefab, direction);
             yield return new WaitForSeconds(prepareTime);
             DestroyActiveWarning();
 
             if (!Boss.IsDead)
             {
-                GameSfx.Play(SfxType.BossDash);
+                GameSfx.Play(slashSfxType);
                 SpawnEffect(impactPrefab, direction, true);
-                CombatVFX.PlayDirectionalStreak(transform.position, direction, CombatVFXKind.ConeImpact, range * 0.55f, 0.16f, 0.14f, 1650);
+
+                if (!useShadowSlashVisual)
+                    CombatVFX.PlayDirectionalStreak(transform.position, direction, CombatVFXKind.ConeImpact, range * 0.55f, 0.16f, 0.14f, 1650);
+
                 ApplyDamage(direction);
             }
 
@@ -85,6 +98,14 @@ namespace VampireLike.Enemies
         {
             Vector2 effectPosition = (Vector2)transform.position + direction * range * 0.5f;
             effectPosition = ClampEffectToCamera(effectPosition);
+
+            if (useShadowSlashVisual)
+            {
+                return autoDestroy
+                    ? CombatVFX.PlayShadowSlashImpact(transform.position, direction, range, angle, effectLifetime, 1650)
+                    : CombatVFX.PlayShadowSlashWarning(transform.position, direction, range, angle, prepareTime, 1480);
+            }
+
             return CombatVFX.PlayCone(
                 effectPosition,
                 direction,
@@ -153,6 +174,16 @@ namespace VampireLike.Enemies
         public void ScaleBossDamage(float multiplier)
         {
             damage = Mathf.Max(1, Mathf.RoundToInt(damage * Mathf.Max(0.1f, multiplier)));
+        }
+
+        public void ConfigureShadowSlashVisual(bool enabled)
+        {
+            useShadowSlashVisual = enabled;
+        }
+
+        public void ConfigureSlashSfx(SfxType slashSfxType)
+        {
+            this.slashSfxType = slashSfxType;
         }
 
         protected override void OnValidate()

@@ -59,6 +59,10 @@ namespace VampireLike.Enemies
         [SerializeField]
         private SfxType impactSfxType = SfxType.BossZone;
 
+        [Header("타겟 장판 연출")]
+        [SerializeField]
+        private bool useFrostDropVisual;
+
         private readonly Collider2D[] hitResults = new Collider2D[4];
         private readonly System.Collections.Generic.List<GameObject> activeWarnings = new System.Collections.Generic.List<GameObject>();
 
@@ -111,6 +115,9 @@ namespace VampireLike.Enemies
 
         private GameObject CreateWarning(Vector2 position)
         {
+            if (useFrostDropVisual)
+                return CombatVFX.PlayFrostDropWarning(position, radius, warningDuration, 1480);
+
             return CreateWarningCircle(position);
         }
 
@@ -154,6 +161,13 @@ namespace VampireLike.Enemies
         private void SpawnImpact(Vector2 position)
         {
             GameSfx.Play(impactSfxType);
+
+            if (useFrostDropVisual)
+            {
+                CombatVFX.PlayFrostDropImpact(position, radius, impactLifetime, 1550);
+                return;
+            }
+
             CombatVFX.PlayBurst(position, CombatVFXKind.TargetImpact, radius * 2f, impactLifetime, 1550);
             CombatVFX.PlayExpandingRing(position, CombatVFXKind.TargetImpact, radius * 0.35f, radius * 2f, impactLifetime, 1551);
         }
@@ -267,6 +281,11 @@ namespace VampireLike.Enemies
             playWarningSfx = true;
             this.warningSfxType = warningSfxType;
             this.impactSfxType = impactSfxType;
+        }
+
+        public void ConfigureFrostDropVisual(bool enabled)
+        {
+            useFrostDropVisual = enabled;
         }
 
         protected override void OnValidate()

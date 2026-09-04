@@ -40,6 +40,12 @@ namespace VampireLike.Enemies
         [SerializeField]
         private bool disableContactDamageDuringTeleport = true;
 
+        [SerializeField]
+        private bool useShadowTeleportVisual;
+
+        [SerializeField]
+        private SfxType teleportSfxType = SfxType.BossTeleport;
+
         private SpriteRenderer[] spriteRenderers;
         private EnemyContactDamage contactDamage;
 
@@ -54,23 +60,44 @@ namespace VampireLike.Enemies
             for (int i = 0; i < count && !Boss.IsDead; i++)
             {
                 Boss.SetState(BossState.Teleporting, false);
-                CombatVFX.PlayBossCastAura(transform, CombatVFXKind.ArcaneImpact, 0.78f, vanishDelay, 1500);
+                CombatVFX.PlayBossCastAura(transform, useShadowTeleportVisual ? CombatVFXKind.Vampirism : CombatVFXKind.ArcaneImpact, 0.78f, vanishDelay, 1500);
+
+                if (useShadowTeleportVisual)
+                    PlayNinjaAfterimage(false, vanishDelay);
+
                 SetVisible(false);
                 SetContactDamageEnabled(false);
-                GameSfx.Play(SfxType.BossTeleport);
-                CombatVFX.PlayTeleportBurst(transform.position, 0.8f, 0.24f, 1600);
+                GameSfx.Play(teleportSfxType);
+
+                if (useShadowTeleportVisual)
+                    CombatVFX.PlayShadowTeleportBurst(transform.position, 0.82f, 0.26f, 1600);
+                else
+                    CombatVFX.PlayTeleportBurst(transform.position, 0.8f, 0.24f, 1600);
 
                 yield return new WaitForSeconds(vanishDelay);
 
                 Vector2 teleportPosition = FindTeleportPosition();
-                CombatVFX.PlayWarning(teleportPosition, CombatVFXKind.TargetWarning, 0.72f, reappearDelay, 1450);
+
+                if (useShadowTeleportVisual)
+                    CombatVFX.PlayShadowTeleportArrivalWarning(teleportPosition, 0.72f, reappearDelay, 1450);
+                else
+                    CombatVFX.PlayWarning(teleportPosition, CombatVFXKind.TargetWarning, 0.72f, reappearDelay, 1450);
+
                 BossRigidbody.position = teleportPosition;
+
+                if (useShadowTeleportVisual)
+                    PlayNinjaAfterimage(true, reappearDelay);
 
                 yield return new WaitForSeconds(reappearDelay);
 
                 SetVisible(true);
                 SetContactDamageEnabled(true);
-                CombatVFX.PlayTeleportBurst(transform.position, 0.9f, 0.22f, 1600);
+                GameSfx.Play(teleportSfxType);
+
+                if (useShadowTeleportVisual)
+                    CombatVFX.PlayShadowTeleportBurst(transform.position, 0.95f, 0.24f, 1600);
+                else
+                    CombatVFX.PlayTeleportBurst(transform.position, 0.9f, 0.22f, 1600);
 
                 if (i < count - 1)
                     yield return new WaitForSeconds(reappearDelay);
@@ -130,6 +157,51 @@ namespace VampireLike.Enemies
 
             if (contactDamage != null)
                 contactDamage.enabled = isEnabled;
+        }
+
+        private void PlayNinjaAfterimage(bool appearing, float duration)
+        {
+            CacheComponents();
+
+            SpriteRenderer source = GetPrimarySpriteRenderer();
+
+            if (source == null)
+                return;
+
+            CombatVFX.PlayNinjaTeleportAfterimage(source, appearing, Mathf.Max(0.08f, duration), 1720);
+        }
+
+        private SpriteRenderer GetPrimarySpriteRenderer()
+        {
+            SpriteRenderer best = null;
+            float bestArea = 0f;
+
+            foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+            {
+                if (spriteRenderer == null || spriteRenderer.sprite == null)
+                    continue;
+
+                Vector3 size = spriteRenderer.bounds.size;
+                float area = size.x * size.y;
+
+                if (best == null || area > bestArea)
+                {
+                    best = spriteRenderer;
+                    bestArea = area;
+                }
+            }
+
+            return best;
+        }
+
+        public void ConfigureShadowTeleportVisual(bool enabled)
+        {
+            useShadowTeleportVisual = enabled;
+        }
+
+        public void ConfigureTeleportSfx(SfxType teleportSfxType)
+        {
+            this.teleportSfxType = teleportSfxType;
         }
 
         protected override void OnValidate()

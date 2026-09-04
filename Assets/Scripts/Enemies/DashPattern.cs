@@ -87,6 +87,12 @@ namespace VampireLike.Enemies
         private SfxType dashSfxType = SfxType.BossDash;
 
         [SerializeField]
+        private SfxType chainedDashSfxType = SfxType.BossDash;
+
+        [SerializeField]
+        private bool useChainedDashSfx;
+
+        [SerializeField]
         private bool playImpactSfx;
 
         [SerializeField]
@@ -133,7 +139,7 @@ namespace VampireLike.Enemies
             for (int i = 0; i < chainCount && !Boss.IsDead; i++)
             {
                 float prepareMultiplier = i == 0 ? 1f : chainedDashPrepareMultiplier;
-                yield return ExecuteSingleDash(prepareMultiplier);
+                yield return ExecuteSingleDash(prepareMultiplier, i);
 
                 if (i < chainCount - 1 && chainedDashDelay > 0f)
                     yield return new WaitForSeconds(chainedDashDelay);
@@ -143,7 +149,7 @@ namespace VampireLike.Enemies
             yield return new WaitForSeconds(endLag);
         }
 
-        private IEnumerator ExecuteSingleDash(float prepareMultiplier)
+        private IEnumerator ExecuteSingleDash(float prepareMultiplier, int chainIndex)
         {
             Vector2 dashDirection = GetDashDirection();
             float effectivePrepareTime = GetEffectivePrepareTime();
@@ -170,7 +176,7 @@ namespace VampireLike.Enemies
             Boss.SetState(BossState.Attacking, false);
             Boss.FaceDirection(dashDirection);
             Boss.ShowAttackFrame(1);
-            GameSfx.Play(dashSfxType);
+            GameSfx.Play(useChainedDashSfx && chainIndex > 0 ? chainedDashSfxType : dashSfxType);
             float elapsedTime = 0f;
             float nextTrailTime = 0f;
             bool hasHitPlayer = false;
@@ -217,6 +223,14 @@ namespace VampireLike.Enemies
         public void ConfigureDashSfx(SfxType dashSfxType)
         {
             this.dashSfxType = dashSfxType;
+            useChainedDashSfx = false;
+        }
+
+        public void ConfigureDashSfx(SfxType dashSfxType, SfxType chainedDashSfxType)
+        {
+            this.dashSfxType = dashSfxType;
+            this.chainedDashSfxType = chainedDashSfxType;
+            useChainedDashSfx = true;
         }
 
         private bool TryApplySweptDashDamage(Vector2 previousPosition, Vector2 nextPosition, Vector2 dashDirection)
